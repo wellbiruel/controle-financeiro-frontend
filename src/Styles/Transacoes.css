@@ -1,0 +1,118 @@
+.transacoes-container {
+  padding: 30px;
+  margin-left: 250px;
+}
+
+.form-transacao {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+  max-width: 600px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #667eea;
+  outline: none;
+}
+
+.form-transacao button {
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-transacao button:disabled {
+  opacity: 0.6;
+}
+
+.historico {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.historico h2 {
+  margin: 0 0 20px 0;
+}
+
+.historico table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.historico th {
+  background: #f5f7fa;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+}
+
+.historico td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.historico .saida {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.historico .entrada {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.btn-delete {
+  padding: 6px 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .transacoes-container {
+    margin-left: 0;
+    padding-top: 80px;
+  }
+
+  .form-transacao {
+    max-width: 100%;
+  }
+}

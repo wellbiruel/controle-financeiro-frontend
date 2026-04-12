@@ -1,0 +1,146 @@
+.sidebar {
+  width: 48px;
+  background: #1E2533;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 40px;
+  z-index: 100;
+  overflow: hidden;
+  transition: width 0.22s ease;
+}
+
+.sidebar.expanded {
+  width: 210px;
+}
+
+.sidebar-inner {
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sb-section {
+  margin-bottom: 4px;
+}
+
+.sb-group-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+  padding: 6px 16px 2px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.sidebar.expanded .sb-group-label {
+  opacity: 1;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  position: relative;
+  text-decoration: none;
+  min-height: 36px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.sb-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+}
+
+.sb-item.active {
+  background: rgba(59,130,246,0.18);
+  color: white;
+}
+
+.sb-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: #3B82F6;
+  border-radius: 0 2px 2px 0;
+}
+
+.sb-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.sb-expand-icon {
+  transition: transform 0.22s;
+}
+
+.sb-expand-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.sb-text {
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar.expanded .sb-text {
+  opacity: 1;
+}
+
+/* Tooltip quando recolhido */
+.sidebar:not(.expanded) .sb-item:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 52px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #334155;
+  color: white;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+
+.sb-footer-item {
+  color: rgba(255,255,255,0.35);
+}
+
+.sb-footer-item:hover {
+  color: rgba(255,255,255,0.7);
+}

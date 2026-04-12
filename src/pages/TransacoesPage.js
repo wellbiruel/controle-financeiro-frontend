@@ -1,97 +1,165 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { getCurrentUser, logout } from '../services/auth';
+import Layout from '../Components/Layout/Layout';
+import { criarGasto, listarGastos, deletarGasto } from '../services/gastos';
+import '../Styles/Transacoes.css';
 
-function TransacoesPage() {
+export default function TransacoesPage() {
   const [transacoes, setTransacoes] = useState([]);
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
-  const [tipo, setTipo] = useState('despesa');
-  const [data, setData] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const navigate = useNavigate();
-  const user = getCurrentUser();
+  const [tipo, setTipo] = useState('saida');
+  const [categoria, setCategoria] = useState('Alimentação');
+  const [data, setData] = useState(new Date().toISOString().split('T')[0]);
+  const [loading, setLoading] = useState(false);
+  const [mes, setMes] = useState(new Date().getMonth() + 1);
+  const [ano, setAno] = useState(new Date().getFullYear());
 
   useEffect(() => {
-    if (!user) navigate('/login');
-    buscarTransacoes();
-  }, []);
+    carregarTransacoes();
+  }, [mes, ano]);
 
-  const buscarTransacoes = async () => {
+  const carregarTransacoes = async () => {
     try {
-      const response = await api.get('/transacoes');
-      setTransacoes(response.data);
-    } catch (err) {
-      console.error('Erro ao buscar transações:', err);
+      const usuarioId = localStorage.getItem('usuario_id');
+      const dados = await listarGastos(usuarioId, mes, ano);
+      setTransacoes(dados);
+    } catch (error) {
+      console.error('Erro ao carregar:', error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setLoading(true);
+
     try {
-      await api.post('/transacoes', { descricao, valor: parseFloat(valor), tipo, data });
-      setSuccess('Transação adicionada com sucesso!');
+      const usuarioId = localStorage.getItem('usuario_id');
+      await criarGasto({
+        usuario_id: usuarioId,
+        tipo,
+        categoria,
+        descricao,
+        valor: parseFloat(valor),
+        data,
+      });
+
       setDescricao('');
       setValor('');
-      setData('');
-      buscarTransacoes();
-    } catch (err) {
-      setError('Erro ao adicionar transação.');
+      setData(new Date().toISOString().split('T')[0]);
+      carregarTransacoes();
+    } catch (error) {
+      console.error('Erro:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleDelete = async (id) => {
+    if (window.confirm('Deletar?')) {
+      await deletarGasto(id);
+      carregarTransacoes();
+    }
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ color: '#333' }}>Transações</h1>
-        <div>
-          <button onClick={() => navigate('/dashboard')} style={{ padding: '8px 16px', marginRight: '10px', borderRadius: '4px', border: '1px solid #007bff', backgroundColor: '#fff', color: '#007bff', cursor: 'pointer' }}>Dashboard</button>
-          <button onClick={handleLogout} style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', backgroundColor: '#dc3545', color: '#fff', cursor: 'pointer' }}>Sair</button>
+    <Layout>
+      <div className="transacoes-container">
+        <h1>Transações</h1>
+
+        <form onSubmit={handleSubmit} className="form-transacao">
+          <div className="form-group">
+            <label>Tipo</label>
+            <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+              <option value="saida">Saída</option>
+              <option value="entrada">Entrada</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Categoria</label>
+            <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+              <option>Alimentação</option>
+              <option>Transporte</option>
+              <option>Saúde</option>
+              <option>Lazer</option>
+              <option>Salário</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Descrição</label>
+            <input
+              type="text"
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+              placeholder="Ex: Almoço"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Valor</label>
+            <input
+              type="number"
+              step="0.01"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Data</label>
+            <input
+              type="date"
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" disabled={loading}>
+            {loading ? 'Adicionando...' : 'Adicionar Transação'}
+          </button>
+        </form>
+
+        <div className="historico">
+          <h2>Histórico - {mes}/{ano}</h2>
+          {transacoes.length === 0 ? (
+            <p>Sem transações</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Categoria</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transacoes.map((t) => (
+                  <tr key={t.id}>
+                    <td>{new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                    <td>{t.descricao}</td>
+                    <td>{t.categoria}</td>
+                    <td className={t.tipo}>{t.tipo}</td>
+                    <td>R$ {parseFloat(t.valor).toFixed(2)}</td>
+                    <td>
+                      <button onClick={() => handleDelete(t.id)} className="btn-delete">
+                        Deletar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
-
-      <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-        <h2 style={{ marginBottom: '15px', color: '#333' }}>Nova Transação</h2>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <input type="text" placeholder="Descrição" value={descricao} onChange={(e) => setDescricao(e.target.value)} required style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }} />
-          <input type="number" placeholder="Valor" value={valor} onChange={(e) => setValor(e.target.value)} required step="0.01" style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }} />
-          <select value={tipo} onChange={(e) => setTipo(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
-            <option value="despesa">Despesa</option>
-            <option value="receita">Receita</option>
-          </select>
-          <input type="date" value={data} onChange={(e) => setData(e.target.value)} required style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }} />
-          <button type="submit" style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontSize: '16px' }}>Adicionar Transação</button>
-        </form>
-      </div>
-
-      <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ marginBottom: '15px', color: '#333' }}>Histórico</h2>
-        {transacoes.length === 0 ? (
-          <p style={{ color: '#666', textAlign: 'center' }}>Nenhuma transação ainda.</p>
-        ) : (
-          transacoes.map((t) => (
-            <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #eee' }}>
-              <span>{t.descricao}</span>
-              <span style={{ color: t.tipo === 'receita' ? '#28a745' : '#dc3545', fontWeight: 'bold' }}>
-                {t.tipo === 'receita' ? '+' : '-'} R$ {parseFloat(t.valor).toFixed(2)}
-              </span>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+    </Layout>
   );
 }
-
-export default TransacoesPage;

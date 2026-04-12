@@ -87,7 +87,7 @@ export default function ImportacaoPage() {
   /* ---------- Download modelo ---------- */
   const baixarModelo = async () => {
     try {
-      const resp = await api.get('/api/importacao/modelo', { responseType: 'blob' });
+      const resp = await api.get('/importacao/modelo', { responseType: 'blob' });
       const url = URL.createObjectURL(resp.data);
       const a   = document.createElement('a');
       a.href     = url;
@@ -128,7 +128,7 @@ export default function ImportacaoPage() {
     try {
       const form = new FormData();
       form.append('arquivo', arquivo);
-      const resp = await api.post('/api/importacao/preview', form, {
+      const resp = await api.post('/importacao/preview', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setLinhas(resp.data.linhas  ?? []);
@@ -148,7 +148,7 @@ export default function ImportacaoPage() {
     try {
       const form = new FormData();
       form.append('arquivo', arquivo);
-      const resp = await api.post('/api/importacao/confirmar', form, {
+      const resp = await api.post('/importacao/confirmar', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setImportado(resp.data.importados ?? resumo?.validas ?? 0);

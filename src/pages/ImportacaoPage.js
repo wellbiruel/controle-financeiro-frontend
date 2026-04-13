@@ -476,8 +476,7 @@ export default function ImportacaoPage() {
                 Importação concluída!
               </h2>
               <p style={{ fontSize: '14px', color: c.muted, margin: '0 0 32px' }}>
-                <strong style={{ color: c.success }}>{importado} transação{importado !== 1 ? 'ões' : ''}</strong>{' '}
-                importada{importado !== 1 ? 's' : ''} com sucesso.
+                <strong style={{ color: c.success }}>{importado} transações</strong> importadas com sucesso.
               </p>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 <button

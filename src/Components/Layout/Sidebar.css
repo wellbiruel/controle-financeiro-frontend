@@ -1,5 +1,5 @@
 .sidebar {
-  width: 48px;
+  width: 52px;
   background: #1E1B4B;
   display: flex;
   flex-direction: column;
@@ -9,7 +9,7 @@
   top: 40px;
   z-index: 100;
   overflow: hidden;
-  transition: width 0.22s ease;
+  transition: width 0.22s cubic-bezier(.4,0,.2,1);
 }
 
 .sidebar.expanded {
@@ -34,12 +34,18 @@
   margin-bottom: 4px;
 }
 
+.sb-section + .sb-section {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
 .sb-group-label {
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.2);
   padding: 6px 16px 2px;
   white-space: nowrap;
   opacity: 0;
@@ -69,20 +75,23 @@
   color: rgba(255,255,255,0.85);
 }
 
-.sb-item.active {
+.sb-item.active,
+.sb-item[aria-current="page"] {
   background: rgba(129,140,248,0.15);
   color: #A5B4FC;
 }
 
-.sb-item.active::before {
+.sb-item.active::before,
+.sb-item[aria-current="page"]::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 6px;
-  bottom: 6px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 3px;
+  height: 60%;
   background: #818CF8;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 3px 3px 0;
 }
 
 .sb-icon {
@@ -108,39 +117,57 @@
   transition: opacity 0.15s;
   overflow: hidden;
   white-space: nowrap;
+  flex: 1;
 }
 
 .sidebar.expanded .sb-text {
   opacity: 1;
 }
 
-/* Tooltip quando recolhido */
+.sb-badge {
+  background: #818CF8;
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.sidebar.expanded .sb-badge {
+  opacity: 1;
+}
+
+/* Tooltip no modo recolhido */
 .sidebar:not(.expanded) .sb-item:hover::after {
-  content: attr(data-label);
+  content: attr(data-tip);
   position: absolute;
-  left: 52px;
+  left: 56px;
   top: 50%;
   transform: translateY(-50%);
-  background: #334155;
+  background: #2D2A6E;
   color: white;
   font-size: 10px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
   white-space: nowrap;
   z-index: 999;
   pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
 .sidebar-footer {
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255,255,255,0.05);
   padding: 4px 0;
   flex-shrink: 0;
 }
 
 .sb-footer-item {
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.25);
 }
 
 .sb-footer-item:hover {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.65);
 }

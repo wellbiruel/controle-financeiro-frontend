@@ -9,6 +9,9 @@ import RelatoriosPage from './pages/RelatoriosPage';
 import ConfiguracoesPage from './pages/ConfiguracoesPage';
 import FluxoAnualPage from './pages/FluxoAnualPage';
 import ImportacaoPage from './pages/ImportacaoPage';
+import EntradasPage from './pages/EntradasPage';
+import SaidasPage from './pages/SaidasPage';
+import MetasPage from './pages/MetasPage';
 import { getCurrentUser } from './services/auth';
 
 const PrivateRoute = ({ children }) => {
@@ -29,6 +32,9 @@ function App() {
         <Route path="/configuracoes" element={<PrivateRoute><ConfiguracoesPage /></PrivateRoute>} />
         <Route path="/fluxo" element={<PrivateRoute><FluxoAnualPage /></PrivateRoute>} />
         <Route path="/importar" element={<PrivateRoute><ImportacaoPage /></PrivateRoute>} />
+        <Route path="/entradas" element={<PrivateRoute><EntradasPage /></PrivateRoute>} />
+        <Route path="/saidas" element={<PrivateRoute><SaidasPage /></PrivateRoute>} />
+        <Route path="/metas" element={<PrivateRoute><MetasPage /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

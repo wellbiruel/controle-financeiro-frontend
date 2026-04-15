@@ -241,7 +241,7 @@ export default function DashboardPage() {
             <button style={{ background: 'white', color: '#0F172A', border: '0.5px solid #E2E8F0', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
               ↓ Exportar
             </button>
-            <button style={{ background: '#1B3A6B', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
+            <button style={{ background: '#6366F1', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
               + Lançamento
             </button>
           </div>
@@ -320,8 +320,8 @@ export default function DashboardPage() {
                         textAlign: 'center',
                         cursor: isFuture || !hasData ? 'default' : 'pointer',
                         opacity: isFuture ? 0.45 : 1,
-                        border: `1.5px ${isFuture || !hasData ? 'dashed' : 'solid'} ${ativo ? '#1B3A6B' : borderC}`,
-                        background: ativo ? '#1B3A6B' : 'transparent',
+                        border: `1.5px ${isFuture || !hasData ? 'dashed' : 'solid'} ${ativo ? '#6366F1' : borderC}`,
+                        background: ativo ? '#6366F1' : 'transparent',
                         transition: 'all 0.15s',
                       }}
                     >

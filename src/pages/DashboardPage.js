@@ -52,14 +52,18 @@ function KPICard({ label, valor, valorColor, iconBg, icon, badge, sub, barPct, b
 
 /* ════════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
+  const usuario    = getCurrentUser();
+  const nomeUsuario = usuario?.nome || usuario?.email || 'Usuário';
+
   const [mesAtivo,    setMesAtivo]    = useState(MES_IDX);
   const [lancamentos, setLancamentos] = useState([]);
   const [grupos,      setGrupos]      = useState([]);
   const [transacoes,  setTransacoes]  = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [chartLoaded, setChartLoaded] = useState(false);
-
-  const usuario   = getCurrentUser();
+  const [subtitulo,   setSubtitulo]   = useState(
+    `${MESES_FULL[MES_IDX]} ${ANO} · ${nomeUsuario}`
+  );
   const barRef    = useRef(null);
   const donutRef  = useRef(null);
   const barInst   = useRef(null);
@@ -232,10 +236,8 @@ export default function DashboardPage() {
         {/* ── Linha 1: Header ── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
           <div>
-            <h1 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', margin: 0 }}>Painel financeiro</h1>
-            <p style={{ fontSize: '13px', color: '#64748B', margin: '3px 0 0' }}>
-              Olá, {usuario?.nome || 'Usuário'} · {MESES_FULL[mesAtivo]} {ANO}
-            </p>
+            <h1 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', margin: 0 }}>Visão Mensal</h1>
+            <p style={{ fontSize: '13px', color: '#64748B', margin: '3px 0 0' }}>{subtitulo}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button style={{ background: 'white', color: '#0F172A', border: '0.5px solid #E2E8F0', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
@@ -314,7 +316,11 @@ export default function DashboardPage() {
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
                     <div
-                      onClick={() => !isFuture && hasData && setMesAtivo(i)}
+                      onClick={() => {
+                        if (isFuture || !hasData) return;
+                        setMesAtivo(i);
+                        setSubtitulo(`${MESES_FULL[i]} ${ANO} · ${nomeUsuario}`);
+                      }}
                       style={{
                         width: '100%', borderRadius: '7px', padding: '6px 3px 5px',
                         textAlign: 'center',

@@ -175,28 +175,54 @@ export default function DashboardPage() {
   const vE = varBadge(e, ePrev);
   const vS = varBadge(s, sPrev);
 
-  /* ── Bar chart ── */
+  /* ── Bar chart (criado uma vez; atualizado via ref no click) ── */
   useEffect(() => {
     if (!chartLoaded || loading) return;
     if (barInst.current) { barInst.current.destroy(); barInst.current = null; }
     if (!barRef.current) return;
+    const sdColor = sd >= 0 ? '#22C55E' : '#EF4444';
     barInst.current = new window.Chart(barRef.current, {
       type: 'bar',
       data: {
-        labels: ['Entradas', 'Saídas'],
-        datasets: [{
-          data: [e, s],
-          backgroundColor: ['#93C5FD', '#FCA5A5'],
-          borderRadius: 6,
-          borderSkipped: false,
-        }],
+        labels: [MESES_FULL[mesAtivo]],
+        datasets: [
+          {
+            label: 'Entradas',
+            data: [e],
+            backgroundColor: '#93C5FD',
+            borderRadius: 6,
+            borderSkipped: false,
+            barPercentage: 0.4,
+            categoryPercentage: 0.5,
+          },
+          {
+            label: 'Saídas',
+            data: [s],
+            backgroundColor: '#FCA5A5',
+            borderRadius: 6,
+            borderSkipped: false,
+            barPercentage: 0.4,
+            categoryPercentage: 0.5,
+          },
+          {
+            label: 'Saldo',
+            type: 'line',
+            data: [sd],
+            borderColor: sdColor,
+            backgroundColor: 'transparent',
+            pointBackgroundColor: sdColor,
+            pointRadius: 5,
+            borderWidth: 2,
+            tension: 0,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: ctx => `R$ ${Number(ctx.raw).toFixed(2)}` } },
+          legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10, padding: 10 } },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: R$ ${Number(ctx.raw).toFixed(2)}` } },
         },
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 11 } } },
@@ -204,7 +230,7 @@ export default function DashboardPage() {
         },
       },
     });
-  }, [chartLoaded, loading, mesAtivo, lancamentos, transacoes]); // eslint-disable-line
+  }, [chartLoaded, loading, lancamentos, transacoes]); // eslint-disable-line
 
   /* ── Donut chart ── */
   useEffect(() => {
@@ -320,6 +346,19 @@ export default function DashboardPage() {
                         if (isFuture || !hasData) return;
                         setMesAtivo(i);
                         setSubtitulo(`${MESES_FULL[i]} ${ANO} · ${nomeUsuario}`);
+                        if (barInst.current) {
+                          const ei = getEntradas(i);
+                          const si = getSaidas(i);
+                          const sdi = getSaldo(i);
+                          const sdColorI = sdi >= 0 ? '#22C55E' : '#EF4444';
+                          barInst.current.data.labels = [MESES_FULL[i]];
+                          barInst.current.data.datasets[0].data = [ei];
+                          barInst.current.data.datasets[1].data = [si];
+                          barInst.current.data.datasets[2].data = [sdi];
+                          barInst.current.data.datasets[2].borderColor = sdColorI;
+                          barInst.current.data.datasets[2].pointBackgroundColor = sdColorI;
+                          barInst.current.update();
+                        }
                       }}
                       style={{
                         width: '100%', borderRadius: '7px', padding: '6px 3px 5px',

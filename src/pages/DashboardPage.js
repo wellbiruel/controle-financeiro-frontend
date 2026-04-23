@@ -1,503 +1,684 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Layout from '../Components/Layout/Layout';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
-import { Chart, BarElement, LineElement, PointElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend, BarController, LineController, DoughnutController } from 'chart.js';
+import Chart from 'chart.js/auto';
 
-Chart.register(BarElement, LineElement, PointElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend, BarController, LineController, DoughnutController);
-
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const MESES_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const ANO = new Date().getFullYear();
-const MES_ATUAL = new Date().getMonth();
 
-export default function DashboardPage() {
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const nomeUsuario = user.nome || user.email || 'Usuário';
+const fmt = (v) => v?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0,00';
+const fmtK = (v) => v >= 1000 ? `R$${(v/1000).toFixed(0)}k` : `R$${Math.round(v)}`;
 
-  const [mesAtivo, setMesAtivo] = useState(MES_ATUAL);
-  const [subtitulo, setSubtitulo] = useState(`${MESES_FULL[MES_ATUAL]} ${ANO} · ${nomeUsuario}`);
-  const [lancamentos, setLancamentos] = useState([]);
-  const [loading, setLoading] = useState(true);
+const CAT_COLORS = ['#EF4444','#60A5FA','#34D399','#A78BFA','#FBB824','#94A3B8','#F472B6','#FB923C'];
 
-  const fluxoRef = useRef(null);
-  const fluxoChart = useRef(null);
-  const pizzaRef = useRef(null);
-  const pizzaChart = useRef(null);
+const S = {
+  page: {
+    background: '#0F0D2A',
+    color: '#E2E8F0',
+    minHeight: '100vh',
+    fontFamily: "'DM Sans', system-ui, sans-serif",
+    paddingBottom: 40,
+  },
+  monthNav: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 16,
+    overflowX: 'auto',
+    paddingBottom: 4,
+    scrollbarWidth: 'none',
+  },
+  monthChip: (active, tipo) => ({
+    padding: '6px 14px',
+    borderRadius: 20,
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: 'pointer',
+    border: tipo === 'empty'
+      ? '0.5px dashed rgba(129,140,248,0.3)'
+      : tipo === 'pos'
+        ? '0.5px solid rgba(52,211,153,0.4)'
+        : tipo === 'neg'
+          ? '0.5px solid rgba(248,113,113,0.4)'
+          : '0.5px solid rgba(129,140,248,0.2)',
+    color: active ? '#fff' : tipo === 'pos' ? '#34D399' : tipo === 'neg' ? '#F87171' : '#94A3B8',
+    background: active ? '#6366F1' : 'transparent',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+    transition: 'all 0.2s',
+    userSelect: 'none',
+  }),
+  grid4: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 12 },
+  grid3: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 12 },
+  grid2: { display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginBottom: 12 },
+  card: (extra = {}) => ({
+    background: '#1A1740',
+    border: '0.5px solid rgba(129,140,248,0.15)',
+    borderRadius: 12,
+    padding: 14,
+    ...extra,
+  }),
+  cardAccent: (grad, borderColor) => ({
+    background: grad,
+    border: `0.5px solid ${borderColor}`,
+    borderRadius: 12,
+    padding: 14,
+  }),
+  kpiLabel: (color = '#94A3B8') => ({
+    fontSize: 11,
+    color,
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    marginBottom: 4,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+  }),
+  kpiValue: (color) => ({ fontSize: 22, fontWeight: 700, color, marginBottom: 4 }),
+  badge: (up) => ({
+    fontSize: 11,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 3,
+    padding: '2px 8px',
+    borderRadius: 20,
+    background: up ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)',
+    color: up ? '#34D399' : '#F87171',
+  }),
+  progressBar: { height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginTop: 8 },
+  progressFill: (pct, color) => ({ height: '100%', width: `${Math.min(pct,100)}%`, background: color, borderRadius: 4, transition: 'width 0.8s ease' }),
+  sectionTitle: { fontSize: 13, fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '16px 0 10px' },
+  chartWrap: (h = 160) => ({ position: 'relative', height: h, width: '100%' }),
+  legendRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  legendItem: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#94A3B8' },
+  legendDot: (color) => ({ width: 8, height: 8, borderRadius: 2, background: color, flexShrink: 0 }),
+};
 
-  const metas = [
-    { nome: 'Viagem de férias', icone: '✈️', bg: '#EEF2FF', cor: '#6366F1', guardado: 3400, total: 5000, aporte: 400, prazo: 'Dezembro 2026', status: 'No prazo' },
-    { nome: 'Troca do carro', icone: '🚗', bg: '#F0FDF4', cor: '#16A34A', guardado: 4800, total: 15000, aporte: 600, prazo: 'Junho 2027', status: 'No prazo' },
-    { nome: 'Reserva de emergência', icone: '🏠', bg: '#FFFBEB', cor: '#F59E0B', guardado: 1800, total: 12000, aporte: 200, prazo: 'Sem prazo', status: 'Ritmo lento' },
-  ];
-
+function SparkBar({ data, color, height = 60 }) {
+  const ref = useRef(null);
+  const chartRef = useRef(null);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [lancRes, , transacoesRes] = await Promise.all([
-          api.get(`/fluxo/lancamentos/${ANO}`),
-          api.get('/fluxo/grupos'),
-          api.get('/transacoes'),
-        ]);
-
-        // lancamentos_mensais não tem campo tipo — são todos saídas (itens de despesa)
-        const lancamentos = (lancRes.data || []).map(l => ({ ...l, tipo: 'saida' }));
-
-        // transacoes tem campo tipo ('entrada'/outro) e campo data (ex: "2026-04-15")
-        // extrai mes e ano do campo data para manter padrão numérico igual ao /fluxo
-        const transacoes = (transacoesRes.data || [])
-          .filter(t => {
-            const ano = parseInt((t.data || '').split('-')[0]);
-            return ano === ANO;
-          })
-          .map(t => ({
-            ...t,
-            mes: parseInt((t.data || '').split('-')[1]),
-            ano: parseInt((t.data || '').split('-')[0]),
-          }));
-
-        setLancamentos([...lancamentos, ...transacoes]);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const getTotalMes = (mes, tipo) => {
-    return lancamentos
-      .filter(l => l.mes === mes + 1 && (tipo === 'entrada' ? l.tipo === 'entrada' : l.tipo !== 'entrada'))
-      .reduce((sum, l) => sum + parseFloat(l.valor || 0), 0);
-  };
-
-  const getDadosMeses = () => MESES_SHORT.map((_, i) => ({
-    e: getTotalMes(i, 'entrada'),
-    s: getTotalMes(i, 'saida'),
-    sd: getTotalMes(i, 'entrada') - getTotalMes(i, 'saida'),
-  }));
-
-  const dados = getDadosMeses();
-  const melhorIdx = dados.reduce((best, d, i) => d.sd > (dados[best]?.sd || -Infinity) ? i : best, 0);
-  const piorIdx = dados.reduce((worst, d, i) => d.sd < (dados[worst]?.sd || Infinity) ? i : worst, 0);
-  const mesesComDados = dados.map(d => d.e > 0 || d.s > 0);
-
-  const dAtivo = dados[mesAtivo] || { e: 0, s: 0, sd: 0 };
-  const entradas = dAtivo.e;
-  const saidas = dAtivo.s;
-  const saldo = dAtivo.sd;
-  const positivo = saldo >= 0;
-  const taxaPoupanca = entradas > 0 ? Math.max(0, ((entradas - saidas) / entradas * 100)).toFixed(1) : '0.0';
-
-  const getMaiorItem = () => {
-    const doMes = lancamentos.filter(l => l.mes === mesAtivo + 1 && l.tipo !== 'entrada');
-    if (!doMes.length) return { nome: '—', valor: 0 };
-    const maior = doMes.reduce((a, b) => parseFloat(a.valor) > parseFloat(b.valor) ? a : b);
-    return { nome: maior.descricao || maior.item || '—', valor: parseFloat(maior.valor) };
-  };
-  const maiorItem = getMaiorItem();
-
-  const getCategorias = () => {
-    const doMes = lancamentos.filter(l => l.mes === mesAtivo + 1 && l.tipo !== 'entrada');
-    const cats = {};
-    doMes.forEach(l => {
-      const c = l.categoria || 'Outros';
-      cats[c] = (cats[c] || 0) + parseFloat(l.valor || 0);
-    });
-    const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
-    const total = sorted.reduce((s, [, v]) => s + v, 0);
-    return sorted.map(([nome, val]) => ({ nome, val, pct: total > 0 ? Math.round(val / total * 100) : 0 }));
-  };
-  const categorias = getCategorias();
-  const coresCat = ['#EF4444', '#60A5FA', '#34D399', '#CBD5E1', '#A78BFA', '#FB923C'];
-
-  const getUltimasTransacoes = () => lancamentos
-    .filter(l => l.mes === mesAtivo + 1)
-    .sort((a, b) => parseFloat(b.valor) - parseFloat(a.valor))
-    .slice(0, 5);
-  const ultimasTx = getUltimasTransacoes();
-
-  const mediaMensal = () => {
-    const comDados = dados.filter(d => d.e > 0 || d.s > 0);
-    if (!comDados.length) return 0;
-    return comDados.reduce((s, d) => s + d.sd, 0) / comDados.length;
-  };
-
-  const selMes = (i) => {
-    if (!mesesComDados[i] && i > MES_ATUAL) return;
-    setMesAtivo(i);
-    setSubtitulo(`${MESES_FULL[i]} ${ANO} · ${nomeUsuario}`);
-  };
-
-  // Gráfico de barras
-  useEffect(() => {
-    if (!fluxoRef.current || loading) return;
-    if (fluxoChart.current) fluxoChart.current.destroy();
-    fluxoChart.current = new Chart(fluxoRef.current, {
+    if (!ref.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    chartRef.current = new Chart(ref.current, {
+      type: 'bar',
       data: {
-        labels: [MESES_FULL[mesAtivo]],
+        labels: data.map((_,i) => i),
+        datasets: [{ data, backgroundColor: color + '99', borderColor: color, borderWidth: 1, borderRadius: 3 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        animation: false,
+      },
+    });
+    return () => chartRef.current?.destroy();
+  }, [data, color]);
+  return <div style={{ position: 'relative', height, width: '100%', marginTop: 8 }}><canvas ref={ref} /></div>;
+}
+
+function DonutChart({ data, colors, centerText }) {
+  const ref = useRef(null);
+  const chartRef = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    chartRef.current = new Chart(ref.current, {
+      type: 'doughnut',
+      data: {
+        labels: data.map(d => d.label),
+        datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.toFixed(1)}%` } },
+        },
+        animation: { duration: 600 },
+      },
+    });
+    return () => chartRef.current?.destroy();
+  }, [data, colors]);
+  return (
+    <div style={{ position: 'relative', height: 180 }}>
+      <canvas ref={ref} />
+      {centerText && (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center', pointerEvents: 'none' }}>
+          <div style={{ fontSize: 11, color: '#64748B', marginBottom: 2 }}>Total</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#E2E8F0' }}>{centerText}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BarLineChart({ labels, entradas, saidas, saldo }) {
+  const ref = useRef(null);
+  const chartRef = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    chartRef.current = new Chart(ref.current, {
+      data: {
+        labels,
         datasets: [
-          { type: 'bar', label: 'Entradas', data: [entradas], backgroundColor: '#A5B4FC', borderRadius: 6, borderSkipped: false, barPercentage: 0.35, categoryPercentage: 0.4 },
-          { type: 'bar', label: 'Saídas', data: [saidas], backgroundColor: '#FCA5A5', borderRadius: 6, borderSkipped: false, barPercentage: 0.35, categoryPercentage: 0.4 },
-          { type: 'line', label: 'Saldo', data: [saldo], borderColor: positivo ? '#16A34A' : '#EF4444', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: positivo ? '#16A34A' : '#EF4444', tension: 0, yAxisID: 'y2' },
-        ]
+          { type: 'bar', label: 'Entradas', data: entradas, backgroundColor: '#34D39966', borderColor: '#34D399', borderWidth: 1, borderRadius: 4 },
+          { type: 'bar', label: 'Saídas', data: saidas, backgroundColor: '#F8717166', borderColor: '#F87171', borderWidth: 1, borderRadius: 4 },
+          { type: 'line', label: 'Saldo', data: saldo, borderColor: '#60A5FA', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#60A5FA', tension: 0.4 },
+        ],
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' }, border: { display: false } },
-          y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 11 }, color: '#94A3B8', callback: v => 'R$' + (v / 1000).toFixed(0) + 'k' }, border: { display: false } },
-          y2: { position: 'right', grid: { display: false }, ticks: { font: { size: 10 }, color: positivo ? '#16A34A' : '#EF4444', callback: v => (v >= 0 ? '+' : '') + 'R$' + (v / 1000).toFixed(1) + 'k' }, border: { display: false } },
+          x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { ticks: { color: '#64748B', font: { size: 10 }, callback: v => fmtK(v) }, grid: { color: 'rgba(255,255,255,0.05)' } },
         },
-      }
+        animation: { duration: 600 },
+      },
     });
-    return () => { if (fluxoChart.current) fluxoChart.current.destroy(); };
-  }, [mesAtivo, lancamentos, loading]);
+    return () => chartRef.current?.destroy();
+  }, [labels, entradas, saidas, saldo]);
+  return <div style={S.chartWrap(200)}><canvas ref={ref} /></div>;
+}
 
-  // Gráfico de pizza
+function MiniDonut({ pct, color = '#6366F1', size = 60 }) {
+  const ref = useRef(null);
+  const chartRef = useRef(null);
   useEffect(() => {
-    if (!pizzaRef.current || loading) return;
-    if (pizzaChart.current) pizzaChart.current.destroy();
-    const labels = categorias.length ? categorias.map(c => c.nome) : ['Sem dados'];
-    const dataVals = categorias.length ? categorias.map(c => c.pct) : [100];
-    const cores = categorias.length ? categorias.map((_, i) => coresCat[i] || '#CBD5E1') : ['#F1F5F9'];
-    pizzaChart.current = new Chart(pizzaRef.current, {
+    if (!ref.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    chartRef.current = new Chart(ref.current, {
       type: 'doughnut',
-      data: { labels, datasets: [{ data: dataVals, backgroundColor: cores, borderWidth: 2, borderColor: 'white', hoverOffset: 4 }] },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } }
+      data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, 'rgba(255,255,255,0.08)'], borderWidth: 0 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '70%',
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: false,
+      },
     });
-    return () => { if (pizzaChart.current) pizzaChart.current.destroy(); };
-  }, [mesAtivo, lancamentos, loading]);
+    return () => chartRef.current?.destroy();
+  }, [pct, color]);
+  return <div style={{ position: 'relative', width: size, height: size }}><canvas ref={ref} /></div>;
+}
 
-  const fmt = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-  const card = (extra = {}) => ({ background: 'white', borderRadius: 12, border: '1px solid #F1F5F9', padding: '16px 18px', ...extra });
+export default function DashboardPage() {
+  const anoAtual = new Date().getFullYear();
+  const mesAtual = new Date().getMonth();
 
-  if (loading) return <Layout><div style={{ padding: 40, textAlign: 'center', color: '#94A3B8' }}>Carregando...</div></Layout>;
+  const [ano, setAno] = useState(anoAtual);
+  const [mesSel, setMesSel] = useState(mesAtual);
+  const [loading, setLoading] = useState(true);
+
+  const [transacoes, setTransacoes] = useState([]);
+  const [lancamentos, setLancamentos] = useState([]);
+  const [nomeUsuario, setNomeUsuario] = useState('');
+  const [tetoGastos, setTetoGastos] = useState(() => Number(localStorage.getItem('teto_gastos') || 0));
+
+  const [metas] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('metas_financeiras') || '[]'); } catch { return []; }
+  });
+
+  useEffect(() => {
+    const u = localStorage.getItem('user');
+    if (u) { try { const parsed = JSON.parse(u); setNomeUsuario(parsed.nome || parsed.email || ''); } catch {} }
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [resT, resL] = await Promise.all([
+        api.get('/transacoes'),
+        api.get(`/fluxo/lancamentos/${ano}`),
+      ]);
+      // normaliza mes/ano das transacoes extraindo do campo data
+      const txNormalizadas = (resT.data || []).map(t => ({
+        ...t,
+        mes: t.mes || parseInt((t.data || '').split('-')[1]),
+        ano: t.ano || parseInt((t.data || '').split('-')[0]),
+      }));
+      setTransacoes(txNormalizadas);
+      setLancamentos(resL.data || []);
+    } catch (e) {
+      console.error('Erro ao buscar dados:', e);
+    } finally {
+      setLoading(false);
+    }
+  }, [ano]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // entradas por mês (transacoes tipo 'entrada')
+  const entradasPorMes = Array.from({ length: 12 }, (_, m) =>
+    transacoes
+      .filter(t => t.tipo === 'entrada' && Number(t.mes) === m + 1 && Number(t.ano) === ano)
+      .reduce((s, t) => s + Number(t.valor), 0)
+  );
+
+  // saidas por mês (lancamentos_mensais via fluxo — todos são saídas)
+  const saidasPorMes = Array.from({ length: 12 }, (_, m) => {
+    if (!Array.isArray(lancamentos)) return 0;
+    return lancamentos
+      .filter(l => Number(l.mes) === m + 1)
+      .reduce((s, l) => s + Number(l.valor || 0), 0);
+  });
+
+  const saldoPorMes = entradasPorMes.map((e, i) => e - saidasPorMes[i]);
+
+  const entradaMes = entradasPorMes[mesSel];
+  const saidaMes = saidasPorMes[mesSel];
+  const saldoMes = saldoPorMes[mesSel];
+
+  const entradaMesAnt = entradasPorMes[mesSel - 1] || 0;
+  const saidaMesAnt = saidasPorMes[mesSel - 1] || 0;
+  const saldoMesAnt = saldoPorMes[mesSel - 1] || 0;
+
+  const varEntrada = entradaMesAnt > 0 ? ((entradaMes - entradaMesAnt) / entradaMesAnt) * 100 : 0;
+  const varSaida = saidaMesAnt > 0 ? ((saidaMes - saidaMesAnt) / saidaMesAnt) * 100 : 0;
+  const varSaldo = saldoMesAnt !== 0 ? ((saldoMes - saldoMesAnt) / Math.abs(saldoMesAnt)) * 100 : 0;
+
+  const saldoAcumulado = saldoPorMes.slice(0, mesSel + 1).reduce((s, v) => s + v, 0);
+
+  const totalEntradas = entradasPorMes.reduce((s, v) => s + v, 0);
+  const totalSaidas = saidasPorMes.reduce((s, v) => s + v, 0);
+  const saldoAnual = totalEntradas - totalSaidas;
+
+  const mesesComDados = saldoPorMes.filter((_, i) => entradasPorMes[i] > 0 || saidasPorMes[i] > 0);
+  const melhorSaldo = Math.max(...(mesesComDados.length ? mesesComDados : [0]));
+  const melhorMes = saldoPorMes.indexOf(melhorSaldo);
+
+  const taxaPoupanca = totalEntradas > 0 ? Math.round((saldoAnual / totalEntradas) * 100) : 0;
+
+  const pcTeto = tetoGastos > 0 ? (saidaMes / tetoGastos) * 100 : 0;
+  const limiteRestante = tetoGastos > 0 ? tetoGastos - saidaMes : 0;
+  const limiteRestantePct = tetoGastos > 0 ? (limiteRestante / tetoGastos) * 100 : 0;
+
+  // categorias do mês selecionado
+  const catMap = {};
+  transacoes
+    .filter(t => t.tipo === 'saida' && Number(t.mes) === mesSel + 1 && Number(t.ano) === ano && t.categoria)
+    .forEach(t => { catMap[t.categoria] = (catMap[t.categoria] || 0) + Number(t.valor); });
+  const totalCat = Object.values(catMap).reduce((s, v) => s + v, 0) || 1;
+  const categoriasDonut = Object.entries(catMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([label, value]) => ({ label, value: parseFloat(((value / totalCat) * 100).toFixed(1)) }));
+
+  const chipTipo = (i) => {
+    if (entradasPorMes[i] === 0 && saidasPorMes[i] === 0) return 'empty';
+    return saldoPorMes[i] >= 0 ? 'pos' : 'neg';
+  };
+
+  const ultimos6E = entradasPorMes.slice(Math.max(0, mesSel - 6), mesSel);
+  const ultimos6S = saidasPorMes.slice(Math.max(0, mesSel - 6), mesSel);
+  const medE = ultimos6E.length > 0 ? ultimos6E.reduce((s,v) => s+v,0)/ultimos6E.length : 0;
+  const medS = ultimos6S.length > 0 ? ultimos6S.reduce((s,v) => s+v,0)/ultimos6S.length : 0;
+  const varE6 = medE > 0 ? ((entradaMes - medE)/medE)*100 : 0;
+  const varS6 = medS > 0 ? ((saidaMes - medS)/medS)*100 : 0;
+  const varSaldo6 = (medE - medS) !== 0 ? ((saldoMes - (medE - medS))/Math.abs(medE - medS))*100 : 0;
+
+  const alertas = [];
+  if (pcTeto > 80) alertas.push({ nivel: 'red', titulo: 'Limite do mês quase atingido', desc: `Você já utilizou ${pcTeto.toFixed(0)}% do orçamento deste mês.` });
+  if (varSaida > 10) alertas.push({ nivel: 'amber', titulo: 'Saídas acima do mês anterior', desc: `Seus gastos aumentaram ${varSaida.toFixed(1)}% em relação ao mês passado.` });
+  if (saldoAnual < 0) alertas.push({ nivel: 'red', titulo: 'Saldo anual negativo', desc: 'Suas despesas estão superando suas receitas neste ano.' });
+  if (alertas.length === 0) alertas.push({ nivel: 'green', titulo: 'Finanças saudáveis!', desc: 'Nenhum alerta crítico este mês. Continue assim!' });
+
+  const insights = [];
+  if (saldoAnual > 0) insights.push({ tipo: 'green', texto: `Você economizou R$ ${fmt(saldoAnual)} até agora em ${ano}! Continue assim para bater suas metas.` });
+  if (melhorMes >= 0 && mesesComDados.length > 1) insights.push({ tipo: 'blue', texto: `Seu melhor mês foi ${MESES_FULL[melhorMes]} com saldo de R$ ${fmt(melhorSaldo)}.` });
+  if (varSaida < 0) insights.push({ tipo: 'green', texto: `Parabéns! Você reduziu os gastos em ${Math.abs(varSaida).toFixed(1)}% em relação ao mês anterior.` });
+  if (mesSel < 11) insights.push({ tipo: 'amber', texto: `Atenção: faltam ${11 - mesSel} meses para encerrar o ano. Revise suas metas de poupança.` });
+
+  const corGauge = pcTeto < 60 ? '#34D399' : pcTeto < 80 ? '#FBB824' : '#F87171';
+
+  if (loading) {
+    return (
+      <div style={{ ...S.page, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, border: '3px solid rgba(129,140,248,0.2)', borderTop: '3px solid #6366F1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <div style={{ color: '#818CF8', fontSize: 14 }}>Carregando dashboard...</div>
+        </div>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
+  }
 
   return (
-    <Layout>
-      <div style={{ padding: '20px 24px', maxWidth: 1400, margin: '0 auto', background: '#F8F9FC', minHeight: '100vh' }}>
+    <div style={S.page}>
+      <style>{`
+        ::-webkit-scrollbar{display:none}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .dash-section{animation:fadeIn 0.4s ease both}
+        .month-chip-hover:hover{opacity:0.85}
+        .btn-ghost:hover{background:rgba(129,140,248,0.1)!important}
+        .alert-item-red{background:rgba(248,113,113,0.08);border:0.5px solid rgba(248,113,113,0.2)}
+        .alert-item-amber{background:rgba(251,191,36,0.08);border:0.5px solid rgba(251,191,36,0.2)}
+        .alert-item-green{background:rgba(52,211,153,0.08);border:0.5px solid rgba(52,211,153,0.2)}
+        @media(max-width:900px){
+          .grid4-resp{grid-template-columns:repeat(2,1fr)!important}
+          .grid3-resp{grid-template-columns:1fr!important}
+          .grid-kpis-resp{grid-template-columns:repeat(2,1fr)!important}
+        }
+        @media(max-width:600px){
+          .grid4-resp{grid-template-columns:1fr!important}
+          .grid-kpis-resp{grid-template-columns:1fr!important}
+        }
+      `}</style>
 
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 600, color: '#0F172A' }}>Visão Mensal</div>
-            <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 3 }}>{subtitulo}</div>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 16px', borderBottom: '0.5px solid rgba(129,140,248,0.1)' }}>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: '#E2E8F0', letterSpacing: '-0.02em' }}>
+            Plano Financeiro Anual
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#475569', cursor: 'pointer' }}>Exportar</button>
-            <button style={{ background: '#6366F1', border: 'none', borderRadius: 8, padding: '8px 18px', fontSize: 13, color: 'white', cursor: 'pointer', fontWeight: 500 }}>+ Lançamento</button>
+          <div style={{ fontSize: 13, color: '#818CF8', marginTop: 2 }}>
+            {MESES_FULL[mesSel]} {ano} {nomeUsuario ? `· ${nomeUsuario}` : ''}
           </div>
         </div>
-
-        {/* KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: 12, marginBottom: 16 }}>
-          {/* Entradas */}
-          <div style={{ ...card(), position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#6366F1', borderRadius: '12px 12px 0 0' }}></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <div style={{ width: 34, height: 34, background: '#EEF2FF', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#4338CA"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 6, background: '#F1F5F9', color: '#64748B' }}>= estável</span>
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(entradas)}</div>
-            <div style={{ fontSize: 12, color: '#94A3B8' }}>Entradas do mês</div>
-            <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Salário + extras</div>
-          </div>
-          {/* Saídas */}
-          <div style={{ ...card(), position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '12px 12px 0 0' }}></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <div style={{ width: 34, height: 34, background: '#FEF2F2', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#DC2626"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 6, background: '#DCFCE7', color: '#166534' }}>Cartões lideram</span>
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(saidas)}</div>
-            <div style={{ fontSize: 12, color: '#94A3B8' }}>Saídas do mês</div>
-          </div>
-          {/* Saldo */}
-          <div style={{ ...card(), position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: positivo ? '#16A34A' : '#EF4444', borderRadius: '12px 12px 0 0' }}></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <div style={{ width: 34, height: 34, background: positivo ? '#F0FDF4' : '#FEF2F2', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={positivo ? '#16A34A' : '#DC2626'}><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 6, background: positivo ? '#DCFCE7' : '#FEE2E2', color: positivo ? '#166534' : '#991B1B' }}>{mesAtivo === melhorIdx ? 'melhor mês ★' : mesAtivo === piorIdx ? 'pior mês' : positivo ? 'positivo' : 'negativo'}</span>
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: positivo ? '#16A34A' : '#EF4444', letterSpacing: '-.5px', marginBottom: 2 }}>{(saldo < 0 ? '-' : '') + fmt(saldo)}</div>
-            <div style={{ fontSize: 12, color: '#94A3B8' }}>Saldo do mês</div>
-            <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>{taxaPoupanca}% da renda guardada</div>
-          </div>
-          {/* Cartões */}
-          <div style={{ ...card(), position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '12px 12px 0 0' }}></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <div style={{ width: 34, height: 34, background: '#FEF2F2', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#DC2626"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 6, background: '#FEE2E2', color: '#991B1B' }}>maior gasto</span>
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(maiorItem.valor)}</div>
-            <div style={{ fontSize: 12, color: '#94A3B8' }}>Fatura cartões</div>
-            <div style={{ fontSize: 11, color: '#991B1B', marginTop: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#DC2626"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-              {maiorItem.nome} · {fmt(maiorItem.valor)}
-            </div>
-          </div>
-        </div>
-
-        {/* Seletor de meses */}
-        <div style={{background:'white',borderRadius:14,border:'1px solid #F1F5F9',padding:'20px 24px',marginBottom:14}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-            <span style={{fontSize:13,fontWeight:600,color:'#334155'}}>Selecione o mês</span>
-            <span style={{fontSize:12,color:'#94A3B8',fontWeight:500}}>{ANO}</span>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:8}}>
-            {MESES_SHORT.map((m,i)=>{
-              const d=dados[i];
-              const temDados=mesesComDados[i];
-              const futuro=!temDados&&i>MES_ATUAL;
-              const pos=d&&d.sd>=0;
-              const ativo=i===mesAtivo;
-              return(
-                <div key={i} onClick={()=>selMes(i)}
-                  style={{borderRadius:10,padding:'10px 6px 8px',cursor:futuro?'default':'pointer',textAlign:'center',
-                    border:ativo?'none':`1.5px solid ${!temDados?'#F1F5F9':i===melhorIdx?'#16A34A':i===piorIdx?'#EF4444':pos?'#86EFAC':'#FCA5A5'}`,
-                    background:ativo?'#6366F1':'white',opacity:futuro?0.4:1,transition:'all .15s',position:'relative'}}>
-                  {i===melhorIdx&&temDados&&<span style={{position:'absolute',top:3,right:5,fontSize:9,color:ativo?'white':'#16A34A'}}>★</span>}
-                  <span style={{fontSize:11,fontWeight:600,display:'block',marginBottom:4,
-                    color:ativo?'white':!temDados?'#CBD5E1':pos?'#166534':'#991B1B'}}>{m}</span>
-                  <span style={{display:'inline-block',fontSize:9,padding:'1px 6px',borderRadius:8,fontWeight:600,
-                    background:ativo?'rgba(255,255,255,.2)':!temDados?'#F1F5F9':pos?'#DCFCE7':'#FEE2E2',
-                    color:ativo?'white':!temDados?'#CBD5E1':pos?'#166534':'#991B1B'}}>
-                    {temDados?(pos?'+':'')+((d.sd/1000).toFixed(1))+'k':'—'}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Card resumo do mês */}
-        <div style={{background:'white',borderRadius:14,border:'1px solid #F1F5F9',overflow:'hidden',marginBottom:14}}>
-          {/* Header */}
-          <div style={{padding:'16px 22px 14px',borderBottom:'1px solid #F8FAFC',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-            <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <div style={{width:38,height:38,borderRadius:10,background:positivo?'#EEF2FF':'#FEF2F2',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={positivo?'#6366F1':'#EF4444'}>
-                  <path d={positivo?'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z':'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'}/>
-                </svg>
-              </div>
-              <div>
-                <div style={{fontSize:16,fontWeight:700,color:'#0F172A'}}>{MESES_FULL[mesAtivo]}</div>
-                <div style={{fontSize:12,color:'#94A3B8'}}>{ANO}</div>
-              </div>
-            </div>
-            <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:20,fontSize:12,fontWeight:600,
-              background:mesAtivo===melhorIdx?'#EEF2FF':positivo?'#F0FDF4':'#FEF2F2',
-              color:mesAtivo===melhorIdx?'#4338CA':positivo?'#166534':'#991B1B'}}>
-              {mesAtivo===melhorIdx?'Melhor mês do ano ★':positivo?'✓ Mês positivo':'✗ Mês negativo'}
-            </div>
-          </div>
-
-          {/* Métricas */}
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',borderBottom:'1px solid #F8FAFC'}}>
-            {[
-              {lbl:'Entradas',val:fmt(entradas),cor:'#6366F1',sub:'= estável',subCor:'#94A3B8'},
-              {lbl:'Saídas',val:fmt(saidas),cor:'#EF4444',sub:'Cartões lideram',subCor:'#94A3B8'},
-              {lbl:'Saldo',val:(positivo?'':'-')+fmt(saldo),cor:positivo?'#16A34A':'#EF4444',sub:taxaPoupanca+'% da renda guardada',subCor:'#94A3B8'},
-              {lbl:'Maior gasto',val:maiorItem.nome,cor:'#0F172A',valSize:15,sub:fmt(maiorItem.valor)+' — cartões',subCor:'#EF4444'},
-            ].map((m,i)=>(
-              <div key={i} style={{padding:'16px 22px',borderRight:i<3?'1px solid #F8FAFC':'none'}}>
-                <div style={{fontSize:10,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5}}>{m.lbl}</div>
-                <div style={{fontSize:m.valSize||18,fontWeight:700,color:m.cor,marginBottom:3,letterSpacing:'-.3px'}}>{m.val}</div>
-                <div style={{fontSize:10,color:m.subCor}}>{m.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Barra visual entrada vs saída */}
-          <div style={{padding:'14px 22px 16px'}}>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#64748B',marginBottom:6}}>
-              <span>Entradas {fmt(entradas)}</span>
-              <span>Saídas {fmt(saidas)}</span>
-            </div>
-            <div style={{display:'flex',height:8,borderRadius:4,overflow:'hidden',gap:2}}>
-              <div style={{height:'100%',background:'#A5B4FC',borderRadius:4,width:Math.round(entradas/Math.max(entradas,saidas,1)*100)+'%',transition:'width .4s'}}></div>
-              <div style={{height:'100%',background:'#FCA5A5',borderRadius:4,width:Math.round(saidas/Math.max(entradas,saidas,1)*100)+'%',transition:'width .4s'}}></div>
-            </div>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#94A3B8',marginTop:5}}>
-              <span>R$ 0</span>
-              <span>{fmt(Math.max(entradas,saidas))}</span>
-            </div>
-          </div>
-
-          {/* Insights inline */}
-          <div style={{display:'flex',borderTop:'1px solid #F8FAFC'}}>
-            {[
-              {bg:'#EEF2FF',iconCor:'#6366F1',path:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z',bold:(entradas>0?Math.round(saidas/entradas*100):0)+'%',txt:'da renda foi gasta'},
-              {bg:'#FEF3C7',iconCor:'#D97706',path:'M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z',bold:categorias[0]?.nome||'—',txt:'maior categoria de gastos'},
-              {bg:positivo?'#DCFCE7':'#FEE2E2',iconCor:positivo?'#16A34A':'#EF4444',path:positivo?'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z':'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z',bold:mesAtivo===melhorIdx?'Melhor mês ★':positivo?'Positivo ✓':'Negativo ✗',txt:'resultado do mês'},
-              {bg:'#EEF2FF',iconCor:'#4338CA',path:'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z',bold:fmt(mediaMensal()),txt:'média mensal guardada'},
-            ].map((ins,i)=>(
-              <div key={i} style={{flex:1,padding:'12px 16px',display:'flex',alignItems:'center',gap:8,borderRight:i<3?'1px solid #F8FAFC':'none'}}>
-                <div style={{width:26,height:26,borderRadius:7,background:ins.bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill={ins.iconCor}><path d={ins.path}/></svg>
-                </div>
-                <div style={{fontSize:11,color:'#64748B',lineHeight:1.4}}>
-                  <span style={{fontWeight:600,color:'#334155'}}>{ins.bold}</span><br/>{ins.txt}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Gráficos */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,320px)', gap: 14, marginBottom: 14 }}>
-          {/* Fluxo */}
-          <div style={{ ...card() }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>Fluxo — {MESES_FULL[mesAtivo]}</span>
-              <span style={{ fontSize: 10, color: '#6366F1', cursor: 'pointer' }} onClick={() => navigate('/fluxo')}>ver fluxo →</span>
-            </div>
-            <div style={{ position: 'relative', height: 160 }}><canvas ref={fluxoRef}></canvas></div>
-            <div style={{ display: 'flex', gap: 14, marginTop: 10 }}>
-              {[['#A5B4FC','Entradas'],['#FCA5A5','Saídas'],['#16A34A','Saldo','line']].map(([cor, lbl, tipo]) => (
-                <span key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#64748B' }}>
-                  <span style={{ width: tipo === 'line' ? 14 : 10, height: tipo === 'line' ? 2 : 10, borderRadius: tipo === 'line' ? 1 : 2, background: cor, display: 'inline-block' }}></span>{lbl}
-                </span>
-              ))}
-            </div>
-          </div>
-          {/* Pizza */}
-          <div style={{ ...card() }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>Gastos por categoria</span>
-              <span style={{ fontSize: 10, color: '#6366F1', cursor: 'pointer' }} onClick={() => navigate('/relatorios')}>ver relatórios →</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 130, height: 130, flexShrink: 0 }}><canvas ref={pizzaRef}></canvas></div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {(categorias.length ? categorias.slice(0, 4) : [{ nome: 'Sem dados', pct: 100, val: 0 }]).map((c, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#334155' }}>
-                      <span style={{ width: 8, height: 8, borderRadius: 2, background: coresCat[i] || '#CBD5E1', display: 'inline-block' }}></span>
-                      {c.nome}
-                    </span>
-                    <span style={{ fontWeight: 600, color: i === 0 ? coresCat[0] : '#0F172A' }}>{c.pct}%</span>
-                  </div>
-                ))}
-                <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 6, marginTop: 2, display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748B' }}>
-                  <span>Total saídas</span><span style={{ fontWeight: 600, color: '#EF4444' }}>{fmt(saidas)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Saúde */}
-          <div style={{ ...card() }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#0F172A', marginBottom: 14 }}>Saúde financeira</div>
-            {[
-              { lbl: 'Taxa de poupança', val: taxaPoupanca + '%', pct: parseFloat(taxaPoupanca), cor: parseFloat(taxaPoupanca) > 20 ? '#16A34A' : parseFloat(taxaPoupanca) > 5 ? '#F59E0B' : '#EF4444', note: 'Meta: 20% da renda' },
-              { lbl: 'Controle de gastos', val: '68%', pct: 68, cor: '#F59E0B', note: 'Cartões ainda elevados' },
-              { lbl: 'Progresso das metas', val: '31%', pct: 31, cor: '#6366F1', note: '3 metas em andamento' },
-            ].map((sf, i) => (
-              <div key={i} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                  <span style={{ color: '#64748B' }}>{sf.lbl}</span>
-                  <span style={{ fontWeight: 600, color: sf.cor }}>{sf.val}</span>
-                </div>
-                <div style={{ height: 5, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: Math.min(sf.pct, 100) + '%', background: sf.cor, borderRadius: 3 }}></div>
-                </div>
-                <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>{sf.note}</div>
-              </div>
-            ))}
-            <div style={{ background: positivo ? '#F0FDF4' : '#FEF2F2', borderRadius: 8, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill={positivo ? '#16A34A' : '#EF4444'}><path d={positivo ? 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' : 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'}/></svg>
-              <span style={{ fontSize: 12, fontWeight: 500, color: positivo ? '#166534' : '#991B1B' }}>{positivo ? 'Mês fechado no positivo!' : 'Mês fechado no negativo.'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Insights */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 12, marginBottom: 14 }}>
-          {[
-            { bg: '#FEE2E2', iconBg: '#DC2626', path: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z', title: 'Atenção nos gastos', sub: `Suas saídas somam ${fmt(saidas)} em ${MESES_FULL[mesAtivo]}.` },
-            { bg: '#DCFCE7', iconBg: '#16A34A', path: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z', title: 'Tendência positiva', sub: positivo ? `Saldo positivo de ${fmt(saldo)}. Continue assim!` : 'Fique atento ao saldo negativo.' },
-            { bg: '#EEF2FF', iconBg: '#4338CA', path: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z', title: 'Meta mais próxima', sub: `Viagem: 68% concluída. Faltam R$ 1.600.` },
-          ].map((ins, i) => (
-            <div key={i} style={{ ...card(), display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: ins.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill={ins.iconBg}><path d={ins.path}/></svg>
-              </div>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#0F172A', marginBottom: 3 }}>{ins.title}</div>
-                <div style={{ fontSize: 11, color: '#64748B', lineHeight: 1.5 }}>{ins.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Metas + Transações */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 14 }}>
-          {/* Metas */}
-          <div style={{ ...card() }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>Metas em andamento</span>
-              <span style={{ fontSize: 10, color: '#6366F1', cursor: 'pointer' }} onClick={() => navigate('/metas')}>ver metas →</span>
-            </div>
-            {metas.map((m, i) => {
-              const pct = Math.round(m.guardado / m.total * 100);
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < metas.length - 1 ? '1px solid #F8FAFC' : 'none' }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 7, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 14 }}>{m.icone}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: '#334155' }}>{m.nome}</div>
-                    <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: pct + '%', background: m.cor, borderRadius: 2 }}></div>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: m.cor }}>{pct}%</div>
-                    <div style={{ fontSize: 10, color: '#94A3B8' }}>falta {fmt(m.total - m.guardado)}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          {/* Transações */}
-          <div style={{ ...card() }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>Últimas transações</span>
-              <span style={{ fontSize: 10, color: '#6366F1', cursor: 'pointer' }} onClick={() => navigate('/saidas')}>ver todas →</span>
-            </div>
-            {ultimasTx.length === 0 ? (
-              <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: 12, padding: 20 }}>Nenhuma transação neste mês</div>
-            ) : ultimasTx.map((tx, i) => {
-              const entrada = tx.tipo === 'entrada';
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < ultimasTx.length - 1 ? '1px solid #F8FAFC' : 'none' }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 9, background: entrada ? '#ECFDF5' : '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill={entrada ? '#059669' : '#DC2626'}><path d={entrada ? 'M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z' : 'M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z'}/></svg>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: '#334155' }}>{tx.descricao || tx.item || '—'}</div>
-                    <div style={{ fontSize: 11, color: '#94A3B8' }}>{tx.categoria || (entrada ? 'Entrada' : 'Saída')} · {MESES_SHORT[mesAtivo]}</div>
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: entrada ? '#16A34A' : '#EF4444', whiteSpace: 'nowrap' }}>
-                    {entrada ? '+' : '-'}{fmt(parseFloat(tx.valor))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <select
+            value={ano}
+            onChange={e => setAno(Number(e.target.value))}
+            style={{ background: '#1E1B4B', border: '0.5px solid #4338CA', color: '#E2E8F0', padding: '7px 14px', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}
+          >
+            {[anoAtual - 1, anoAtual, anoAtual + 1].map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <button
+            onClick={fetchData}
+            style={{ background: '#1E1B4B', border: '0.5px solid #4338CA', color: '#818CF8', width: 36, height: 36, borderRadius: '50%', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Atualizar dados"
+          >↻</button>
         </div>
       </div>
-    </Layout>
+
+      <div style={{ padding: '16px 20px' }}>
+
+        {/* Seletor de meses */}
+        <div style={S.monthNav} className="dash-section">
+          <span style={{ color: '#64748B', fontSize: 18, cursor: 'pointer', flexShrink: 0, userSelect: 'none' }}
+            onClick={() => setAno(a => a - 1)}>‹</span>
+          {MESES.map((m, i) => (
+            <div key={i} className="month-chip-hover" style={S.monthChip(mesSel === i, chipTipo(i))} onClick={() => setMesSel(i)}>
+              {m}{melhorMes === i && mesesComDados.length > 0 ? ' ★' : ''}
+            </div>
+          ))}
+          <span style={{ color: '#64748B', fontSize: 18, cursor: 'pointer', flexShrink: 0, userSelect: 'none' }}
+            onClick={() => setAno(a => a + 1)}>›</span>
+        </div>
+
+        {/* 4 KPIs superiores */}
+        <div style={{ ...S.grid4, marginBottom: 12 }} className="grid4-resp dash-section">
+          <div style={S.cardAccent('linear-gradient(135deg,#312E81,#1A1740)', 'rgba(129,140,248,0.3)')}>
+            <div style={S.kpiLabel()}>🐷 Dinheiro Guardado</div>
+            <div style={S.kpiValue('#818CF8')}>R$ {fmt(saldoAcumulado)}</div>
+            <span style={S.badge(saldoMes >= 0)}>{saldoMes >= 0 ? '▲' : '▼'} acumulado {ano}</span>
+            <SparkBar data={saldoPorMes.map(v => Math.max(0, v))} color="#818CF8" height={40} />
+          </div>
+
+          <div style={S.cardAccent('linear-gradient(135deg,#134E4A,#1A1740)', 'rgba(20,184,166,0.3)')}>
+            <div style={S.kpiLabel()}>🛡️ Reserva de Segurança</div>
+            <div style={S.kpiValue('#2DD4BF')}>
+              {entradaMes > 0 ? `${(saldoAcumulado / (saidaMes || 1)).toFixed(1)} meses` : '—'}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 8 }}>de despesas cobertas</div>
+            <div style={{ ...S.progressBar, marginTop: 0 }}>
+              <div style={S.progressFill(Math.min((saldoAcumulado / (saidaMes || 1)) / 6 * 100, 100), '#14B8A6')} />
+            </div>
+            <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>Meta: 6 meses</div>
+          </div>
+
+          <div style={S.cardAccent('linear-gradient(135deg,#4C1D95,#1A1740)', 'rgba(167,139,250,0.3)')}>
+            <div style={S.kpiLabel()}>🎯 Metas</div>
+            <div style={S.kpiValue('#A78BFA')}>
+              {metas.length > 0 ? `R$ ${fmt(metas.reduce((s, m) => s + Number(m.atual || 0), 0))}` : 'Sem metas'}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8' }}>Total acumulado</div>
+            <div style={{ marginTop: 8, fontSize: 11, color: '#A78BFA', cursor: 'pointer' }}>
+              {metas.length} {metas.length === 1 ? 'meta ativa' : 'metas ativas'} ›
+            </div>
+          </div>
+
+          <div style={S.cardAccent('linear-gradient(135deg,#78350F,#1A1740)', 'rgba(251,191,36,0.3)')}>
+            <div style={S.kpiLabel()}>⏱️ Limite Restante do Mês</div>
+            <div style={S.kpiValue('#FBB824')}>
+              {tetoGastos > 0 ? `R$ ${fmt(limiteRestante)}` : '—'}
+            </div>
+            {tetoGastos > 0 ? (
+              <span style={{ ...S.badge(limiteRestantePct > 30), background: 'rgba(251,191,36,0.15)', color: '#FBB824' }}>
+                {limiteRestantePct.toFixed(0)}% do orçamento
+              </span>
+            ) : (
+              <div style={{ fontSize: 11, color: '#94A3B8' }}>
+                Configure o teto em{' '}
+                <span style={{ color: '#FBB824', cursor: 'pointer' }} onClick={() => {
+                  const v = prompt('Teto de gastos mensal (R$):');
+                  if (v && !isNaN(v)) { const n = Number(v); setTetoGastos(n); localStorage.setItem('teto_gastos', n); }
+                }}>Fluxo Anual</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* KPIs mensais + gauge */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr) 1.1fr', gap: 12, marginBottom: 12 }} className="grid4-resp dash-section">
+          <div style={S.card()}>
+            <div style={S.kpiLabel('#34D399')}>↑ Entradas (Mês)</div>
+            <div style={S.kpiValue('#34D399')}>R$ {fmt(entradaMes)}</div>
+            <span style={S.badge(varEntrada >= 0)}>{varEntrada >= 0 ? '▲' : '▼'} {Math.abs(varEntrada).toFixed(1)}% vs mês anterior</span>
+            <SparkBar data={entradasPorMes.slice(0, mesSel + 1)} color="#34D399" height={55} />
+          </div>
+
+          <div style={S.card()}>
+            <div style={S.kpiLabel('#F87171')}>↓ Saídas (Mês)</div>
+            <div style={S.kpiValue('#F87171')}>R$ {fmt(saidaMes)}</div>
+            <span style={S.badge(varSaida <= 0)}>{varSaida >= 0 ? '▲' : '▼'} {Math.abs(varSaida).toFixed(1)}% vs mês anterior</span>
+            <SparkBar data={saidasPorMes.slice(0, mesSel + 1)} color="#F87171" height={55} />
+          </div>
+
+          <div style={S.card()}>
+            <div style={S.kpiLabel('#60A5FA')}>= Saldo do Mês</div>
+            <div style={S.kpiValue('#60A5FA')}>R$ {fmt(saldoMes)}</div>
+            <span style={S.badge(varSaldo >= 0)}>{varSaldo >= 0 ? '▲' : '▼'} {Math.abs(varSaldo).toFixed(1)}% vs mês anterior</span>
+            <SparkBar data={saldoPorMes.slice(0, mesSel + 1)} color="#60A5FA" height={55} />
+          </div>
+
+          <div style={S.card({ textAlign: 'center' })}>
+            <div style={{ fontSize: 11, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Limite do Mês (Teto)</div>
+            <div style={{ fontSize: 34, fontWeight: 800, color: corGauge }}>
+              {tetoGastos > 0 ? `${pcTeto.toFixed(0)}%` : '—'}
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 10 }}>do orçamento utilizado</div>
+            <div style={{ height: 12, background: 'rgba(255,255,255,0.08)', borderRadius: 6, overflow: 'hidden', marginBottom: 4 }}>
+              <div style={{ height: '100%', width: `${Math.min(pcTeto, 100)}%`, background: 'linear-gradient(90deg,#34D399 0%,#FBB824 55%,#F87171 80%)', borderRadius: 6, transition: 'width 0.8s ease' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#64748B', marginBottom: 8 }}>
+              <span>R$ 0</span>
+              <span style={{ color: corGauge, fontWeight: 600 }}>R$ {fmt(saidaMes)} / R$ {fmt(tetoGastos)}</span>
+            </div>
+            {pcTeto > 80 && tetoGastos > 0 && (
+              <>
+                <div style={{ background: '#FBB824', color: '#1C1917', fontSize: 11, fontWeight: 700, padding: '3px 12px', borderRadius: 20, display: 'inline-block', marginBottom: 4 }}>⚠ ATENÇÃO</div>
+                <div style={{ fontSize: 10, color: '#94A3B8' }}>Acima de 80% do limite!</div>
+              </>
+            )}
+            {tetoGastos === 0 && <div style={{ fontSize: 11, color: '#64748B' }}>Configure no Fluxo Anual</div>}
+          </div>
+        </div>
+
+        {/* Gráfico anual + Donut + Comparativos */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gap: 12, marginBottom: 12 }} className="grid3-resp dash-section">
+          <div style={S.card()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0' }}>Evolução Financeira Anual</span>
+            </div>
+            <div style={S.legendRow}>
+              {[['#34D399','Entradas'],['#F87171','Saídas'],['#60A5FA','Saldo']].map(([c,l]) => (
+                <div key={l} style={S.legendItem}><div style={S.legendDot(c)} />{l}</div>
+              ))}
+            </div>
+            <BarLineChart labels={MESES} entradas={entradasPorMes} saidas={saidasPorMes} saldo={saldoPorMes} />
+          </div>
+
+          <div style={S.card()}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0', marginBottom: 8 }}>
+              Gastos por Categoria ({MESES[mesSel]})
+            </div>
+            {categoriasDonut.length > 0 ? (
+              <>
+                <DonutChart data={categoriasDonut} colors={CAT_COLORS.slice(0, categoriasDonut.length)} centerText={`R$\n${fmt(saidaMes)}`} />
+                <div style={S.legendRow}>
+                  {categoriasDonut.map((c, i) => (
+                    <div key={c.label} style={S.legendItem}><div style={S.legendDot(CAT_COLORS[i])} />{c.label} {c.value}%</div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div style={{ color: '#64748B', fontSize: 12, textAlign: 'center', padding: '40px 0' }}>
+                Sem dados de categoria<br />para {MESES_FULL[mesSel]}
+              </div>
+            )}
+          </div>
+
+          <div style={S.card()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0' }}>Comparativos</span>
+              <span style={{ fontSize: 11, color: '#818CF8' }}>{MESES[mesSel]}/{ano}</span>
+            </div>
+            <div style={{ fontSize: 10, color: '#64748B', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              vs Mês Anterior ({MESES[mesSel - 1] || '—'}/{ano})
+            </div>
+            {[
+              ['Entradas', varEntrada, entradaMes - entradaMesAnt, true],
+              ['Saídas', varSaida, saidaMes - saidaMesAnt, false],
+              ['Saldo', varSaldo, saldoMes - saldoMesAnt, true],
+            ].map(([label, pct, diff, maisEMelhor]) => (
+              <div key={label} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center', padding: '6px 0', borderBottom: '0.5px solid rgba(129,140,248,0.08)', fontSize: 12 }}>
+                <span style={{ color: '#94A3B8', fontSize: 11 }}>{label}</span>
+                <span style={{ color: (maisEMelhor ? pct >= 0 : pct <= 0) ? '#34D399' : '#F87171', fontWeight: 600 }}>
+                  {pct >= 0 ? '▲' : '▼'} {Math.abs(pct).toFixed(1)}%
+                </span>
+                <span style={{ color: diff >= 0 ? '#34D399' : '#F87171', fontSize: 10 }}>
+                  {diff >= 0 ? '+' : ''}R${fmt(diff)}
+                </span>
+              </div>
+            ))}
+            <div style={{ fontSize: 10, color: '#64748B', margin: '10px 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              vs Média Últimos 6 Meses
+            </div>
+            {[
+              ['Entradas', varE6, entradaMes - medE, true],
+              ['Saídas', varS6, saidaMes - medS, false],
+              ['Saldo', varSaldo6, saldoMes - (medE - medS), true],
+            ].map(([label, pct, diff, maisEMelhor]) => (
+              <div key={label} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center', padding: '6px 0', borderBottom: '0.5px solid rgba(129,140,248,0.08)', fontSize: 12 }}>
+                <span style={{ color: '#94A3B8', fontSize: 11 }}>{label}</span>
+                <span style={{ color: (maisEMelhor ? pct >= 0 : pct <= 0) ? '#34D399' : '#F87171', fontWeight: 600 }}>
+                  {pct >= 0 ? '▲' : '▼'} {Math.abs(pct).toFixed(1)}%
+                </span>
+                <span style={{ color: diff >= 0 ? '#34D399' : '#F87171', fontSize: 10 }}>
+                  {diff >= 0 ? '+' : ''}R${fmt(diff)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Alertas + Insights + Metas */}
+        <div style={S.grid3} className="grid3-resp dash-section">
+          <div style={S.card()}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0', marginBottom: 12 }}>🔔 Alertas</div>
+            {alertas.map((a, i) => (
+              <div key={i} className={`alert-item-${a.nivel}`} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: 10, borderRadius: 8, marginBottom: 8 }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0, background: a.nivel === 'red' ? 'rgba(248,113,113,0.2)' : a.nivel === 'green' ? 'rgba(52,211,153,0.2)' : 'rgba(251,191,36,0.2)' }}>
+                  {a.nivel === 'red' ? '🔴' : a.nivel === 'green' ? '🟢' : '🟡'}
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0', marginBottom: 2 }}>{a.titulo}</div>
+                  <div style={{ fontSize: 11, color: '#64748B', lineHeight: 1.4 }}>{a.desc}</div>
+                </div>
+              </div>
+            ))}
+            <button className="btn-ghost" style={{ background: 'transparent', border: '0.5px solid rgba(248,113,113,0.3)', color: '#F87171', padding: '7px 16px', borderRadius: 8, fontSize: 12, cursor: 'pointer', width: '100%', marginTop: 4 }}>
+              Ver todos os alertas
+            </button>
+          </div>
+
+          <div style={S.card()}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0', marginBottom: 12 }}>💡 Insights do Ano</div>
+            {insights.map((ins, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flexShrink: 0, background: ins.tipo === 'green' ? 'rgba(52,211,153,0.2)' : ins.tipo === 'blue' ? 'rgba(96,165,250,0.2)' : 'rgba(251,191,36,0.2)', color: ins.tipo === 'green' ? '#34D399' : ins.tipo === 'blue' ? '#60A5FA' : '#FBB824' }}>
+                  {ins.tipo === 'green' ? '✓' : ins.tipo === 'blue' ? '★' : '!'}
+                </div>
+                <div style={{ fontSize: 12, color: '#CBD5E1', lineHeight: 1.5 }}>{ins.texto}</div>
+              </div>
+            ))}
+            <button className="btn-ghost" style={{ background: 'transparent', border: '0.5px solid rgba(129,140,248,0.3)', color: '#818CF8', padding: '7px 16px', borderRadius: 8, fontSize: 12, cursor: 'pointer', width: '100%', marginTop: 4 }}>
+              Ver mais insights
+            </button>
+          </div>
+
+          <div style={S.card()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0' }}>🎯 Metas Ativas</span>
+              <span style={{ fontSize: 11, color: '#818CF8', cursor: 'pointer' }}>Ver todas</span>
+            </div>
+            {metas.length > 0 ? metas.slice(0, 3).map((meta, i) => {
+              const pct = meta.total > 0 ? (Number(meta.atual || 0) / Number(meta.total)) * 100 : 0;
+              const cores = ['#6366F1', '#14B8A6', '#F59E0B'];
+              return (
+                <div key={i} style={{ marginBottom: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <div style={{ fontSize: 13, color: '#E2E8F0' }}>{meta.nome || `Meta ${i+1}`}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#818CF8' }}>{pct.toFixed(0)}%</div>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#64748B', marginBottom: 4 }}>R$ {fmt(Number(meta.atual || 0))} / R$ {fmt(Number(meta.total || 0))}</div>
+                  <div style={S.progressBar}><div style={S.progressFill(pct, cores[i % cores.length])} /></div>
+                </div>
+              );
+            }) : (
+              <div style={{ color: '#64748B', fontSize: 12, textAlign: 'center', padding: '30px 0' }}>
+                Nenhuma meta cadastrada.<br />
+                <span style={{ color: '#818CF8', cursor: 'pointer' }}>Criar primeira meta →</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Resumo Anual */}
+        <div style={{ ...S.card(), marginTop: 4 }} className="dash-section">
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+            Resumo Anual {ano}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8, alignItems: 'center' }}>
+            {[
+              { lbl: 'Entradas Totais', val: `R$ ${fmt(totalEntradas)}`, cor: '#34D399' },
+              { lbl: 'Saídas Totais', val: `R$ ${fmt(totalSaidas)}`, cor: '#F87171' },
+              { lbl: 'Saldo Anual', val: `R$ ${fmt(saldoAnual)}`, cor: '#60A5FA' },
+              { lbl: 'Melhor Mês', val: mesesComDados.length > 0 ? MESES_FULL[melhorMes] : '—', cor: '#34D399', sub: mesesComDados.length > 0 ? `R$ ${fmt(melhorSaldo)}` : null },
+            ].map((k, i) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 10, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{k.lbl}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: k.cor }}>{k.val}</div>
+                {k.sub && <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>{k.sub}</div>}
+              </div>
+            ))}
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ fontSize: 10, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Taxa de Poupança</div>
+              <div style={{ position: 'relative' }}>
+                <MiniDonut pct={Math.max(0, taxaPoupanca)} color="#6366F1" size={60} />
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: 12, fontWeight: 700, color: '#818CF8', whiteSpace: 'nowrap' }}>
+                  {taxaPoupanca}%
+                </div>
+              </div>
+              <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 4 }}>de tudo que ganham</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 }

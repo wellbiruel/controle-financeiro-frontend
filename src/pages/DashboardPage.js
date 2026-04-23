@@ -35,11 +35,29 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [lancRes] = await Promise.all([
+        const [lancRes, , transacoesRes] = await Promise.all([
           api.get(`/fluxo/lancamentos/${ANO}`),
           api.get('/fluxo/grupos'),
+          api.get('/transacoes'),
         ]);
-        setLancamentos(lancRes.data || []);
+
+        // lancamentos_mensais não tem campo tipo — são todos saídas (itens de despesa)
+        const lancamentos = (lancRes.data || []).map(l => ({ ...l, tipo: 'saida' }));
+
+        // transacoes tem campo tipo ('entrada'/outro) e campo data (ex: "2026-04-15")
+        // extrai mes e ano do campo data para manter padrão numérico igual ao /fluxo
+        const transacoes = (transacoesRes.data || [])
+          .filter(t => {
+            const ano = parseInt((t.data || '').split('-')[0]);
+            return ano === ANO;
+          })
+          .map(t => ({
+            ...t,
+            mes: parseInt((t.data || '').split('-')[1]),
+            ano: parseInt((t.data || '').split('-')[0]),
+          }));
+
+        setLancamentos([...lancamentos, ...transacoes]);
       } catch (e) {
         console.error(e);
       } finally {

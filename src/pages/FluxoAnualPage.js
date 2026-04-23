@@ -19,7 +19,6 @@ export default function FluxoAnualPage() {
   const [mesAtivo, setMesAtivo] = useState(MES_ATUAL);
   const [anoAtivo] = useState(ANO);
   const [lancamentos, setLancamentos] = useState([]);
-  const [grupos, setGrupos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [teto, setTeto] = useState(() => parseFloat(localStorage.getItem('finanTeto') || '7000'));
   const [editandoTeto, setEditandoTeto] = useState(false);
@@ -33,7 +32,7 @@ export default function FluxoAnualPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [lancRes, gruposRes, txRes] = await Promise.all([
+        const [lancRes, , txRes] = await Promise.all([
           api.get(`/fluxo/lancamentos/${ANO}`),
           api.get('/fluxo/grupos'),
           api.get('/transacoes'),
@@ -48,7 +47,6 @@ export default function FluxoAnualPage() {
             ano: parseInt((t.data || '').split('-')[0]),
           }));
         setLancamentos([...saidas, ...entradas]);
-        setGrupos(gruposRes.data || []);
       } catch (e) {
         console.error(e);
       } finally {
@@ -99,7 +97,7 @@ export default function FluxoAnualPage() {
     const catTop = Object.entries(todasCats).sort((a, b) => b[1] - a[1])[0];
     const catPct = totalS > 0 && catTop ? Math.round(catTop[1] / totalS * 100) : 0;
 
-    const mesesComS = dados.filter((d, i) => mesesComDados[i] && i < MES_ATUAL);
+    const mesesComS = dados.filter((_, i) => mesesComDados[i] && i < MES_ATUAL);
     const tendencia = mesesComS.length >= 2
       ? mesesComS[mesesComS.length - 1].s > mesesComS[mesesComS.length - 2].s ? 'subindo' : 'caindo'
       : 'estável';

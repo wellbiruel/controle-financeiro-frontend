@@ -252,67 +252,109 @@ export default function DashboardPage() {
         </div>
 
         {/* Seletor de meses */}
-        <div style={{ ...card(), marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#334155' }}>Navegação mensal — clique para explorar</span>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {[['#86EFAC','Positivo'],['#FCA5A5','Negativo'],['#16A34A','Melhor ★'],['#E2E8F0','Sem dados']].map(([cor, lbl]) => (
-                <span key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, color: '#64748B' }}>
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: cor, display: 'inline-block' }}></span>{lbl}
-                </span>
-              ))}
-            </div>
+        <div style={{background:'white',borderRadius:14,border:'1px solid #F1F5F9',padding:'20px 24px',marginBottom:14}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+            <span style={{fontSize:13,fontWeight:600,color:'#334155'}}>Selecione o mês</span>
+            <span style={{fontSize:12,color:'#94A3B8',fontWeight:500}}>{ANO}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)', gap: 6 }}>
-            {MESES_SHORT.map((m, i) => {
-              const d = dados[i];
-              const temDados = mesesComDados[i];
-              const ativo = i === mesAtivo;
-              const pos = d.sd >= 0;
-              const futuro = !temDados && i > MES_ATUAL;
-              return (
-                <div key={i} onClick={() => selMes(i)}
-                  style={{ borderRadius: 8, padding: '6px 3px', textAlign: 'center', cursor: futuro ? 'default' : 'pointer', position: 'relative', border: ativo ? 'none' : `1px solid ${!temDados ? '#E2E8F0' : pos ? '#86EFAC' : '#FCA5A5'}`, borderStyle: futuro ? 'dashed' : 'solid', background: ativo ? '#6366F1' : 'white', opacity: futuro ? 0.45 : 1, transition: 'all .15s' }}>
-                  {i === melhorIdx && temDados && <span style={{ position: 'absolute', top: 2, right: 3, fontSize: 8, color: ativo ? 'white' : '#16A34A' }}>★</span>}
-                  <span style={{ fontSize: 10, fontWeight: 500, display: 'block', marginBottom: 3, color: ativo ? 'white' : !temDados ? '#CBD5E1' : pos ? '#166534' : '#991B1B' }}>{m}</span>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', margin: '0 auto', background: !temDados ? '#E2E8F0' : pos ? '#16A34A' : '#EF4444' }}></div>
-                  <span style={{ fontSize: 8, marginTop: 2, display: 'block', color: ativo ? 'rgba(255,255,255,.7)' : !temDados ? '#CBD5E1' : pos ? '#16A34A' : '#EF4444' }}>
-                    {temDados ? (pos ? '+' : '') + (d.sd / 1000).toFixed(1) + 'k' : '—'}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:8}}>
+            {MESES_SHORT.map((m,i)=>{
+              const d=dados[i];
+              const temDados=mesesComDados[i];
+              const futuro=!temDados&&i>MES_ATUAL;
+              const pos=d&&d.sd>=0;
+              const ativo=i===mesAtivo;
+              return(
+                <div key={i} onClick={()=>selMes(i)}
+                  style={{borderRadius:10,padding:'10px 6px 8px',cursor:futuro?'default':'pointer',textAlign:'center',
+                    border:ativo?'none':`1.5px solid ${!temDados?'#F1F5F9':i===melhorIdx?'#16A34A':i===piorIdx?'#EF4444':pos?'#86EFAC':'#FCA5A5'}`,
+                    background:ativo?'#6366F1':'white',opacity:futuro?0.4:1,transition:'all .15s',position:'relative'}}>
+                  {i===melhorIdx&&temDados&&<span style={{position:'absolute',top:3,right:5,fontSize:9,color:ativo?'white':'#16A34A'}}>★</span>}
+                  <span style={{fontSize:11,fontWeight:600,display:'block',marginBottom:4,
+                    color:ativo?'white':!temDados?'#CBD5E1':pos?'#166534':'#991B1B'}}>{m}</span>
+                  <span style={{display:'inline-block',fontSize:9,padding:'1px 6px',borderRadius:8,fontWeight:600,
+                    background:ativo?'rgba(255,255,255,.2)':!temDados?'#F1F5F9':pos?'#DCFCE7':'#FEE2E2',
+                    color:ativo?'white':!temDados?'#CBD5E1':pos?'#166534':'#991B1B'}}>
+                    {temDados?(pos?'+':'')+((d.sd/1000).toFixed(1))+'k':'—'}
                   </span>
                 </div>
               );
             })}
           </div>
-          <div style={{ borderTop: '1px solid #F5F5F5', paddingTop: 8, marginTop: 8 }}>
-            <div style={{ fontSize: 9, color: '#94A3B8', marginBottom: 5 }}>Saldo mês a mês</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)', gap: 6, alignItems: 'flex-end', height: 24 }}>
-              {dados.map((d, i) => {
-                const temDados = mesesComDados[i];
-                const h = temDados ? Math.max(3, Math.round(Math.abs(d.sd) / 5000 * 22)) : 2;
-                return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: 24 }}>
-                    <div style={{ width: '80%', height: h, background: !temDados ? '#E2E8F0' : d.sd >= 0 ? '#86EFAC' : '#FCA5A5', borderRadius: 2, opacity: temDados ? 1 : 0.4 }}></div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
-        {/* Resumo anual */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: 12, marginBottom: 16 }}>
-          {[
-            { lbl: 'Melhor mês', val: MESES_FULL[melhorIdx], sub: `+${fmt(dados[melhorIdx]?.sd || 0)}`, valCor: '#16A34A', bgBadge: '#DCFCE7', corBadge: '#166534' },
-            { lbl: 'Pior mês', val: MESES_FULL[piorIdx], sub: fmt(dados[piorIdx]?.sd || 0), valCor: '#EF4444', bgBadge: '#FEE2E2', corBadge: '#991B1B' },
-            { lbl: 'Média guardada/mês', val: fmt(mediaMensal()), sub: `Acumulado: ${fmt(dados.reduce((s,d) => s + d.sd, 0))}` },
-            { lbl: 'Projeção anual', val: fmt(mediaMensal() * 12), sub: 'Mantendo ritmo atual', valCor: '#6366F1' },
-          ].map((a, i) => (
-            <div key={i} style={{ ...card() }}>
-              <div style={{ fontSize: 11, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5 }}>{a.lbl}</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: a.valCor || '#0F172A' }}>{a.val}</div>
-              <div style={{ fontSize: 11, color: '#64748B', marginTop: 3 }}>{a.sub}</div>
+        {/* Card resumo do mês */}
+        <div style={{background:'white',borderRadius:14,border:'1px solid #F1F5F9',overflow:'hidden',marginBottom:14}}>
+          {/* Header */}
+          <div style={{padding:'16px 22px 14px',borderBottom:'1px solid #F8FAFC',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{width:38,height:38,borderRadius:10,background:positivo?'#EEF2FF':'#FEF2F2',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={positivo?'#6366F1':'#EF4444'}>
+                  <path d={positivo?'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z':'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'}/>
+                </svg>
+              </div>
+              <div>
+                <div style={{fontSize:16,fontWeight:700,color:'#0F172A'}}>{MESES_FULL[mesAtivo]}</div>
+                <div style={{fontSize:12,color:'#94A3B8'}}>{ANO}</div>
+              </div>
             </div>
-          ))}
+            <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',borderRadius:20,fontSize:12,fontWeight:600,
+              background:mesAtivo===melhorIdx?'#EEF2FF':positivo?'#F0FDF4':'#FEF2F2',
+              color:mesAtivo===melhorIdx?'#4338CA':positivo?'#166534':'#991B1B'}}>
+              {mesAtivo===melhorIdx?'Melhor mês do ano ★':positivo?'✓ Mês positivo':'✗ Mês negativo'}
+            </div>
+          </div>
+
+          {/* Métricas */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',borderBottom:'1px solid #F8FAFC'}}>
+            {[
+              {lbl:'Entradas',val:fmt(entradas),cor:'#6366F1',sub:'= estável',subCor:'#94A3B8'},
+              {lbl:'Saídas',val:fmt(saidas),cor:'#EF4444',sub:'Cartões lideram',subCor:'#94A3B8'},
+              {lbl:'Saldo',val:(positivo?'':'-')+fmt(saldo),cor:positivo?'#16A34A':'#EF4444',sub:taxaPoupanca+'% da renda guardada',subCor:'#94A3B8'},
+              {lbl:'Maior gasto',val:maiorItem.nome,cor:'#0F172A',valSize:15,sub:fmt(maiorItem.valor)+' — cartões',subCor:'#EF4444'},
+            ].map((m,i)=>(
+              <div key={i} style={{padding:'16px 22px',borderRight:i<3?'1px solid #F8FAFC':'none'}}>
+                <div style={{fontSize:10,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5}}>{m.lbl}</div>
+                <div style={{fontSize:m.valSize||18,fontWeight:700,color:m.cor,marginBottom:3,letterSpacing:'-.3px'}}>{m.val}</div>
+                <div style={{fontSize:10,color:m.subCor}}>{m.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Barra visual entrada vs saída */}
+          <div style={{padding:'14px 22px 16px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#64748B',marginBottom:6}}>
+              <span>Entradas {fmt(entradas)}</span>
+              <span>Saídas {fmt(saidas)}</span>
+            </div>
+            <div style={{display:'flex',height:8,borderRadius:4,overflow:'hidden',gap:2}}>
+              <div style={{height:'100%',background:'#A5B4FC',borderRadius:4,width:Math.round(entradas/Math.max(entradas,saidas,1)*100)+'%',transition:'width .4s'}}></div>
+              <div style={{height:'100%',background:'#FCA5A5',borderRadius:4,width:Math.round(saidas/Math.max(entradas,saidas,1)*100)+'%',transition:'width .4s'}}></div>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#94A3B8',marginTop:5}}>
+              <span>R$ 0</span>
+              <span>{fmt(Math.max(entradas,saidas))}</span>
+            </div>
+          </div>
+
+          {/* Insights inline */}
+          <div style={{display:'flex',borderTop:'1px solid #F8FAFC'}}>
+            {[
+              {bg:'#EEF2FF',iconCor:'#6366F1',path:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z',bold:(entradas>0?Math.round(saidas/entradas*100):0)+'%',txt:'da renda foi gasta'},
+              {bg:'#FEF3C7',iconCor:'#D97706',path:'M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z',bold:categorias[0]?.nome||'—',txt:'maior categoria de gastos'},
+              {bg:positivo?'#DCFCE7':'#FEE2E2',iconCor:positivo?'#16A34A':'#EF4444',path:positivo?'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z':'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z',bold:mesAtivo===melhorIdx?'Melhor mês ★':positivo?'Positivo ✓':'Negativo ✗',txt:'resultado do mês'},
+              {bg:'#EEF2FF',iconCor:'#4338CA',path:'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z',bold:fmt(mediaMensal()),txt:'média mensal guardada'},
+            ].map((ins,i)=>(
+              <div key={i} style={{flex:1,padding:'12px 16px',display:'flex',alignItems:'center',gap:8,borderRight:i<3?'1px solid #F8FAFC':'none'}}>
+                <div style={{width:26,height:26,borderRadius:7,background:ins.bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill={ins.iconCor}><path d={ins.path}/></svg>
+                </div>
+                <div style={{fontSize:11,color:'#64748B',lineHeight:1.4}}>
+                  <span style={{fontWeight:600,color:'#334155'}}>{ins.bold}</span><br/>{ins.txt}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Gráficos */}

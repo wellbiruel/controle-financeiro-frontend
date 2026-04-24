@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import Chart from 'chart.js/auto';
+import Layout from '../Components/Layout/Layout';
 
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -12,9 +13,7 @@ const CAT_COLORS = ['#EF4444','#60A5FA','#34D399','#A78BFA','#FBB824','#94A3B8',
 
 const S = {
   page: {
-    background: '#0F0D2A',
     color: '#E2E8F0',
-    minHeight: '100vh',
     fontFamily: "'DM Sans', system-ui, sans-serif",
     paddingBottom: 40,
   },
@@ -334,17 +333,20 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ ...S.page, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, border: '3px solid rgba(129,140,248,0.2)', borderTop: '3px solid #6366F1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <div style={{ color: '#818CF8', fontSize: 14 }}>Carregando dashboard...</div>
+      <Layout>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 48, height: 48, border: '3px solid rgba(129,140,248,0.2)', borderTop: '3px solid #6366F1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+            <div style={{ color: '#818CF8', fontSize: 14 }}>Carregando dashboard...</div>
+          </div>
+          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         </div>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      </div>
+      </Layout>
     );
   }
 
   return (
+    <Layout>
     <div style={S.page}>
       <style>{`
         ::-webkit-scrollbar{display:none}
@@ -367,33 +369,19 @@ export default function DashboardPage() {
         }
       `}</style>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 16px', borderBottom: '0.5px solid rgba(129,140,248,0.1)' }}>
-        <div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: '#E2E8F0', letterSpacing: '-0.02em' }}>
-            Plano Financeiro Anual
-          </div>
-          <div style={{ fontSize: 13, color: '#818CF8', marginTop: 2 }}>
-            {MESES_FULL[mesSel]} {ano} {nomeUsuario ? `· ${nomeUsuario}` : ''}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <select
-            value={ano}
-            onChange={e => setAno(Number(e.target.value))}
-            style={{ background: '#1E1B4B', border: '0.5px solid #4338CA', color: '#E2E8F0', padding: '7px 14px', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}
-          >
-            {[anoAtual - 1, anoAtual, anoAtual + 1].map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-          <button
-            onClick={fetchData}
-            style={{ background: '#1E1B4B', border: '0.5px solid #4338CA', color: '#818CF8', width: 36, height: 36, borderRadius: '50%', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            title="Atualizar dados"
-          >↻</button>
-        </div>
-      </div>
-
       <div style={{ padding: '16px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#E2E8F0' }}>Plano Financeiro Anual</div>
+            <div style={{ fontSize: 12, color: '#818CF8', marginTop: 2 }}>{MESES_FULL[mesSel]} {ano} {nomeUsuario ? `· ${nomeUsuario}` : ''}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ background: '#1E1B4B', border: '0.5px solid #4338CA', color: '#E2E8F0', padding: '7px 14px', borderRadius: 8, fontSize: 14, cursor: 'pointer' }}>
+              {[anoAtual - 1, anoAtual, anoAtual + 1].map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <button onClick={fetchData} style={{ background: '#1E1B4B', border: '0.5px solid #4338CA', color: '#818CF8', width: 36, height: 36, borderRadius: '50%', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Atualizar dados">↻</button>
+          </div>
+        </div>
 
         {/* Seletor de meses */}
         <div style={S.monthNav} className="dash-section">
@@ -680,5 +668,6 @@ export default function DashboardPage() {
 
       </div>
     </div>
+    </Layout>
   );
 }

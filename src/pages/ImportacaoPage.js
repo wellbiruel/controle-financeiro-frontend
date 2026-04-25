@@ -7,7 +7,7 @@ const STEPS = ['Upload', 'Validação', 'Confirmação'];
 const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 const c = {
-  primary:    '#6366F1',
+  primary:    '#3B82F6',
   bg:         '#F8FAFC',
   pageBg:     '#F1F5F9',
   white:      'white',
@@ -770,7 +770,7 @@ export default function ImportacaoPage() {
               {/* 4 cards resumo com barra colorida */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
                 {[
-                  { label: 'Total importado',  valor: resultadoImportacao.importados, cor: '#6366F1' },
+                  { label: 'Total importado',  valor: resultadoImportacao.importados, cor: '#3B82F6' },
                   { label: 'Saídas',           valor: resultadoImportacao.saidas,     cor: '#EF4444' },
                   { label: 'Entradas',         valor: resultadoImportacao.entradas,   cor: '#16A34A' },
                   { label: 'Erros ignorados',  valor: resultadoImportacao.erros,      cor: '#94A3B8' },

@@ -116,13 +116,13 @@ export default function FluxoAnualPage() {
     return [
       catTop
         ? { titulo: `${catTop[0]} lidera os gastos`, desc: `${catPct}% de todas as saídas do ano`, cor: '#EF4444', bgCor: '#FEE2E2', icone: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z' }
-        : { titulo: 'Sem dados de categoria', desc: 'Adicione lançamentos para ver insights', cor: '#60A5FA', bgCor: '#EEF2FF', icone: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z' },
+        : { titulo: 'Sem dados de categoria', desc: 'Adicione lançamentos para ver insights', cor: '#60A5FA', bgCor: '#EFF6FF', icone: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z' },
       dados[melhorIdx].sd > 0
         ? { titulo: `${MESES_F[melhorIdx]} foi o melhor mês`, desc: `Saldo de +${fmt(dados[melhorIdx].sd)}`, cor: '#16A34A', bgCor: '#DCFCE7', icone: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' }
         : { titulo: 'Nenhum mês positivo ainda', desc: 'Revise suas entradas e saídas', cor: '#EF4444', bgCor: '#FEE2E2', icone: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z' },
       { titulo: `Taxa de poupança: ${taxaMedia}%`, desc: taxaMedia >= 20 ? 'Acima da meta de 20% — excelente!' : taxaMedia >= 5 ? 'Abaixo de 20% — tente aumentar' : 'Poupança muito baixa — revise gastos', cor: taxaMedia >= 20 ? '#16A34A' : taxaMedia >= 5 ? '#D97706' : '#EF4444', bgCor: taxaMedia >= 20 ? '#DCFCE7' : taxaMedia >= 5 ? '#FEF3C7' : '#FEE2E2', icone: 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z' },
-      { titulo: `Saídas ${tendencia === 'caindo' ? 'em queda ↓' : tendencia === 'subindo' ? 'em alta ↑' : 'estáveis →'}`, desc: tendencia === 'caindo' ? 'Boa tendência de controle' : tendencia === 'subindo' ? 'Fique atento ao aumento dos gastos' : 'Sem variação significativa', cor: tendencia === 'caindo' ? '#16A34A' : tendencia === 'subindo' ? '#D97706' : '#60A5FA', bgCor: tendencia === 'caindo' ? '#DCFCE7' : tendencia === 'subindo' ? '#FEF3C7' : '#EEF2FF', icone: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z' },
-      { titulo: `Meta "${metaMaisProxima.nome}" mais próxima`, desc: `${Math.round(metaMaisProxima.guardado / metaMaisProxima.total * 100)}% concluída — faltam R$ ${(metaMaisProxima.total - metaMaisProxima.guardado).toLocaleString('pt-BR')}`, cor: '#6366F1', bgCor: '#EEF2FF', icone: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z' },
+      { titulo: `Saídas ${tendencia === 'caindo' ? 'em queda ↓' : tendencia === 'subindo' ? 'em alta ↑' : 'estáveis →'}`, desc: tendencia === 'caindo' ? 'Boa tendência de controle' : tendencia === 'subindo' ? 'Fique atento ao aumento dos gastos' : 'Sem variação significativa', cor: tendencia === 'caindo' ? '#16A34A' : tendencia === 'subindo' ? '#D97706' : '#60A5FA', bgCor: tendencia === 'caindo' ? '#DCFCE7' : tendencia === 'subindo' ? '#FEF3C7' : '#EFF6FF', icone: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z' },
+      { titulo: `Meta "${metaMaisProxima.nome}" mais próxima`, desc: `${Math.round(metaMaisProxima.guardado / metaMaisProxima.total * 100)}% concluída — faltam R$ ${(metaMaisProxima.total - metaMaisProxima.guardado).toLocaleString('pt-BR')}`, cor: '#3B82F6', bgCor: '#EFF6FF', icone: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z' },
     ];
   };
 
@@ -151,7 +151,7 @@ export default function FluxoAnualPage() {
   const badgeTeto = pcTeto < 80 ? `✅ ${pcTeto}% — dentro do limite` : pcTeto <= 100 ? `⚠ ${pcTeto}% — atenção` : `❌ Teto ultrapassado!`;
 
   const metas = [
-    { nome: 'Viagem de férias', icone: '✈️', cor: '#6366F1', guardado: 3400, total: 5000 },
+    { nome: 'Viagem de férias', icone: '✈️', cor: '#3B82F6', guardado: 3400, total: 5000 },
     { nome: 'Troca do carro', icone: '🚗', cor: '#16A34A', guardado: 4800, total: 15000 },
     { nome: 'Reserva de emergência', icone: '🏠', cor: '#F59E0B', guardado: 1800, total: 12000 },
   ];
@@ -175,9 +175,9 @@ export default function FluxoAnualPage() {
       data: {
         labels: MESES,
         datasets: [
-          { type: 'bar', label: 'Entradas', data: dados.map(d => d.e), backgroundColor: dados.map((_, i) => i === mesAtivo ? '#818CF8' : '#C7D2FE'), borderRadius: 5, borderSkipped: false, barPercentage: 0.4, categoryPercentage: 0.6 },
+          { type: 'bar', label: 'Entradas', data: dados.map(d => d.e), backgroundColor: dados.map((_, i) => i === mesAtivo ? '#93C5FD' : '#C7D2FE'), borderRadius: 5, borderSkipped: false, barPercentage: 0.4, categoryPercentage: 0.6 },
           { type: 'bar', label: 'Saídas', data: dados.map(d => d.s), backgroundColor: dados.map((_, i) => i === mesAtivo ? '#F87171' : '#FECACA'), borderRadius: 5, borderSkipped: false, barPercentage: 0.4, categoryPercentage: 0.6 },
-          { type: 'line', label: 'Saldo', data: dados.map(d => d.sd), borderColor: '#6366F1', backgroundColor: 'transparent', borderWidth: 2, pointRadius: dados.map((_, i) => i === mesAtivo ? 6 : 3), pointBackgroundColor: dados.map(d => d.sd >= 0 ? '#16A34A' : '#EF4444'), tension: 0.3, yAxisID: 'y2' },
+          { type: 'line', label: 'Saldo', data: dados.map(d => d.sd), borderColor: '#3B82F6', backgroundColor: 'transparent', borderWidth: 2, pointRadius: dados.map((_, i) => i === mesAtivo ? 6 : 3), pointBackgroundColor: dados.map(d => d.sd >= 0 ? '#16A34A' : '#EF4444'), tension: 0.3, yAxisID: 'y2' },
         ],
       },
       options: {
@@ -188,7 +188,7 @@ export default function FluxoAnualPage() {
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' }, border: { display: false } },
           y: { grid: { color: '#F8FAFC' }, ticks: { font: { size: 10 }, color: '#94A3B8', callback: v => 'R$' + (v / 1000).toFixed(0) + 'k' }, border: { display: false } },
-          y2: { position: 'right', grid: { display: false }, ticks: { font: { size: 10 }, color: '#6366F1', callback: v => (v >= 0 ? '+' : '') + 'R$' + (v / 1000).toFixed(1) + 'k' }, border: { display: false } },
+          y2: { position: 'right', grid: { display: false }, ticks: { font: { size: 10 }, color: '#3B82F6', callback: v => (v >= 0 ? '+' : '') + 'R$' + (v / 1000).toFixed(1) + 'k' }, border: { display: false } },
         },
       },
     });
@@ -199,7 +199,7 @@ export default function FluxoAnualPage() {
 
   return (
     <Layout>
-      <div style={{ padding: '20px 24px', maxWidth: 1400, margin: '0 auto', background: '#F8F9FC', minHeight: '100vh' }}>
+      <div style={{ padding: '20px 24px', maxWidth: 1400, margin: '0 auto', background: '#F7F8FA', minHeight: '100vh' }}>
 
         {/* Linha 1 — Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
@@ -209,17 +209,17 @@ export default function FluxoAnualPage() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => navigate('/dashboard')} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#475569', cursor: 'pointer' }}>Dashboard</button>
-            <button onClick={() => navigate('/transacoes')} style={{ background: '#6366F1', border: 'none', borderRadius: 8, padding: '8px 18px', fontSize: 13, color: 'white', cursor: 'pointer', fontWeight: 500 }}>+ Lançamento</button>
+            <button onClick={() => navigate('/transacoes')} style={{ background: '#3B82F6', border: 'none', borderRadius: 8, padding: '8px 18px', fontSize: 13, color: 'white', cursor: 'pointer', fontWeight: 500 }}>+ Lançamento</button>
           </div>
         </div>
 
         {/* Linha 2 — KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: 12, marginBottom: 16 }}>
           {[
-            { lbl: 'Entradas no ano', val: fmt(totalE), cor: '#6366F1', bgIco: '#EEF2FF', icoFill: '#4338CA', path: 'M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z', badge: '= acumulado', badgeBg: '#F1F5F9', badgeCor: '#64748B' },
+            { lbl: 'Entradas no ano', val: fmt(totalE), cor: '#3B82F6', bgIco: '#EFF6FF', icoFill: '#1D4ED8', path: 'M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z', badge: '= acumulado', badgeBg: '#F1F5F9', badgeCor: '#64748B' },
             { lbl: 'Saídas no ano', val: fmt(totalS), cor: '#EF4444', bgIco: '#FEF2F2', icoFill: '#DC2626', path: 'M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z', badge: 'total gasto', badgeBg: '#FEE2E2', badgeCor: '#991B1B' },
             { lbl: 'Saldo acumulado', val: fmt(saldoAcum), cor: saldoAcum >= 0 ? '#16A34A' : '#EF4444', bgIco: saldoAcum >= 0 ? '#F0FDF4' : '#FEF2F2', icoFill: saldoAcum >= 0 ? '#16A34A' : '#DC2626', path: 'M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z', badge: saldoAcum >= 0 ? 'positivo' : 'negativo', badgeBg: saldoAcum >= 0 ? '#DCFCE7' : '#FEE2E2', badgeCor: saldoAcum >= 0 ? '#166534' : '#991B1B' },
-            { lbl: 'Projeção anual', val: fmt(projecaoAnual), cor: '#6366F1', bgIco: '#EEF2FF', icoFill: '#4338CA', path: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z', badge: 'mantendo ritmo', badgeBg: '#EEF2FF', badgeCor: '#4338CA' },
+            { lbl: 'Projeção anual', val: fmt(projecaoAnual), cor: '#3B82F6', bgIco: '#EFF6FF', icoFill: '#1D4ED8', path: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z', badge: 'mantendo ritmo', badgeBg: '#EFF6FF', badgeCor: '#1D4ED8' },
           ].map((k, i) => (
             <div key={i} style={{ ...card, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: k.cor, borderRadius: '12px 12px 0 0' }} />
@@ -243,7 +243,7 @@ export default function FluxoAnualPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}>Teto de gastos</span>
               <button onClick={() => { setEditandoTeto(!editandoTeto); setNovoTeto(teto.toString()); }}
-                style={{ fontSize: 11, color: '#6366F1', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
+                style={{ fontSize: 11, color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
                 {editandoTeto ? 'cancelar' : 'editar'}
               </button>
             </div>
@@ -253,7 +253,7 @@ export default function FluxoAnualPage() {
                   placeholder="Ex: 7000"
                   style={{ flex: 1, padding: '7px 10px', border: '1.5px solid #E2E8F0', borderRadius: 7, fontSize: 13, outline: 'none' }} />
                 <button onClick={salvarTeto}
-                  style={{ padding: '7px 14px', background: '#6366F1', color: 'white', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ padding: '7px 14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                   Salvar
                 </button>
               </div>
@@ -273,7 +273,7 @@ export default function FluxoAnualPage() {
           <div style={card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}>Metas de saldo</span>
-              <span onClick={() => navigate('/metas')} style={{ fontSize: 11, color: '#6366F1', cursor: 'pointer', fontWeight: 500 }}>ver metas →</span>
+              <span onClick={() => navigate('/metas')} style={{ fontSize: 11, color: '#3B82F6', cursor: 'pointer', fontWeight: 500 }}>ver metas →</span>
             </div>
             {metas.map((m, i) => {
               const pct = Math.round(m.guardado / m.total * 100);
@@ -315,38 +315,29 @@ export default function FluxoAnualPage() {
 
         {/* Linha 4 — Seletor de meses */}
         <div style={{ ...card, marginBottom: 14 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}>Selecione o mês</span>
             <span style={{ fontSize: 11, color: '#94A3B8' }}>{anoAtivo}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #E9ECEF', overflowX: 'auto', scrollbarWidth: 'none' }}>
             {MESES.map((m, i) => {
-              const d = dados[i];
               const tem = mesesComDados[i];
-              const ativo = i === mesAtivo;
-              const pos = d.sd >= 0;
               const futuro = !tem && i > MES_ATUAL;
+              const active = i === mesAtivo;
+              const pos = dados[i].sd >= 0;
+              const color = active ? '#3B82F6' : !tem ? '#D1D5DB' : pos ? '#374151' : '#DC2626';
               return (
-                <div key={i} onClick={() => !futuro && setMesAtivo(i)}
-                  style={{ borderRadius: 8, padding: '6px 3px', textAlign: 'center', cursor: futuro ? 'default' : 'pointer', position: 'relative',
-                    border: ativo ? 'none' : `1.5px solid ${!tem ? '#F1F5F9' : pos ? '#86EFAC' : '#FCA5A5'}`,
-                    background: ativo ? '#6366F1' : 'white', opacity: futuro ? 0.4 : 1, transition: 'all .15s' }}>
-                  {i === melhorIdx && tem && <span style={{ position: 'absolute', top: 2, right: 3, fontSize: 8, color: ativo ? 'white' : '#16A34A' }}>★</span>}
-                  <span style={{ fontSize: 10, fontWeight: 600, display: 'block', marginBottom: 2, color: ativo ? 'white' : !tem ? '#CBD5E1' : pos ? '#166534' : '#991B1B' }}>{m}</span>
-                  <span style={{ fontSize: 8, color: ativo ? 'rgba(255,255,255,.8)' : !tem ? '#CBD5E1' : pos ? '#16A34A' : '#EF4444' }}>
-                    {tem ? fmtK(d.sd) : '—'}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: 'repeat(12,1fr)', gap: 6, alignItems: 'flex-end', height: 20 }}>
-            {dados.map((d, i) => {
-              const h = mesesComDados[i] ? Math.max(2, Math.round(Math.abs(d.sd) / 6000 * 18)) : 2;
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: 20 }}>
-                  <div style={{ width: '80%', height: h, background: !mesesComDados[i] ? '#E2E8F0' : d.sd >= 0 ? '#86EFAC' : '#FCA5A5', borderRadius: 2, opacity: mesesComDados[i] ? 1 : 0.4 }} />
-                </div>
+                <button key={i} onClick={() => !futuro && setMesAtivo(i)}
+                  style={{
+                    padding: '7px 12px', fontSize: 11, fontWeight: active ? 600 : 500,
+                    cursor: futuro ? 'default' : 'pointer',
+                    border: 'none', borderBottom: `2px solid ${active ? '#3B82F6' : 'transparent'}`,
+                    color, background: 'transparent', outline: 'none',
+                    whiteSpace: 'nowrap', flexShrink: 0, marginBottom: -1, opacity: futuro ? 0.4 : 1,
+                  }}
+                >
+                  {i === melhorIdx && tem ? `★ ${m}` : m}
+                </button>
               );
             })}
           </div>
@@ -356,8 +347,8 @@ export default function FluxoAnualPage() {
         <div style={{ ...card, marginBottom: 14, padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid #F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: positivoMes ? '#EEF2FF' : '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={positivoMes ? '#6366F1' : '#EF4444'}>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: positivoMes ? '#EFF6FF' : '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={positivoMes ? '#3B82F6' : '#EF4444'}>
                   <path d={positivoMes ? 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' : 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'} />
                 </svg>
               </div>
@@ -367,14 +358,14 @@ export default function FluxoAnualPage() {
               </div>
             </div>
             <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 16,
-              background: mesAtivo === melhorIdx ? '#EEF2FF' : positivoMes ? '#F0FDF4' : '#FEF2F2',
-              color: mesAtivo === melhorIdx ? '#4338CA' : positivoMes ? '#166534' : '#991B1B' }}>
+              background: mesAtivo === melhorIdx ? '#EFF6FF' : positivoMes ? '#F0FDF4' : '#FEF2F2',
+              color: mesAtivo === melhorIdx ? '#1D4ED8' : positivoMes ? '#166534' : '#991B1B' }}>
               {mesAtivo === melhorIdx ? 'Melhor mês ★' : mesAtivo === piorIdx ? 'Pior mês' : positivoMes ? '✓ Positivo' : '✗ Negativo'}
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderBottom: '1px solid #F8FAFC' }}>
             {[
-              { lbl: 'Entradas', val: fmt(entrMes), cor: '#6366F1' },
+              { lbl: 'Entradas', val: fmt(entrMes), cor: '#3B82F6' },
               { lbl: 'Saídas', val: fmt(saidMes), cor: '#EF4444' },
               { lbl: 'Saldo', val: (positivoMes ? '' : '-') + fmt(saldMes), cor: positivoMes ? '#16A34A' : '#EF4444' },
               { lbl: 'Maior gasto', val: maiorGasto.descricao || '—', cor: '#0F172A', sub: fmt(parseFloat(maiorGasto.valor || 0)), subCor: '#EF4444' },
@@ -398,7 +389,7 @@ export default function FluxoAnualPage() {
           </div>
           <div style={{ display: 'flex' }}>
             {[
-              { lbl: (entrMes > 0 ? Math.round(saidMes / entrMes * 100) : 0) + '%', desc: 'da renda foi gasta', cor: '#6366F1', bg: '#EEF2FF' },
+              { lbl: (entrMes > 0 ? Math.round(saidMes / entrMes * 100) : 0) + '%', desc: 'da renda foi gasta', cor: '#3B82F6', bg: '#EFF6FF' },
               { lbl: catsMes[0]?.nome || '—', desc: 'maior categoria', cor: '#D97706', bg: '#FEF3C7' },
               { lbl: positivoMes ? 'Positivo ✓' : 'Negativo ✗', desc: 'resultado do mês', cor: positivoMes ? '#16A34A' : '#EF4444', bg: positivoMes ? '#DCFCE7' : '#FEE2E2' },
             ].map((ins, i) => (
@@ -421,7 +412,7 @@ export default function FluxoAnualPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>Fluxo {anoAtivo} — clique para selecionar mês</span>
               <div style={{ display: 'flex', gap: 10 }}>
-                {[['#A5B4FC','Entradas'],['#FCA5A5','Saídas'],['#6366F1','Saldo','line']].map(([cor, lbl, tipo]) => (
+                {[['#A5B4FC','Entradas'],['#FCA5A5','Saídas'],['#3B82F6','Saldo','line']].map(([cor, lbl, tipo]) => (
                   <span key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: '#64748B' }}>
                     <span style={{ width: tipo === 'line' ? 12 : 8, height: tipo === 'line' ? 2 : 8, borderRadius: tipo === 'line' ? 1 : 2, background: cor, display: 'inline-block' }} />{lbl}
                   </span>
@@ -481,11 +472,11 @@ export default function FluxoAnualPage() {
                 const corPctTeto = pctTeto < 80 ? '#16A34A' : pctTeto <= 100 ? '#D97706' : '#EF4444';
                 return (
                   <tr key={i} onClick={() => tem && setMesAtivo(i)}
-                    style={{ borderBottom: '1px solid #F8FAFC', background: ativo ? '#EEF2FF' : 'white', cursor: tem ? 'pointer' : 'default', transition: 'background .1s' }}>
-                    <td style={{ padding: '10px 16px', fontWeight: ativo ? 700 : 400, color: ativo ? '#4338CA' : '#334155' }}>
+                    style={{ borderBottom: '1px solid #F8FAFC', background: ativo ? '#EFF6FF' : 'white', cursor: tem ? 'pointer' : 'default', transition: 'background .1s' }}>
+                    <td style={{ padding: '10px 16px', fontWeight: ativo ? 700 : 400, color: ativo ? '#1D4ED8' : '#334155' }}>
                       {m}{i === melhorIdx && tem ? ' ★' : ''}
                     </td>
-                    <td style={{ padding: '10px 16px', color: tem ? '#6366F1' : '#CBD5E1', fontWeight: 500 }}>{tem ? fmt(d.e) : '—'}</td>
+                    <td style={{ padding: '10px 16px', color: tem ? '#3B82F6' : '#CBD5E1', fontWeight: 500 }}>{tem ? fmt(d.e) : '—'}</td>
                     <td style={{ padding: '10px 16px', color: tem ? '#EF4444' : '#CBD5E1', fontWeight: 500 }}>{tem ? fmt(d.s) : '—'}</td>
                     <td style={{ padding: '10px 16px', color: !tem ? '#CBD5E1' : pos ? '#16A34A' : '#EF4444', fontWeight: 600 }}>{tem ? (pos ? '+' : '-') + fmt(d.sd) : '—'}</td>
                     <td style={{ padding: '10px 16px', color: !tem ? '#CBD5E1' : pctGasto > 100 ? '#EF4444' : '#334155' }}>{tem ? pctGasto + '%' : '—'}</td>

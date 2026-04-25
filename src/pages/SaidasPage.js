@@ -10,7 +10,7 @@ const MES_ATUAL = new Date().getMonth() + 1;
 const fmt  = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const card = { background: 'white', borderRadius: '10px', border: '0.5px solid #E2E8F0', padding: '14px 16px' };
 
-const CAT_COLORS = ['#EF4444','#F59E0B','#8B5CF6','#06B6D4','#EC4899','#10B981','#F97316','#6366F1'];
+const CAT_COLORS = ['#EF4444','#F59E0B','#8B5CF6','#06B6D4','#EC4899','#10B981','#F97316','#3B82F6'];
 
 function KPICard({ label, valor, sub, cor, iconBg, icon }) {
   return (
@@ -108,7 +108,7 @@ export default function SaidasPage() {
             <button style={{ background: 'white', color: '#0F172A', border: '0.5px solid #E2E8F0', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
               ↓ Exportar
             </button>
-            <button style={{ background: '#6366F1', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
+            <button style={{ background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
               + Nova saída
             </button>
           </div>
@@ -151,8 +151,8 @@ export default function SaidasPage() {
                 key={g}
                 onClick={() => setFiltroGrupo(g)}
                 style={{
-                  border: `1px solid ${filtroGrupo === g ? '#6366F1' : '#E2E8F0'}`,
-                  background: filtroGrupo === g ? '#6366F1' : 'white',
+                  border: `1px solid ${filtroGrupo === g ? '#3B82F6' : '#E2E8F0'}`,
+                  background: filtroGrupo === g ? '#3B82F6' : 'white',
                   color: filtroGrupo === g ? 'white' : '#64748B',
                   borderRadius: '6px', padding: '3px 10px', fontSize: '11px', fontWeight: '500', cursor: 'pointer', whiteSpace: 'nowrap',
                   display: 'flex', alignItems: 'center', gap: '5px',
@@ -172,8 +172,8 @@ export default function SaidasPage() {
                 key={i}
                 onClick={() => setFiltroMes(i + 1)}
                 style={{
-                  border: `1px solid ${filtroMes === i + 1 ? '#6366F1' : '#E2E8F0'}`,
-                  background: filtroMes === i + 1 ? '#6366F1' : 'white',
+                  border: `1px solid ${filtroMes === i + 1 ? '#3B82F6' : '#E2E8F0'}`,
+                  background: filtroMes === i + 1 ? '#3B82F6' : 'white',
                   color: filtroMes === i + 1 ? 'white' : '#64748B',
                   borderRadius: '6px', padding: '3px 8px', fontSize: '10px', fontWeight: '500', cursor: 'pointer',
                 }}

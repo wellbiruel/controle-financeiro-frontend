@@ -15,7 +15,7 @@ const TIPO_COLORS = {
   'salário':    { bg: '#DCFCE7', color: '#166534' },
   'salario':    { bg: '#DCFCE7', color: '#166534' },
   'renda extra':{ bg: '#FEF3C7', color: '#92400E' },
-  'outros':     { bg: '#EEF2FF', color: '#3730A3' },
+  'outros':     { bg: '#EFF6FF', color: '#1D4ED8' },
 };
 const getTipoColor = (desc = '') => {
   const d = desc.toLowerCase();
@@ -121,7 +121,7 @@ export default function EntradasPage() {
             </button>
             <button
               onClick={() => setShowModal(true)}
-              style={{ background: '#6366F1', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}
+              style={{ background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}
             >
               + Nova entrada
             </button>
@@ -131,9 +131,9 @@ export default function EntradasPage() {
         {/* ── KPIs ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px' }}>
           <KPICard
-            label="Total do mês" valor={fmt(totalMes)} cor="#6366F1"
-            iconBg="#EEF2FF"
-            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="#6366F1"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>}
+            label="Total do mês" valor={fmt(totalMes)} cor="#3B82F6"
+            iconBg="#EFF6FF"
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="#3B82F6"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>}
           />
           <KPICard
             label="Salário" valor={fmt(salarioMes)} cor="#16A34A"
@@ -165,8 +165,8 @@ export default function EntradasPage() {
                 key={t}
                 onClick={() => setFiltroTipo(t)}
                 style={{
-                  border: `1px solid ${filtroTipo === t ? '#6366F1' : '#E2E8F0'}`,
-                  background: filtroTipo === t ? '#6366F1' : 'white',
+                  border: `1px solid ${filtroTipo === t ? '#3B82F6' : '#E2E8F0'}`,
+                  background: filtroTipo === t ? '#3B82F6' : 'white',
                   color: filtroTipo === t ? 'white' : '#64748B',
                   borderRadius: '6px', padding: '3px 10px', fontSize: '11px', fontWeight: '500', cursor: 'pointer',
                 }}
@@ -184,8 +184,8 @@ export default function EntradasPage() {
                 key={i}
                 onClick={() => setFiltroMes(i + 1)}
                 style={{
-                  border: `1px solid ${filtroMes === i + 1 ? '#6366F1' : '#E2E8F0'}`,
-                  background: filtroMes === i + 1 ? '#6366F1' : 'white',
+                  border: `1px solid ${filtroMes === i + 1 ? '#3B82F6' : '#E2E8F0'}`,
+                  background: filtroMes === i + 1 ? '#3B82F6' : 'white',
                   color: filtroMes === i + 1 ? 'white' : '#64748B',
                   borderRadius: '6px', padding: '3px 8px', fontSize: '10px', fontWeight: '500', cursor: 'pointer', whiteSpace: 'nowrap',
                 }}
@@ -317,7 +317,7 @@ export default function EntradasPage() {
                 <button onClick={() => setShowModal(false)} style={{ background: 'white', color: '#64748B', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '8px 18px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
                   Cancelar
                 </button>
-                <button onClick={handleSalvar} disabled={salvando || !form.valor} style={{ background: salvando || !form.valor ? '#CBD5E1' : '#6366F1', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '12px', fontWeight: '500', cursor: salvando || !form.valor ? 'not-allowed' : 'pointer' }}>
+                <button onClick={handleSalvar} disabled={salvando || !form.valor} style={{ background: salvando || !form.valor ? '#CBD5E1' : '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '12px', fontWeight: '500', cursor: salvando || !form.valor ? 'not-allowed' : 'pointer' }}>
                   {salvando ? 'Salvando…' : 'Salvar'}
                 </button>
               </div>

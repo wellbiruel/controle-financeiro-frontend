@@ -55,7 +55,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 44 }}>
-          <div style={{ width: 34, height: 34, background: '#818CF8', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 34, height: 34, background: '#93C5FD', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
           </div>
           <span style={{ color: 'white', fontSize: 17, fontWeight: 700 }}>FinanControl</span>
@@ -64,7 +64,7 @@ export default function LoginPage() {
         {/* Hero */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(129,140,248,.2)', border: '1px solid rgba(129,140,248,.3)', borderRadius: 20, padding: '4px 12px', marginBottom: 16 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#818CF8' }}></div>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#93C5FD' }}></div>
             <span style={{ fontSize: 11, color: '#A5B4FC', fontWeight: 500 }}>Gestão de finanças pessoais</span>
           </div>
           <div style={{ fontSize: 26, fontWeight: 700, color: 'white', lineHeight: 1.25, marginBottom: 10 }}>
@@ -78,7 +78,7 @@ export default function LoginPage() {
         {/* Mini cards KPI */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
           {[
-            { lbl: 'Entradas', val: 'R$ 7.226', sub: 'Abril 2026', subColor: 'rgba(255,255,255,.45)', bar: '#818CF8', barW: '80%' },
+            { lbl: 'Entradas', val: 'R$ 7.226', sub: 'Abril 2026', subColor: 'rgba(255,255,255,.45)', bar: '#93C5FD', barW: '80%' },
             { lbl: 'Saldo', val: 'R$ 589', valColor: '#86EFAC', sub: 'Positivo', subColor: '#86EFAC', bar: '#34D399', barW: '55%' },
             { lbl: 'Meta viagem', val: '68%', valColor: '#A5B4FC', sub: 'R$ 1.600 restam', subColor: 'rgba(255,255,255,.45)', bar: '#A5B4FC', barW: '68%' },
             { lbl: 'Saídas', val: 'R$ 6.637', sub: 'Cartões lideram', subColor: '#FCA5A5', bar: '#FCA5A5', barW: '90%' },
@@ -159,7 +159,7 @@ export default function LoginPage() {
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', letterSpacing: '.07em', textTransform: 'uppercase' }}>Senha</label>
-              <span style={{ fontSize: 13, color: '#6366F1', cursor: 'pointer', fontWeight: 500 }}>Esqueceu a senha?</span>
+              <span style={{ fontSize: 13, color: '#3B82F6', cursor: 'pointer', fontWeight: 500 }}>Esqueceu a senha?</span>
             </div>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <div style={{ position: 'absolute', left: 14, pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
@@ -175,7 +175,7 @@ export default function LoginPage() {
 
           {/* Lembrar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-            <div onClick={() => setLembrar(!lembrar)} style={{ width: 18, height: 18, border: lembrar ? 'none' : '1.5px solid #E2E8F0', borderRadius: 5, background: lembrar ? '#6366F1' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+            <div onClick={() => setLembrar(!lembrar)} style={{ width: 18, height: 18, border: lembrar ? 'none' : '1.5px solid #E2E8F0', borderRadius: 5, background: lembrar ? '#3B82F6' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
               {lembrar && <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>}
             </div>
             <span style={{ fontSize: 13, color: '#64748B' }}>Lembrar neste dispositivo</span>
@@ -186,7 +186,7 @@ export default function LoginPage() {
 
           {/* Botão */}
           <button type="submit" disabled={loading}
-            style={{ width: '100%', padding: '15px 20px', background: loading ? '#A5B4FC' : '#6366F1', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: 'white', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            style={{ width: '100%', padding: '15px 20px', background: loading ? '#A5B4FC' : '#3B82F6', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: 'white', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             {loading ? 'Entrando...' : 'Entrar na plataforma'}
             {!loading && <div style={{ width: 22, height: 22, background: 'rgba(255,255,255,.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
@@ -217,7 +217,7 @@ export default function LoginPage() {
         {/* Rodapé */}
         <div style={{ paddingTop: 24, borderTop: '1px solid #F8FAFC', textAlign: 'center' }}>
           <div style={{ fontSize: 14, color: '#64748B', marginBottom: 6 }}>
-            Ainda não tem conta? <span style={{ color: '#6366F1', cursor: 'pointer', fontWeight: 600 }}>Fale com a gente</span>
+            Ainda não tem conta? <span style={{ color: '#3B82F6', cursor: 'pointer', fontWeight: 600 }}>Fale com a gente</span>
           </div>
           <div style={{ fontSize: 11, color: '#CBD5E1' }}>Plataforma privada · acesso mediante convite</div>
         </div>

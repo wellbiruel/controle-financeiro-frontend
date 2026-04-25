@@ -1,10 +1,10 @@
 .topbar {
-  height: 40px;
-  background: #17143D;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  height: 58px;
+  background: white;
+  border-bottom: 1px solid #F1F3F5;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 20px;
   gap: 10px;
   position: fixed;
   top: 0;
@@ -14,8 +14,8 @@
 }
 
 .tb-logo {
-  color: white;
-  font-size: 13px;
+  color: #111827;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -24,8 +24,8 @@
 
 .tb-divider {
   width: 1px;
-  height: 18px;
-  background: rgba(255,255,255,0.1);
+  height: 20px;
+  background: rgba(0,0,0,0.08);
   flex-shrink: 0;
 }
 
@@ -33,10 +33,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 4px;
-  padding: 4px 10px;
+  background: #F7F8FA;
+  border: 1px solid #E9ECEF;
+  border-radius: 6px;
+  padding: 6px 12px;
   flex: 1;
   max-width: 340px;
 }
@@ -45,13 +45,13 @@
   background: none;
   border: none;
   outline: none;
-  color: white;
-  font-size: 11px;
+  color: #111827;
+  font-size: 13px;
   width: 100%;
 }
 
 .tb-search input::placeholder {
-  color: rgba(255,255,255,0.4);
+  color: #ADB5BD;
 }
 
 .tb-right {
@@ -62,33 +62,33 @@
 }
 
 .tb-icon-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.65);
+  color: #9CA3AF;
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
 }
 
 .tb-icon-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: #F7F8FA;
+  color: #374151;
 }
 
 .tb-badge {
   position: absolute;
   top: 2px;
   right: 2px;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   background: #EF4444;
   border-radius: 50%;
-  border: 1.5px solid #17143D;
-  font-size: 8px;
+  border: 1.5px solid white;
+  font-size: 9px;
   color: white;
   display: flex;
   align-items: center;
@@ -100,42 +100,42 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px 8px;
+  border-radius: 6px;
   cursor: pointer;
-  color: white;
+  color: #374151;
   position: relative;
   flex-shrink: 0;
 }
 
 .tb-user:hover {
-  background: rgba(255,255,255,0.1);
+  background: #F7F8FA;
 }
 
 .tb-avatar {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #818CF8, #6366F1);
+  background: #3B82F6;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 700;
   color: white;
   flex-shrink: 0;
 }
 
 .tb-name {
-  font-size: 11px;
-  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  color: #374151;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .tb-arr {
-  font-size: 8px;
-  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+  color: #9CA3AF;
 }
 
 /* Dropdowns */
@@ -144,9 +144,9 @@
   top: calc(100% + 6px);
   right: 0;
   background: white;
-  border: 1px solid #E2E8F0;
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  border: 1px solid #E9ECEF;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   z-index: 999;
 }
 
@@ -155,24 +155,24 @@
 
 .dd-header {
   padding: 10px 14px 8px;
-  border-bottom: 1px solid #F5F5F5;
+  border-bottom: 1px solid #F7F8FA;
 }
 
 .dd-title {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
-  color: #222;
+  color: #111827;
 }
 
 .dd-sub {
-  font-size: 10px;
-  color: #9E9E9E;
+  font-size: 13px;
+  color: #9CA3AF;
   margin-top: 1px;
 }
 
 .dd-action {
-  font-size: 9px;
-  color: #6366F1;
+  font-size: 13px;
+  color: #3B82F6;
   cursor: pointer;
   float: right;
   margin-top: 2px;
@@ -182,13 +182,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 14px;
-  font-size: 11px;
-  color: #334155;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #374151;
   cursor: pointer;
 }
 
-.dd-item:hover { background: #F8FAFC; }
+.dd-item:hover { background: #F7F8FA; }
 .dd-item.danger { color: #EF4444; }
 .dd-item.danger:hover { background: #FEF2F2; }
 
@@ -196,7 +196,7 @@
   margin-left: auto;
   background: #EF4444;
   color: white;
-  font-size: 8px;
+  font-size: 10px;
   padding: 1px 5px;
   border-radius: 8px;
   font-weight: 600;
@@ -204,7 +204,7 @@
 
 .dd-sep {
   height: 1px;
-  background: #F5F5F5;
+  background: #F7F8FA;
   margin: 3px 0;
 }
 
@@ -212,13 +212,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 14px;
-  font-size: 11px;
-  color: #334155;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #374151;
   cursor: pointer;
 }
 
-.dd-toggle:hover { background: #F8FAFC; }
+.dd-toggle:hover { background: #F7F8FA; }
 
 .dd-toggle-label {
   display: flex;
@@ -236,7 +236,7 @@
   flex-shrink: 0;
 }
 
-.dd-sw.on { background: #818CF8; }
+.dd-sw.on { background: #3B82F6; }
 
 .dd-sw::after {
   content: '';
@@ -257,12 +257,12 @@
   display: flex;
   gap: 8px;
   padding: 8px 14px;
-  border-bottom: 1px solid #FAFAFA;
+  border-bottom: 1px solid #F7F8FA;
   cursor: pointer;
   align-items: flex-start;
 }
 
-.notif-item:hover { background: #F8FAFC; }
+.notif-item:hover { background: #F7F8FA; }
 .notif-item.unread { background: #FAFEFF; }
 
 .notif-dot {
@@ -270,17 +270,17 @@
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .notif-txt {
-  font-size: 10px;
-  color: #334155;
+  font-size: 13px;
+  color: #374151;
   line-height: 1.4;
 }
 
 .notif-time {
-  font-size: 9px;
-  color: #9E9E9E;
+  font-size: 13px;
+  color: #9CA3AF;
   margin-top: 2px;
 }

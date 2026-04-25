@@ -448,7 +448,7 @@ export default function MetasPage() {
 
         {/* Alerta compacto */}
         {excessoAporte > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'white', border: '1px solid #FECACA', borderRadius: 10, padding: '10px 16px', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'white', border: '1px solid #F1F3F5', borderRadius: 10, padding: '10px 16px', marginBottom: 14 }}>
             <div style={{ width: 26, height: 26, borderRadius: 6, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#B91C1C"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             </div>

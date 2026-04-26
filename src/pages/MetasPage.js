@@ -51,10 +51,10 @@ function fmt(v) {
 
 function getIcone(nome = '') {
   const n = nome.toLowerCase();
-  if (n.includes('viagem') || n.includes('férias') || n.includes('ferias') || n.includes('viajar')) return ICONES.viagem;
-  if (n.includes('carro') || n.includes('veículo') || n.includes('veiculo') || n.includes('moto')) return ICONES.carro;
-  if (n.includes('casa') || n.includes('imóvel') || n.includes('imovel') || n.includes('aparta') || n.includes('reserva')) return ICONES.reserva;
-  if (n.includes('edu') || n.includes('curso') || n.includes('pós') || n.includes('facul')) return ICONES.educacao;
+  if (n.includes('viagem') || n.includes('ferias') || n.includes('frias') || n.includes('viajar')) return ICONES.viagem;
+  if (n.includes('carro') || n.includes('veculo') || n.includes('veiculo') || n.includes('moto')) return ICONES.carro;
+  if (n.includes('reserva') || n.includes('emergncia') || n.includes('emergencia') || n.includes('casa') || n.includes('imvel') || n.includes('imovel')) return ICONES.reserva;
+  if (n.includes('edu') || n.includes('curso') || n.includes('facul')) return ICONES.educacao;
   return ICONES.default;
 }
 
@@ -149,10 +149,10 @@ function MetaCard({ meta, menuAberto, onMenuToggle, onAporte, onSimular, onEdita
   const diff = necessario ? necessario - meta.aporte : null;
   const atrasadoMeses = previsaoMeses && meta.prazoMeses ? Math.max(0, previsaoMeses - meta.prazoMeses) : 0;
 
-  const config = {
-    ok:      { diagBg: '#F0FDF4', diagCor: '#15803D', diagTxt: 'Saudável',  barTempoCor: '#BBF7D0', cardBorder: '#E9ECEF' },
-    atencao: { diagBg: '#FFFBEB', diagCor: '#D97706', diagTxt: 'Atenção',   barTempoCor: '#FDE68A', cardBorder: '#FDE68A' },
-    critico: { diagBg: '#FEF2F2', diagCor: '#B91C1C', diagTxt: 'Crítico',   barTempoCor: '#FECACA', cardBorder: '#FECACA' },
+  const cfg = {
+    ok:      { cardBorder: '#E9ECEF', diagBg: '#F0FDF4', diagCor: '#15803D', diagTxt: 'Saudável',  barTempoCor: '#BBF7D0' },
+    atencao: { cardBorder: '#FDE68A', diagBg: '#FFFBEB', diagCor: '#D97706', diagTxt: 'Atenção',   barTempoCor: '#FDE68A' },
+    critico: { cardBorder: '#FECACA', diagBg: '#FEF2F2', diagCor: '#B91C1C', diagTxt: 'Crítico',   barTempoCor: '#FECACA' },
   }[status];
 
   const tagCor = { ok: '#16A34A', atencao: '#D97706', critico: '#EF4444' }[status];
@@ -177,7 +177,7 @@ function MetaCard({ meta, menuAberto, onMenuToggle, onAporte, onSimular, onEdita
   return (
     <div style={{
       background: 'white', borderRadius: 12,
-      border: `1px solid ${config.cardBorder}`,
+      border: `1px solid ${cfg.cardBorder}`,
       overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,.05)',
       transition: 'box-shadow .2s',
     }}
@@ -241,9 +241,9 @@ function MetaCard({ meta, menuAberto, onMenuToggle, onAporte, onSimular, onEdita
           <div style={{ fontSize: 11, color: '#6B7280', marginTop: 5 }}>Faltam {fmt(falta)}</div>
         </div>
         {/* Diagnóstico */}
-        <div style={{ padding: '13px 18px', background: config.diagBg }}>
+        <div style={{ padding: '13px 18px', background: cfg.diagBg }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 7 }}>Diagnóstico</div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: config.diagCor, letterSpacing: '-.2px', marginBottom: 4 }}>{config.diagTxt}</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: cfg.diagCor, letterSpacing: '-.2px', marginBottom: 4 }}>{cfg.diagTxt}</div>
           <div style={{ fontSize: 11, color: '#6B7280', lineHeight: 1.55 }}>{diagMsg}</div>
         </div>
       </div>
@@ -262,7 +262,7 @@ function MetaCard({ meta, menuAberto, onMenuToggle, onAporte, onSimular, onEdita
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ fontSize: 11, color: '#6B7280', width: 148, flexShrink: 0 }}>Tempo decorrido</div>
           <div style={{ flex: 1, height: 6, background: '#F1F5F9', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: meta.prazoMeses ? `${Math.min(pctTempo, 100)}%` : '2%', background: config.barTempoCor, borderRadius: 4 }} />
+            <div style={{ height: '100%', width: meta.prazoMeses ? `${Math.min(pctTempo, 100)}%` : '2%', background: cfg.barTempoCor, borderRadius: 4 }} />
           </div>
           <div style={{ fontSize: 11, fontWeight: 500, minWidth: 130, textAlign: 'right', color: { ok: '#16A34A', atencao: '#D97706', critico: '#EF4444' }[status] }}>
             {meta.prazoMeses ? `${meta.prazoMeses - (previsaoMeses || 0)} de ${meta.prazoMeses} meses` : 'sem prazo definido'}

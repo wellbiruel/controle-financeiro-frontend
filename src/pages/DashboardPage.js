@@ -22,20 +22,20 @@ const DADOS_MOCK = [
 ];
 
 const PMAS = [
-  { txt: 'Aumente o aporte da reserva de R$ 200 para R$ 500/mes — conclui em Jun/2027', btn: 'Ver metas' },
-  { txt: 'Reduza R$ 363 em saidas para voltar ao limite mensal planejado', btn: 'Ver categorias' },
-  { txt: 'Cartão C6 = 37,8% das saidas — revise o limite deste cartão', btn: 'Ver cartões' },
-  { txt: 'Taxa de poupança em 8,2% — meta é 20%. Redirecione R$ 800/mes para metas', btn: 'Ver planejamento' },
+  { txt: 'Aumente o aporte da reserva de R$ 200 para R$ 500/mês — conclui em Jun/2027', btn: 'Ver metas' },
+  { txt: 'Reduza R$ 363 em saídas para voltar ao limite mensal planejado', btn: 'Ver categorias' },
+  { txt: 'Cartão C6 = 37,8% das saídas — revise o limite deste cartão', btn: 'Ver cartões' },
+  { txt: 'Taxa de poupança em 8,2% — meta é 20%. Redirecione R$ 800/mês para metas', btn: 'Ver planejamento' },
 ];
 
 const INSIGHTS = [
-  { tipo: 'alert', cat: 'Cartões acima do ideal',    txt: 'Cartões = 50% das saidas. Ideal é abaixo de 40%. Revise os limites mensais.', cta: 'Ver cartões' },
+  { tipo: 'alert', cat: 'Cartões acima do ideal',    txt: 'Cartões = 50% das saídas. Ideal é abaixo de 40%. Revise os limites mensais.', cta: 'Ver cartões' },
   { tipo: 'info',  cat: 'Comparativo de perfil',     txt: 'Usuários com perfil semelhante guardam 12% da renda. Você guarda 8,2%.', cta: 'Ver metas' },
   { tipo: 'ok',    cat: 'Conquista do mês',           txt: 'Abril foi o melhor mês do ano — saídas cairam 13% e saldo fechou positivo.', cta: 'Ver fluxo' },
   { tipo: 'alert', cat: 'Reserva crítica',            txt: 'Reserva cobre 1,8 meses. O recomendado para o seu padrão é 6 meses.', cta: 'Ajustar' },
   { tipo: 'warn',  cat: 'Tendência 2026',             txt: 'Inflação em alimentação subiu 4,2%. Reavalie o orçamento da categoria Mercado.', cta: 'Ver categoria' },
   { tipo: 'ok',    cat: 'Meta próxima',               txt: 'Viagem de férias está a R$ 1.600 da conclusão — possível encerrar em Maio.', cta: 'Ver meta' },
-  { tipo: 'info',  cat: 'Planejamento',               txt: 'Aumentar R$ 120/mes na reserva adianta sua segurança financeira em 18 meses.', cta: 'Simular' },
+  { tipo: 'info',  cat: 'Planejamento',               txt: 'Aumentar R$ 120/mês na reserva adianta sua segurança financeira em 18 meses.', cta: 'Simular' },
   { tipo: 'warn',  cat: 'Padrão de consumo',          txt: 'Gastos em cartões cresceram 8% nos últimos 3 meses. Fique atento.', cta: 'Analisar' },
 ];
 
@@ -54,7 +54,17 @@ const cardTitle = {
 };
 const cardLink = { fontSize: 12, color: '#3B82F6', fontWeight: 400, cursor: 'pointer' };
 
-// IcoEdit
+function TetoLink({ onClick }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 11, color: hover ? '#3B82F6' : '#9CA3AF', cursor: 'pointer', paddingTop: 8, borderTop: '1px solid #F7F8FA', transition: 'color .15s', marginTop: 6 }}>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Alterar teto mensal
+    </div>
+  );
+}
+
 function IcoEdit() {
   return (
     <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
@@ -146,7 +156,6 @@ function GraficoSaldo({ dados }) {
         Saldo por mês · 2026
         <span style={cardLink}>ver fluxo</span>
       </div>
-      {/* Pills */}
       <div style={{ display: 'flex', gap: 7, marginBottom: 10, flexWrap: 'wrap' }}>
         {[
           { cor: '#86EFAC', bg: '#F0FDF4', txt: `${positivos.length} positivos` },
@@ -158,7 +167,6 @@ function GraficoSaldo({ dados }) {
           </div>
         ))}
       </div>
-      {/* Barras */}
       <div style={{ height: 110, display: 'flex', alignItems: 'flex-end', gap: 5, paddingTop: 22, position: 'relative' }}>
         {MESES.map((m, i) => {
           const val  = saldos[i];
@@ -185,7 +193,6 @@ function GraficoSaldo({ dados }) {
           </div>
         )}
       </div>
-      {/* Bottom */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 8, borderTop: '1px solid #F7F8FA' }}>
         <div style={{ display: 'flex', gap: 10 }}>
           {[{ cor: '#86EFAC', txt: 'Positivo' }, { cor: '#FCA5A5', txt: 'Negativo' }, { cor: '#F1F5F9', txt: 'Sem dados' }].map((l, i) => (
@@ -293,9 +300,11 @@ function PMA() {
 
 // Página principal
 export default function DashboardPage() {
-  const [ativo, setAtivo]             = useState(3);
+  const [ativo, setAtivo]                 = useState(3);
   const [modalGuardado, setModalGuardado] = useState(false);
   const [modalReserva, setModalReserva]   = useState(false);
+  const [modalTeto, setModalTeto]         = useState(false);
+  const [valorTeto, setValorTeto]         = useState(7000);
   const [saldoGuardado, setSaldoGuardado] = useState(756);
   const [saldoReserva,  setSaldoReserva]  = useState(1800);
   const [hoverGuardado, setHoverGuardado] = useState(false);
@@ -303,7 +312,7 @@ export default function DashboardPage() {
 
   const d      = DADOS_MOCK[ativo];
   const status = d?.status || 'atencao';
-  const pct    = d ? Math.round(d.s / TETO * 100) : 0;
+  const pct    = d ? Math.round(d.s / valorTeto * 100) : 0;
   const gaugeColor = pct > 100 ? '#EF4444' : pct > 80 ? '#F59E0B' : '#16A34A';
   const gaugeBadge = pct > 100
     ? { bg: '#FEE2E2', cor: '#991B1B', txt: 'Teto ultrapassado!' }
@@ -328,7 +337,6 @@ export default function DashboardPage() {
     { desc: 'Saldo atual',        val: fmt(saldoReserva), cor: '#0F766E', data: '' },
   ];
 
-  // Estilo do botão editar
   const btnEdit = (hover) => ({
     position: 'absolute', top: 10, right: 10,
     display: 'flex', alignItems: 'center', gap: 4,
@@ -383,7 +391,6 @@ export default function DashboardPage() {
 
         {/* Cards destaque */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: 10, marginBottom: 12 }}>
-          {/* Dinheiro Guardado */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#1D4ED8', position: 'relative' }}
             onMouseEnter={() => setHoverGuardado(true)} onMouseLeave={() => setHoverGuardado(false)}>
             <button style={btnEdit(hoverGuardado)} onClick={() => setModalGuardado(true)}><IcoEdit /> Editar</button>
@@ -392,7 +399,6 @@ export default function DashboardPage() {
             <div style={{ fontSize: 12, marginBottom: 10, color: '#93C5FD' }}>Investimentos além da reserva</div>
             <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}><div style={{ height: '100%', width: `${Math.min(saldoGuardado / 10000 * 100, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} /></div>
           </div>
-          {/* Reserva */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#0F766E', position: 'relative' }}
             onMouseEnter={() => setHoverReserva(true)} onMouseLeave={() => setHoverReserva(false)}>
             <button style={btnEdit(hoverReserva)} onClick={() => setModalReserva(true)}><IcoEdit /> Editar</button>
@@ -401,25 +407,22 @@ export default function DashboardPage() {
             <div style={{ fontSize: 12, marginBottom: 10, color: '#5EEAD4' }}>{pctReserva}% da meta · {mesesReserva} meses</div>
             <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}><div style={{ height: '100%', width: `${Math.min(pctReserva, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} /></div>
           </div>
-          {/* Metas */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#6D28D9' }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, color: '#DDD6FE' }}>Metas ativas</div>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>3 metas</div>
             <div style={{ fontSize: 12, marginBottom: 10, color: '#C4B5FD' }}>Viagem 68% · Carro 32% · Reserva 15%</div>
             <div style={{ display: 'flex', gap: 2, marginTop: 8 }}><div style={{ height: 3, flex: 68, background: 'rgba(255,255,255,.7)', borderRadius: 1 }} /><div style={{ height: 3, flex: 32, background: 'rgba(255,255,255,.2)', borderRadius: 1 }} /></div>
           </div>
-          {/* Limite */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#B45309' }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, color: '#FDE68A' }}>Limite restante</div>
-            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>{fmt(Math.max(0, TETO - (d?.s || 0)))}</div>
-            <div style={{ fontSize: 12, marginBottom: 10, color: '#FCD34D' }}>{100 - pct}% do teto · {fmt(TETO)}/mês</div>
+            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>{fmt(Math.max(0, valorTeto - (d?.s || 0)))}</div>
+            <div style={{ fontSize: 12, marginBottom: 10, color: '#FCD34D' }}>{100 - pct}% do teto · {fmt(valorTeto)}/mês</div>
             <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}><div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} /></div>
           </div>
         </div>
 
         {/* KPIs + Maior Gasto */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
-          {/* Entradas */}
           <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '11px 11px 0 0', background: '#3B82F6' }} />
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Entradas</div>
@@ -427,7 +430,6 @@ export default function DashboardPage() {
             <div style={{ fontSize: 13, color: '#6B7280' }}>Salário + extras</div>
             <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: '#16A34A' }}>Estável vs mês anterior</div>
           </div>
-          {/* Saídas */}
           <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '11px 11px 0 0', background: '#EF4444' }} />
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Saídas</div>
@@ -435,7 +437,6 @@ export default function DashboardPage() {
             <div style={{ fontSize: 13, color: '#6B7280' }}>Cartões lideram (50%)</div>
             <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: '#16A34A' }}>-13% vs mês anterior</div>
           </div>
-          {/* Saldo */}
           <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '11px 11px 0 0', background: '#16A34A' }} />
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Saldo</div>
@@ -443,7 +444,6 @@ export default function DashboardPage() {
             <div style={{ fontSize: 13, color: '#6B7280' }}>8,2% da renda guardada</div>
             <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: '#3B82F6' }}>Melhor mês do ano</div>
           </div>
-          {/* Teto */}
           <div style={{ ...card, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Teto de gastos</div>
             <div style={{ fontSize: 34, fontWeight: 700, color: '#111827', textAlign: 'center', marginBottom: 2, letterSpacing: '-1px' }}>{pct}%</div>
@@ -453,11 +453,11 @@ export default function DashboardPage() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#6B7280', marginBottom: 6 }}>
               <span>Gasto: <strong style={{ color: '#DC2626' }}>{d ? fmt(d.s) : '–'}</strong></span>
-              <span>{fmt(TETO)}</span>
+              <span>{fmt(valorTeto)}</span>
             </div>
             <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, padding: '4px 8px', borderRadius: 6, background: gaugeBadge.bg, color: gaugeBadge.cor }}>{gaugeBadge.txt}</div>
+            <TetoLink onClick={() => setModalTeto(true)} />
           </div>
-          {/* Maior Gasto */}
           <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '11px 11px 0 0' }} />
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Maior gasto</div>
@@ -476,10 +476,8 @@ export default function DashboardPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.4fr', gap: 10, marginBottom: 12 }}>
           <GraficoSaldo dados={DADOS_MOCK} />
 
-          {/* Categorias expandidas */}
           <div style={card}>
             <div style={cardTitle}>Categorias</div>
-            {/* Destaque maior */}
             <div style={{ background: '#FEF2F2', borderRadius: 8, padding: '10px 12px', marginBottom: 12, border: '1px solid #FECACA' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Maior impacto</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 2 }}>Cartões</div>
@@ -509,7 +507,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Saúde expandida */}
           <div style={card}>
             <div style={cardTitle}>Saúde financeira</div>
             {[
@@ -534,7 +531,6 @@ export default function DashboardPage() {
 
         {/* Bottom */}
         <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 1fr 190px', gap: 10, marginBottom: 12 }}>
-          {/* Comparativos */}
           <div style={card}>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Comparativos</div>
             {[
@@ -555,10 +551,8 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Radar */}
           <RadarFinanceiro />
 
-          {/* Metas */}
           <div style={card}>
             <div style={cardTitle}>
               Metas em andamento
@@ -582,7 +576,6 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Score */}
           <div style={{ ...card, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.07em', fontWeight: 600, marginBottom: 10 }}>Score financeiro</div>
             <div style={{ fontSize: 52, fontWeight: 800, color: '#111827', letterSpacing: '-2px', lineHeight: 1 }}>{d?.score || 71}</div>
@@ -592,10 +585,10 @@ export default function DashboardPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'left' }}>
               {[
-                { cor: '#16A34A', txt: 'Saldo positivo',    ok: true },
-                { cor: '#16A34A', txt: 'Melhor mês',        ok: true },
-                { cor: '#F59E0B', txt: 'Teto em 94%',       ok: false },
-                { cor: '#EF4444', txt: 'Reserva crítica',   ok: false },
+                { cor: '#16A34A', txt: 'Saldo positivo',  ok: true },
+                { cor: '#16A34A', txt: 'Melhor mês',      ok: true },
+                { cor: '#F59E0B', txt: 'Teto em 94%',     ok: false },
+                { cor: '#EF4444', txt: 'Reserva crítica', ok: false },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: item.cor, fontWeight: 500 }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
@@ -612,12 +605,12 @@ export default function DashboardPage() {
         <div style={{ background: '#111827', borderRadius: 11, padding: '16px 22px', display: 'grid', gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr auto', gap: 14, alignItems: 'center' }}>
           <div><div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Resumo 2026</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>Jan – Abr</div></div>
           {[
-            { l: 'Entradas',    v: 'R$ 27.382', cor: '#BFDBFE' },
-            { l: 'Saídas',      v: 'R$ 26.626', cor: '#FECACA' },
-            { l: 'Saldo',       v: 'R$ 756',    cor: '#86EFAC' },
-            { l: 'Score médio', v: '63/100',     cor: '#FDE68A' },
-            { l: 'Melhor mês',  v: 'Abril →',   cor: 'white' },
-            { l: 'Pior mês',    v: 'Fevereiro',  cor: '#FECACA' },
+            { l: 'Entradas',    v: 'R$ 27.382',      cor: '#BFDBFE' },
+            { l: 'Saídas',      v: 'R$ 26.626',      cor: '#FECACA' },
+            { l: 'Saldo',       v: 'R$ 756',         cor: '#86EFAC' },
+            { l: 'Score médio', v: '63/100',          cor: '#FDE68A' },
+            { l: 'Melhor mês',  v: 'Abril →',        cor: 'white'   },
+            { l: 'Pior mês',    v: 'Fevereiro',      cor: '#FECACA' },
             { l: 'Diagnóstico', v: 'Em recuperação', cor: '#FDE68A' },
           ].map((item, i) => (
             <div key={i} style={{ textAlign: 'center' }}>
@@ -628,6 +621,34 @@ export default function DashboardPage() {
         </div>
 
         {/* Modais */}
+        {modalTeto && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.2)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalTeto(false)}>
+            <div style={{ background: 'white', borderRadius: 14, padding: 24, width: 380, boxShadow: '0 16px 48px rgba(0,0,0,.12)', border: '1px solid #E9ECEF' }} onClick={e => e.stopPropagation()}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 3 }}>Teto mensal de gastos</div>
+              <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 18 }}>Limite máximo de saídas que você se permite por mês</div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Valor do teto (R$)</label>
+                <input type="number" value={valorTeto} onChange={e => setValorTeto(Number(e.target.value))}
+                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' }}
+                  onFocus={e => { e.target.style.borderColor = '#3B82F6'; e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,.1)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }} />
+                <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Use a renda líquida como referência · atual: R$ 7.226</div>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'block', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Válido a partir de</label>
+                <input type="month" defaultValue="2026-05"
+                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' }} />
+              </div>
+              <div style={{ background: '#EFF6FF', borderRadius: 7, padding: '10px 12px', fontSize: 12, color: '#1D4ED8', marginBottom: 16, lineHeight: 1.5 }}>
+                Com renda de R$ 7.226, um teto de R$ {valorTeto.toLocaleString('pt-BR')} deixa R$ {Math.max(0, 7226 - valorTeto).toLocaleString('pt-BR')} de margem.
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setModalTeto(false)} style={{ flex: 1, padding: 8, background: 'white', border: '1px solid #E9ECEF', borderRadius: 7, fontSize: 12, color: '#374151', cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
+                <button onClick={() => setModalTeto(false)} style={{ flex: 1, padding: 8, background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}>Salvar teto</button>
+              </div>
+            </div>
+          </div>
+        )}
         {modalGuardado && (
           <ModalEdicao titulo="Dinheiro guardado" subtitulo="Investimentos além da reserva de segurança" saldoAtual={saldoGuardado} metaValor={null}
             onSalvar={setSaldoGuardado} onClose={() => setModalGuardado(false)} logItems={LOG_GUARDADO} />

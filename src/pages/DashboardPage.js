@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../Components/Layout/Layout';
 
 const MESES   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -267,11 +267,6 @@ function GraficoSaldo({ dados }) {
               style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: fut ? 'default' : 'pointer', position: 'relative' }}
               onMouseEnter={e => { if (!fut) { const r = e.currentTarget.getBoundingClientRect(); setTooltip({ x: r.left + r.width/2, y: r.top - 38, m, val, pos }); }}}
               onMouseLeave={() => setTooltip(null)}>
-              {(isMelhor || isPior) && (
-                <div style={{ position: 'absolute', top: -24, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 500, color: isMelhor ? '#16A34A' : '#EF4444', whiteSpace: 'nowrap' }}>
-                  {isMelhor ? '↑ melhor' : '▼ pior'}
-                </div>
-              )}
               <div style={{ fontSize: 9, fontWeight: 600, position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', color: corVal }}>
                 {valTxt}
               </div>

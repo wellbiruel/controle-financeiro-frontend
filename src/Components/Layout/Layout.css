@@ -1,33 +1,20 @@
 .app-layout {
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #F7F8FA;
+  height: 100vh;
+  overflow: hidden;
+  background: #F3F4F6;
 }
 
 .app-body {
-  display: flex;
   flex: 1;
-  padding-top: 58px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .app-content {
   flex: 1;
-  margin-left: 52px;
-  min-height: calc(100vh - 58px);
-  transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
-  overflow: auto;
-}
-
-.app-content.sidebar-open {
-  margin-left: 240px;
-}
-
-body, #root { background: #F7F8FA; }
-
-/* Largura total */
-body:not(.wide-mode) .app-content > * {
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
+  overflow-y: auto;
+  background: #F3F4F6;
 }

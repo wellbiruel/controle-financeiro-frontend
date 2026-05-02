@@ -3,23 +3,18 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import './Layout.css';
 
-function Layout({ children }) {
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+export default function Layout({ children }) {
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <div className="app-layout">
-      <TopBar />
+      <Sidebar expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
       <div className="app-body">
-        <Sidebar
-          expanded={sidebarExpanded}
-          onToggleExpand={() => setSidebarExpanded(v => !v)}
-        />
-        <div className={`app-content ${sidebarExpanded ? 'sidebar-open' : ''}`}>
+        <TopBar />
+        <main className="app-content">
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );
 }
-
-export default Layout;

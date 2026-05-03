@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../Components/Layout/Layout';
+import api from '../services/api';
 
-// Constantes
+// —— Constantes ——
 const MESES   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MESES_F = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const BG_MAP    = { ok: '#DCFCE7', atencao: '#FEF3C7', critico: '#FEE2E2' };
@@ -9,17 +10,7 @@ const COR_MAP   = { ok: '#15803D', atencao: '#92400E', critico: '#991B1B' };
 const BADGE_MAP = { ok: 'Saudável', atencao: 'Atenção', critico: 'Crítico' };
 
 const fmt  = v => 'R$ ' + Math.round(Math.abs(v)).toLocaleString('pt-BR');
-const fmtS = v => (v >= 0 ? '+' : '-') + 'R$ ' + Math.abs(v).toLocaleString('pt-BR');
-
-const TETO = 7000;
-
-const DADOS_MOCK = [
-  { e: 6740, s: 6325, sd: 415,  score: 62, cor: '#F59E0B', status: 'atencao' },
-  { e: 6790, s: 7627, sd: -837, score: 38, cor: '#EF4444', status: 'critico' },
-  { e: 6626, s: 6037, sd: 589,  score: 68, cor: '#F59E0B', status: 'atencao' },
-  { e: 7226, s: 6637, sd: 589,  score: 71, cor: '#F59E0B', status: 'atencao' },
-  null, null, null, null, null, null, null, null,
-];
+const fmtS = v => (v >= 0 ? '+' : '–') + 'R$ ' + Math.abs(v).toLocaleString('pt-BR');
 
 const PMAS = [
   { txt: 'Aumente o aporte da reserva de R$ 200 para R$ 500/mês — conclui em Jun/2027', btn: 'Ver metas' },
@@ -29,42 +20,112 @@ const PMAS = [
 ];
 
 const INSIGHTS = [
-  { tipo: 'alert', cat: 'Cartões acima do ideal',    txt: 'Cartões = 50% das saídas. Ideal é abaixo de 40%. Revise os limites mensais.', cta: 'Ver cartões' },
-  { tipo: 'info',  cat: 'Comparativo de perfil',     txt: 'Usuários com perfil semelhante guardam 12% da renda. Você guarda 8,2%.', cta: 'Ver metas' },
-  { tipo: 'ok',    cat: 'Conquista do mês',           txt: 'Abril foi o melhor mês do ano — saídas cairam 13% e saldo fechou positivo.', cta: 'Ver fluxo' },
-  { tipo: 'alert', cat: 'Reserva crítica',            txt: 'Reserva cobre 1,8 meses. O recomendado para o seu padrão é 6 meses.', cta: 'Ajustar' },
-  { tipo: 'warn',  cat: 'Tendência 2026',             txt: 'Inflação em alimentação subiu 4,2%. Reavalie o orçamento da categoria Mercado.', cta: 'Ver categoria' },
-  { tipo: 'ok',    cat: 'Meta próxima',               txt: 'Viagem de férias está a R$ 1.600 da conclusão — possível encerrar em Maio.', cta: 'Ver meta' },
-  { tipo: 'info',  cat: 'Planejamento',               txt: 'Aumentar R$ 120/mês na reserva adianta sua segurança financeira em 18 meses.', cta: 'Simular' },
-  { tipo: 'warn',  cat: 'Padrão de consumo',          txt: 'Gastos em cartões cresceram 8% nos últimos 3 meses. Fique atento.', cta: 'Analisar' },
+  { tipo: 'alert', cat: 'Cartões acima do ideal',  txt: 'Cartões = 50% das saídas. Ideal é abaixo de 40%. Revise os limites mensais.', cta: 'Ver cartões' },
+  { tipo: 'info',  cat: 'Comparativo de perfil',   txt: 'Usuários com perfil semelhante guardam 12% da renda. Você guarda 8,2%.', cta: 'Ver metas' },
+  { tipo: 'ok',    cat: 'Conquista do mês',        txt: 'Abril foi o melhor mês do ano — saídas caíram 13% e saldo fechou positivo.', cta: 'Ver fluxo' },
+  { tipo: 'alert', cat: 'Reserva crítica',         txt: 'Reserva cobre 1,8 meses. O recomendado para o seu padrão é 6 meses.', cta: 'Ajustar' },
+  { tipo: 'warn',  cat: 'Tendência 2026',          txt: 'Inflação em alimentação subiu 4,2%. Reavalie o orçamento da categoria Mercado.', cta: 'Ver categoria' },
+  { tipo: 'ok',    cat: 'Meta próxima',            txt: 'Viagem de férias está a R$ 1.600 da conclusão — possível encerrar em Maio.', cta: 'Ver meta' },
+  { tipo: 'info',  cat: 'Planejamento',            txt: 'Aumentar R$ 120/mês na reserva adianta sua segurança financeira em 18 meses.', cta: 'Simular' },
+  { tipo: 'warn',  cat: 'Padrão de consumo',       txt: 'Gastos em cartões cresceram 8% nos últimos 3 meses. Fique atento.', cta: 'Analisar' },
 ];
 
 const COR_BORDA = { alert: '#FECACA', ok: '#BBF7D0', warn: '#FDE68A', info: '#BFDBFE' };
 const BG_RI     = { alert: '#FEF2F2', ok: '#F0FDF4', warn: '#FFFBEB', info: '#EFF6FF' };
 const COR_CAT   = { alert: '#EF4444', ok: '#16A34A', warn: '#D97706', info: '#3B82F6' };
 
-// Estilos base
-const card = {
-  background: 'white', borderRadius: 11,
-  border: '1px solid #F1F3F5', padding: '16px 18px',
-};
-const cardTitle = {
-  fontSize: 15, fontWeight: 600, color: '#111827',
-  marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-};
+// Mock fallback por mês/ano
+const MOCK_BASE = [
+  { e: 6740, s: 6325, sd: 415,  score: 62, cor: '#F59E0B', status: 'atencao' },
+  { e: 6790, s: 7627, sd: -837, score: 38, cor: '#EF4444', status: 'critico' },
+  { e: 6626, s: 6037, sd: 589,  score: 68, cor: '#F59E0B', status: 'atencao' },
+  { e: 7226, s: 6637, sd: 589,  score: 71, cor: '#F59E0B', status: 'atencao' },
+];
+
+function mockData(mes, ano) {
+  if (ano === 2026 && mes >= 1 && mes <= 4) return MOCK_BASE[mes - 1];
+  return null;
+}
+
+// —— Estilos base ——
+const card = { background: 'white', borderRadius: 11, border: '1px solid #F1F3F5', padding: '16px 18px' };
+const cardTitle = { fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
 const cardLink = { fontSize: 12, color: '#3B82F6', fontWeight: 400, cursor: 'pointer' };
 
-function TetoLink({ onClick }) {
-  const [hover, setHover] = useState(false);
+// —— Skeleton ——
+const SKELETON_CSS = `@keyframes sk-pulse{0%{background-position:200% center}100%{background-position:-200% center}}`;
+
+function Skeleton({ w = '100%', h = 16, r = 6 }) {
   return (
-    <div onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 11, color: hover ? '#3B82F6' : '#9CA3AF', cursor: 'pointer', paddingTop: 8, borderTop: '1px solid #F7F8FA', transition: 'color .15s', marginTop: 6 }}>
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-      Alterar teto mensal
+    <div style={{
+      width: w, height: h, borderRadius: r,
+      background: 'linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'sk-pulse 1.4s ease-in-out infinite',
+    }} />
+  );
+}
+
+// —— KpiCard ——
+function KpiCard({ cor, label, value, sub, trend, trendCor, loading }) {
+  return (
+    <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: cor, borderRadius: '11px 11px 0 0' }} />
+      <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>{label}</div>
+      {loading
+        ? <><Skeleton h={30} /><div style={{ marginTop: 8 }}><Skeleton h={14} r={4} /></div></>
+        : <>
+            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.6px', color: '#111827' }}>{value}</div>
+            <div style={{ fontSize: 13, color: '#6B7280' }}>{sub}</div>
+            {trend && <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: trendCor }}>{trend}</div>}
+          </>
+      }
     </div>
   );
 }
 
+// —— ProgressBar ——
+function ProgressBar({ pct, cor, h = 6 }) {
+  return (
+    <div style={{ height: h, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: cor, borderRadius: 3, transition: 'width .4s ease' }} />
+    </div>
+  );
+}
+
+// —— ScoreGauge (arco SVG) ——
+function ScoreGauge({ score, cor }) {
+  const r = 42, cx = 60, cy = 56;
+  const len = Math.PI * r;
+  const filled = len * (score / 100);
+  const arc = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+  return (
+    <svg width="120" height="68" viewBox="0 0 120 68" style={{ display: 'block', margin: '0 auto' }}>
+      <path d={arc} fill="none" stroke="#F1F5F9" strokeWidth="9" strokeLinecap="round" />
+      <path d={arc} fill="none" stroke={cor} strokeWidth="9" strokeLinecap="round"
+        strokeDasharray={`${filled} ${len}`} />
+      <text x={cx} y={cy - 4} textAnchor="middle" fontSize="22" fontWeight="800" fill="#111827">{score}</text>
+      <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" fill="#9CA3AF">/100</text>
+    </svg>
+  );
+}
+
+// —— PeriodSelector ——
+function PeriodSelector({ mes, ano, onChange }) {
+  const sel = { padding: '7px 12px', borderRadius: 7, border: '1px solid #E9ECEF', fontSize: 13, color: '#374151', background: 'white', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' };
+  return (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <select style={sel} value={mes} onChange={e => onChange(Number(e.target.value), ano)}>
+        {MESES_F.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+      </select>
+      <select style={sel} value={ano} onChange={e => onChange(mes, Number(e.target.value))}>
+        {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+  );
+}
+
+// —— ícones ——
 function IcoEdit() {
   return (
     <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
@@ -73,7 +134,7 @@ function IcoEdit() {
   );
 }
 
-// Modal edição
+// —— ModalEdicao ——
 function ModalEdicao({ titulo, subtitulo, saldoAtual, metaValor, onSalvar, onClose, logItems }) {
   const [tabIdx, setTabIdx] = useState(0);
   const [saldo, setSaldo]   = useState(saldoAtual);
@@ -87,7 +148,7 @@ function ModalEdicao({ titulo, subtitulo, saldoAtual, metaValor, onSalvar, onClo
     onSalvar(v); onClose();
   };
 
-  const inp = { width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' };
+  const inp = { width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827', boxSizing: 'border-box' };
   const lbl = { display: 'block', fontSize: 11, color: '#6B7280', marginBottom: 4 };
 
   return (
@@ -105,8 +166,15 @@ function ModalEdicao({ titulo, subtitulo, saldoAtual, metaValor, onSalvar, onClo
         </div>
         {tabIdx === 0 && (
           <div>
-            <div style={{ marginBottom: 12 }}><label style={lbl}>Saldo atual (R$)</label><input style={inp} type="number" value={saldo} onChange={e => setSaldo(e.target.value)} />{metaValor && <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Meta: R$ {metaValor.toLocaleString('pt-BR')}</div>}</div>
-            <div style={{ marginBottom: 12 }}><label style={lbl}>Data de referência</label><input style={inp} type="date" defaultValue={today} /></div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={lbl}>Saldo atual (R$)</label>
+              <input style={inp} type="number" value={saldo} onChange={e => setSaldo(e.target.value)} />
+              {metaValor && <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Meta: R$ {metaValor.toLocaleString('pt-BR')}</div>}
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={lbl}>Data de referência</label>
+              <input style={inp} type="date" defaultValue={today} />
+            </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button onClick={onClose} style={{ flex: 1, padding: 8, background: 'white', border: '1px solid #E9ECEF', borderRadius: 7, fontSize: 12, color: '#374151', cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
               <button onClick={handleSalvar} style={{ flex: 1, padding: 8, background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}>Atualizar saldo</button>
@@ -115,9 +183,19 @@ function ModalEdicao({ titulo, subtitulo, saldoAtual, metaValor, onSalvar, onClo
         )}
         {tabIdx === 1 && (
           <div>
-            <div style={{ marginBottom: 12 }}><label style={lbl}>Valor do aporte (R$)</label><input style={inp} type="number" placeholder="0,00" value={aporte} onChange={e => setAporte(e.target.value)} /><div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Será somado ao saldo atual de {fmt(saldoAtual)}</div></div>
-            <div style={{ marginBottom: 12 }}><label style={lbl}>Descrição (opcional)</label><input style={inp} type="text" placeholder="Ex: CDB, Tesouro Direto..." /></div>
-            <div style={{ marginBottom: 12 }}><label style={lbl}>Data</label><input style={inp} type="date" defaultValue={today} /></div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={lbl}>Valor do aporte (R$)</label>
+              <input style={inp} type="number" placeholder="0,00" value={aporte} onChange={e => setAporte(e.target.value)} />
+              <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Será somado ao saldo atual de {fmt(saldoAtual)}</div>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={lbl}>Descrição (opcional)</label>
+              <input style={inp} type="text" placeholder="Ex: CDB, Tesouro Direto..." />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={lbl}>Data</label>
+              <input style={inp} type="date" defaultValue={today} />
+            </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button onClick={onClose} style={{ flex: 1, padding: 8, background: 'white', border: '1px solid #E9ECEF', borderRadius: 7, fontSize: 12, color: '#374151', cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
               <button onClick={handleSalvar} style={{ flex: 1, padding: 8, background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}>Confirmar aporte</button>
@@ -128,10 +206,14 @@ function ModalEdicao({ titulo, subtitulo, saldoAtual, metaValor, onSalvar, onClo
           <div>
             {logItems.map((l, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: i < logItems.length - 1 ? '1px solid #F7F8FA' : 'none', fontSize: 12 }}>
-                <span>{l.desc}</span><span style={{ fontWeight: 600, color: l.cor }}>{l.val}</span><span style={{ fontSize: 10, color: '#9CA3AF' }}>{l.data}</span>
+                <span>{l.desc}</span>
+                <span style={{ fontWeight: 600, color: l.cor }}>{l.val}</span>
+                <span style={{ fontSize: 10, color: '#9CA3AF' }}>{l.data}</span>
               </div>
             ))}
-            <div style={{ marginTop: 14 }}><button onClick={onClose} style={{ padding: '8px 20px', background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}>Fechar</button></div>
+            <div style={{ marginTop: 14 }}>
+              <button onClick={onClose} style={{ padding: '8px 20px', background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}>Fechar</button>
+            </div>
           </div>
         )}
       </div>
@@ -139,15 +221,14 @@ function ModalEdicao({ titulo, subtitulo, saldoAtual, metaValor, onSalvar, onClo
   );
 }
 
-// Gráfico de saldo
-function GraficoSaldo({ dados }) {
+// —— GraficoSaldo ——
+function GraficoSaldo({ anoData }) {
   const [tooltip, setTooltip] = useState(null);
-  const saldos    = dados.map(d => d ? d.sd : null);
-  const comDados  = saldos.filter(v => v !== null);
-  const positivos = comDados.filter(v => v > 0);
-  const negativos = comDados.filter(v => v < 0);
-  const totalAcum = comDados.reduce((s, v) => s + v, 0);
-  const absMax    = Math.max(...comDados.map(v => Math.abs(v)), 1);
+  const comDados  = anoData.filter(Boolean);
+  const positivos = comDados.filter(d => d.sd > 0);
+  const negativos = comDados.filter(d => d.sd < 0);
+  const totalAcum = comDados.reduce((s, d) => s + d.sd, 0);
+  const absMax    = Math.max(...comDados.map(d => Math.abs(d.sd)), 1);
   const maxH      = 110;
 
   return (
@@ -159,8 +240,8 @@ function GraficoSaldo({ dados }) {
       <div style={{ display: 'flex', gap: 7, marginBottom: 10, flexWrap: 'wrap' }}>
         {[
           { cor: '#86EFAC', bg: '#F0FDF4', txt: `${positivos.length} positivos` },
-          { cor: '#FCA5A5', bg: '#FEF2F2', txt: `${negativos.length} negativo` },
-          { cor: '#D1D5DB', bg: '#F7F8FA', txt: `${saldos.filter(v => v === null).length} sem dados` },
+          { cor: '#FCA5A5', bg: '#FEF2F2', txt: `${negativos.length} negativos` },
+          { cor: '#D1D5DB', bg: '#F7F8FA', txt: `${anoData.filter(v => !v).length} sem dados` },
         ].map((p, i) => (
           <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 12, fontWeight: 500, background: p.bg, color: '#374151' }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: p.cor }} />{p.txt}
@@ -169,17 +250,16 @@ function GraficoSaldo({ dados }) {
       </div>
       <div style={{ height: 110, display: 'flex', alignItems: 'flex-end', gap: 5, paddingTop: 22, position: 'relative' }}>
         {MESES.map((m, i) => {
-          const val  = saldos[i];
-          const fut  = val === null;
-          const pos  = !fut && val >= 0;
+          const d   = anoData[i];
+          const fut = !d;
+          const pos = !fut && d.sd >= 0;
           const cor  = fut ? '#F1F5F9' : pos ? '#86EFAC' : '#FCA5A5';
           const corV = fut ? '#D1D5DB' : pos ? '#16A34A' : '#EF4444';
-          const h    = fut ? 4 : Math.max(4, Math.round(Math.abs(val) / absMax * maxH));
-          const valTxt = fut ? '' : (pos ? '+' : '-') + 'R$ ' + Math.abs(val).toLocaleString('pt-BR');
-
+          const h    = fut ? 4 : Math.max(4, Math.round(Math.abs(d.sd) / absMax * maxH));
+          const valTxt = fut ? '' : (pos ? '+' : '–') + 'R$ ' + Math.abs(d.sd).toLocaleString('pt-BR');
           return (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: fut ? 'default' : 'pointer', position: 'relative' }}
-              onMouseEnter={e => { if (!fut) { const r = e.currentTarget.getBoundingClientRect(); setTooltip({ x: r.left + r.width / 2, y: r.top - 38, m, val, pos }); }}}
+              onMouseEnter={e => { if (!fut) { const r = e.currentTarget.getBoundingClientRect(); setTooltip({ x: r.left + r.width / 2, y: r.top - 38, m, val: d.sd, pos }); }}}
               onMouseLeave={() => setTooltip(null)}>
               <div style={{ fontSize: 9, fontWeight: 700, position: 'absolute', top: -17, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', color: corV }}>{valTxt}</div>
               <div style={{ width: '100%', height: h, background: cor, borderRadius: '4px 4px 0 0', minHeight: 3 }} />
@@ -189,7 +269,7 @@ function GraficoSaldo({ dados }) {
         })}
         {tooltip && (
           <div style={{ position: 'fixed', background: '#111827', color: 'white', fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 8, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 200, left: tooltip.x, top: tooltip.y, transform: 'translateX(-50%)' }}>
-            {tooltip.m} · <span style={{ color: tooltip.pos ? '#86EFAC' : '#FCA5A5' }}>{tooltip.pos ? '+' : '-'}R$ {Math.abs(tooltip.val).toLocaleString('pt-BR')}</span>
+            {tooltip.m} · <span style={{ color: tooltip.pos ? '#86EFAC' : '#FCA5A5' }}>{tooltip.pos ? '+' : '–'}R$ {Math.abs(tooltip.val).toLocaleString('pt-BR')}</span>
           </div>
         )}
       </div>
@@ -207,12 +287,12 @@ function GraficoSaldo({ dados }) {
   );
 }
 
-// Radar Financeiro — 10s, pausa no hover
+// —— RadarFinanceiro — useRef para paused ——
 function RadarFinanceiro() {
-  const [idx, setIdx]       = useState(0);
-  const [fade, setFade]     = useState(true);
-  const [paused, setPaused] = useState(false);
-  const [timer, setTimer]   = useState(10);
+  const [idx, setIdx]   = useState(0);
+  const [fade, setFade] = useState(true);
+  const [timer, setTimer] = useState(10);
+  const pausedRef = useRef(false);
   const total = Math.ceil(INSIGHTS.length / 2);
 
   const transRadar = useCallback((next) => {
@@ -221,21 +301,23 @@ function RadarFinanceiro() {
   }, []);
 
   useEffect(() => {
-    if (paused) return;
     const t = setInterval(() => {
+      if (pausedRef.current) return;
       setTimer(prev => {
         if (prev <= 1) { transRadar((idx + 1) % total); return 10; }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(t);
-  }, [idx, paused, total, transRadar]);
+  }, [idx, total, transRadar]);
 
   const i1 = INSIGHTS[idx * 2];
   const i2 = INSIGHTS[(idx * 2 + 1) % INSIGHTS.length];
 
   return (
-    <div style={card} onMouseEnter={() => setPaused(true)} onMouseLeave={() => { setPaused(false); setTimer(10); }}>
+    <div style={card}
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; setTimer(10); }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: 7 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="#3B82F6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
@@ -260,16 +342,17 @@ function RadarFinanceiro() {
             <div key={i} onClick={() => transRadar(i)} style={{ width: 6, height: 6, borderRadius: '50%', background: i === idx ? '#3B82F6' : '#E9ECEF', cursor: 'pointer', transition: 'background .2s' }} />
           ))}
         </div>
-        <div style={{ fontSize: 11, color: '#D1D5DB' }}>{paused ? 'pausado' : `próximo em ${timer}s`}</div>
+        <div style={{ fontSize: 11, color: '#D1D5DB' }}>próximo em {timer}s</div>
       </div>
     </div>
   );
 }
 
-// PMA
+// —— PMA — useRef para paused ——
 function PMA() {
   const [idx, setIdx]   = useState(0);
   const [fade, setFade] = useState(true);
+  const pausedRef = useRef(false);
 
   const transPMA = useCallback((next) => {
     setFade(false);
@@ -277,12 +360,16 @@ function PMA() {
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => transPMA((idx + 1) % PMAS.length), 7000);
+    const t = setInterval(() => {
+      if (!pausedRef.current) transPMA((idx + 1) % PMAS.length);
+    }, 7000);
     return () => clearInterval(t);
   }, [idx, transPMA]);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#111827', borderRadius: 10, padding: '11px 18px', marginBottom: 14 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#111827', borderRadius: 10, padding: '11px 18px', marginBottom: 14 }}
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}>
       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
       <span style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Ação agora</span>
       <span style={{ fontSize: 13, fontWeight: 500, color: 'white', flex: 1, opacity: fade ? 1 : 0, transform: fade ? 'translateY(0)' : 'translateY(-5px)', transition: 'opacity .4s, transform .4s' }}>
@@ -298,19 +385,34 @@ function PMA() {
   );
 }
 
-// Página principal
+// —— Página principal ——
 export default function DashboardPage() {
-  const [ativo, setAtivo]                 = useState(3);
-  const [modalGuardado, setModalGuardado] = useState(false);
-  const [modalReserva, setModalReserva]   = useState(false);
-  const [modalTeto, setModalTeto]         = useState(false);
-  const [valorTeto, setValorTeto]         = useState(7000);
+  const hoje = new Date();
+  const [mes, setMes] = useState(hoje.getMonth() + 1);
+  const [ano, setAno] = useState(hoje.getFullYear());
+  const [dados, setDados]               = useState(null);
+  const [loading, setLoading]           = useState(false);
+  const [valorTeto, setValorTeto]       = useState(7000);
   const [saldoGuardado, setSaldoGuardado] = useState(756);
   const [saldoReserva,  setSaldoReserva]  = useState(1800);
+  const [modalGuardado, setModalGuardado] = useState(false);
+  const [modalReserva,  setModalReserva]  = useState(false);
+  const [modalTeto,     setModalTeto]     = useState(false);
   const [hoverGuardado, setHoverGuardado] = useState(false);
   const [hoverReserva,  setHoverReserva]  = useState(false);
 
-  const d      = DADOS_MOCK[ativo];
+  // Busca real + fallback mock
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    api.get(`/dashboard/completo?mes=${String(mes).padStart(2,'0')}&ano=${ano}`)
+      .then(res => { if (!cancelled) setDados(res.data); })
+      .catch(() => { if (!cancelled) setDados(mockData(mes, ano)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [mes, ano]);
+
+  const d      = dados;
   const status = d?.status || 'atencao';
   const pct    = d ? Math.round(d.s / valorTeto * 100) : 0;
   const gaugeColor = pct > 100 ? '#EF4444' : pct > 80 ? '#F59E0B' : '#16A34A';
@@ -322,6 +424,8 @@ export default function DashboardPage() {
 
   const pctReserva   = Math.round(saldoReserva / 12000 * 100);
   const mesesReserva = (saldoReserva / 700).toFixed(1);
+  const anoData      = MESES.map((_, i) => mockData(i + 1, ano));
+  const mesLabel     = `${MESES_F[mes - 1]} ${ano}`;
 
   const LOG_GUARDADO = [
     { desc: 'Saldo inicial 2026', val: 'R$ 0',    cor: '#3B82F6', data: 'Jan/2026' },
@@ -348,6 +452,7 @@ export default function DashboardPage() {
 
   return (
     <Layout>
+      <style>{SKELETON_CSS}</style>
       <div style={{ padding: '18px 24px', maxWidth: 1280, margin: '0 auto', background: '#F7F8FA', minHeight: '100vh' }}>
 
         {/* Header */}
@@ -355,7 +460,7 @@ export default function DashboardPage() {
           <div>
             <div style={{ fontSize: 22, fontWeight: 600, color: '#111827', letterSpacing: '-.4px' }}>Visão Mensal</div>
             <div style={{ fontSize: 13, color: '#6B7280', marginTop: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
-              {MESES_F[ativo]} 2026 · Well e Amanda
+              {mesLabel} · Well e Amanda
               {d && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 11px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: BG_MAP[status], color: COR_MAP[status] }}>
                   {status === 'ok' ? '🟢' : status === 'atencao' ? '🟡' : '🔴'} {BADGE_MAP[status]} · {d.score}/100
@@ -363,27 +468,11 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button style={{ background: 'white', color: '#374151', border: '1px solid #E9ECEF', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer' }}>Exportar</button>
-            <button style={{ background: '#3B82F6', color: 'white', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>+ Lançamento</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <PeriodSelector mes={mes} ano={ano} onChange={(m, a) => { setMes(m); setAno(a); }} />
+            <button style={{ background: 'white', color: '#374151', border: '1px solid #E9ECEF', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Exportar</button>
+            <button style={{ background: '#3B82F6', color: 'white', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>+ Lançamento</button>
           </div>
-        </div>
-
-        {/* Seletor de meses */}
-        <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: '1px solid #E9ECEF', overflowX: 'auto' }}>
-          {MESES.map((m, i) => {
-            const md  = DADOS_MOCK[i];
-            const fut = !md;
-            const pos = md && md.sd >= 0;
-            const on  = i === ativo;
-            return (
-              <div key={i} onClick={() => !fut && setAtivo(i)}
-                style={{ padding: '9px 14px 10px', fontSize: 13, fontWeight: 500, textAlign: 'center', flexShrink: 0, cursor: fut ? 'default' : 'pointer', borderBottom: on ? '2px solid #3B82F6' : '2px solid transparent', color: fut ? '#D1D5DB' : on ? '#3B82F6' : pos ? '#374151' : '#DC2626' }}>
-                {i === 3 && md ? '★ ' : ''}{m}
-                {md && <span style={{ fontSize: 10, display: 'block', marginTop: 2, fontWeight: 600, color: md.cor }}>{md.score}</span>}
-              </div>
-            );
-          })}
         </div>
 
         {/* PMA */}
@@ -391,79 +480,90 @@ export default function DashboardPage() {
 
         {/* Cards destaque */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: 10, marginBottom: 12 }}>
+          {/* Dinheiro guardado */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#1D4ED8', position: 'relative' }}
             onMouseEnter={() => setHoverGuardado(true)} onMouseLeave={() => setHoverGuardado(false)}>
             <button style={btnEdit(hoverGuardado)} onClick={() => setModalGuardado(true)}><IcoEdit /> Editar</button>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, color: '#BFDBFE' }}>Dinheiro guardado</div>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>{fmt(saldoGuardado)}</div>
             <div style={{ fontSize: 12, marginBottom: 10, color: '#93C5FD' }}>Investimentos além da reserva</div>
-            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}><div style={{ height: '100%', width: `${Math.min(saldoGuardado / 10000 * 100, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} /></div>
+            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}>
+              <div style={{ height: '100%', width: `${Math.min(saldoGuardado / 10000 * 100, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} />
+            </div>
           </div>
+          {/* Reserva */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#0F766E', position: 'relative' }}
             onMouseEnter={() => setHoverReserva(true)} onMouseLeave={() => setHoverReserva(false)}>
             <button style={btnEdit(hoverReserva)} onClick={() => setModalReserva(true)}><IcoEdit /> Editar</button>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, color: '#99F6E4' }}>Reserva de segurança</div>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>{fmt(saldoReserva)}</div>
             <div style={{ fontSize: 12, marginBottom: 10, color: '#5EEAD4' }}>{pctReserva}% da meta · {mesesReserva} meses</div>
-            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}><div style={{ height: '100%', width: `${Math.min(pctReserva, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} /></div>
+            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}>
+              <div style={{ height: '100%', width: `${Math.min(pctReserva, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} />
+            </div>
           </div>
+          {/* Metas */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#6D28D9' }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, color: '#DDD6FE' }}>Metas ativas</div>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>3 metas</div>
             <div style={{ fontSize: 12, marginBottom: 10, color: '#C4B5FD' }}>Viagem 68% · Carro 32% · Reserva 15%</div>
-            <div style={{ display: 'flex', gap: 2, marginTop: 8 }}><div style={{ height: 3, flex: 68, background: 'rgba(255,255,255,.7)', borderRadius: 1 }} /><div style={{ height: 3, flex: 32, background: 'rgba(255,255,255,.2)', borderRadius: 1 }} /></div>
+            <div style={{ display: 'flex', gap: 2, marginTop: 8 }}>
+              <div style={{ height: 3, flex: 68, background: 'rgba(255,255,255,.7)', borderRadius: 1 }} />
+              <div style={{ height: 3, flex: 32, background: 'rgba(255,255,255,.2)', borderRadius: 1 }} />
+            </div>
           </div>
+          {/* Limite restante */}
           <div style={{ borderRadius: 11, padding: '16px 18px', background: '#B45309' }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, color: '#FDE68A' }}>Limite restante</div>
-            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>{fmt(Math.max(0, valorTeto - (d?.s || 0)))}</div>
-            <div style={{ fontSize: 12, marginBottom: 10, color: '#FCD34D' }}>{100 - pct}% do teto · {fmt(valorTeto)}/mês</div>
-            <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}><div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} /></div>
+            {loading
+              ? <Skeleton h={32} />
+              : <>
+                  <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.5px', color: 'white' }}>{fmt(Math.max(0, valorTeto - (d?.s || 0)))}</div>
+                  <div style={{ fontSize: 12, marginBottom: 10, color: '#FCD34D' }}>{100 - pct}% do teto · {fmt(valorTeto)}/mês</div>
+                  <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,.2)' }}>
+                    <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: 'rgba(255,255,255,.6)', borderRadius: 2 }} />
+                  </div>
+                </>
+            }
           </div>
         </div>
 
-        {/* KPIs + Maior Gasto */}
+        {/* KPIs + Teto + Maior Gasto */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
-          <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '11px 11px 0 0', background: '#3B82F6' }} />
-            <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Entradas</div>
-            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.6px', color: '#111827' }}>{d ? fmt(d.e) : '–'}</div>
-            <div style={{ fontSize: 13, color: '#6B7280' }}>Salário + extras</div>
-            <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: '#16A34A' }}>Estável vs mês anterior</div>
-          </div>
-          <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '11px 11px 0 0', background: '#EF4444' }} />
-            <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Saídas</div>
-            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.6px', color: '#DC2626' }}>{d ? fmt(d.s) : '–'}</div>
-            <div style={{ fontSize: 13, color: '#6B7280' }}>Cartões lideram (50%)</div>
-            <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: '#16A34A' }}>-13% vs mês anterior</div>
-          </div>
-          <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '11px 11px 0 0', background: '#16A34A' }} />
-            <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Saldo</div>
-            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, letterSpacing: '-.6px', color: d && d.sd >= 0 ? '#16A34A' : '#EF4444' }}>{d ? fmt(d.sd) : '–'}</div>
-            <div style={{ fontSize: 13, color: '#6B7280' }}>8,2% da renda guardada</div>
-            <div style={{ fontSize: 13, marginTop: 6, fontWeight: 500, color: '#3B82F6' }}>Melhor mês do ano</div>
-          </div>
+          <KpiCard cor="#3B82F6" label="Entradas" value={d ? fmt(d.e) : '–'} sub="Salário + extras" trend="Estável vs mês anterior" trendCor="#16A34A" loading={loading} />
+          <KpiCard cor="#EF4444" label="Saídas"   value={d ? fmt(d.s) : '–'} sub="Cartões lideram (50%)" trend="-13% vs mês anterior" trendCor="#16A34A" loading={loading} />
+          <KpiCard cor="#16A34A" label="Saldo"    value={d ? fmt(d.sd) : '–'} sub="8,2% da renda guardada" trend="Melhor mês do ano" trendCor="#3B82F6" loading={loading} />
+
+          {/* Teto */}
           <div style={{ ...card, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Teto de gastos</div>
-            <div style={{ fontSize: 34, fontWeight: 700, color: '#111827', textAlign: 'center', marginBottom: 2, letterSpacing: '-1px' }}>{pct}%</div>
-            <div style={{ fontSize: 12, color: '#6B7280', textAlign: 'center', marginBottom: 8 }}>do orçamento utilizado</div>
-            <div style={{ height: 7, background: '#F1F5F9', borderRadius: 4, overflow: 'hidden', marginBottom: 5 }}>
-              <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: gaugeColor, borderRadius: 4, transition: 'width .4s ease' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#6B7280', marginBottom: 6 }}>
-              <span>Gasto: <strong style={{ color: '#DC2626' }}>{d ? fmt(d.s) : '–'}</strong></span>
-              <span>{fmt(valorTeto)}</span>
-            </div>
-            <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, padding: '4px 8px', borderRadius: 6, background: gaugeBadge.bg, color: gaugeBadge.cor }}>{gaugeBadge.txt}</div>
-            <TetoLink onClick={() => setModalTeto(true)} />
+            {loading
+              ? <><Skeleton h={40} /><div style={{ marginTop: 8 }}><Skeleton h={7} r={4} /></div></>
+              : <>
+                  <div style={{ fontSize: 34, fontWeight: 700, color: '#111827', textAlign: 'center', marginBottom: 2, letterSpacing: '-1px' }}>{pct}%</div>
+                  <div style={{ fontSize: 12, color: '#6B7280', textAlign: 'center', marginBottom: 8 }}>do orçamento utilizado</div>
+                  <ProgressBar pct={pct} cor={gaugeColor} h={7} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#6B7280', marginTop: 5, marginBottom: 6 }}>
+                    <span>Gasto: <strong style={{ color: '#DC2626' }}>{d ? fmt(d.s) : '–'}</strong></span>
+                    <span>{fmt(valorTeto)}</span>
+                  </div>
+                  <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, padding: '4px 8px', borderRadius: 6, background: gaugeBadge.bg, color: gaugeBadge.cor }}>{gaugeBadge.txt}</div>
+                  <div onClick={() => setModalTeto(true)}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 11, color: '#9CA3AF', cursor: 'pointer', paddingTop: 8, borderTop: '1px solid #F7F8FA', marginTop: 6, transition: 'color .15s' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    Alterar teto mensal
+                  </div>
+                </>
+            }
           </div>
+
+          {/* Maior gasto */}
           <div style={{ ...card, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '11px 11px 0 0' }} />
             <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 8 }}>Maior gasto</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>Cartão C6</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: '#DC2626', marginBottom: 3, letterSpacing: '-.6px' }}>R$ 2.450</div>
-            <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 8 }}>37,8% das saídas de Abril</div>
+            <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 8 }}>37,8% das saídas de {MESES_F[mes - 1]}</div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: '#FEE2E2', color: '#B91C1C' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
               Alto impacto
@@ -474,7 +574,7 @@ export default function DashboardPage() {
 
         {/* Gráfico + Categorias + Saúde */}
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.4fr', gap: 10, marginBottom: 12 }}>
-          <GraficoSaldo dados={DADOS_MOCK} />
+          <GraficoSaldo anoData={anoData} />
 
           <div style={card}>
             <div style={cardTitle}>Categorias</div>
@@ -485,11 +585,11 @@ export default function DashboardPage() {
               <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>+12% vs Março — atenção</div>
             </div>
             {[
-              { cor: '#EF4444', nome: 'Cartões',  pct: 100, val: 'R$ 3.306', p: '50%' },
-              { cor: '#3B82F6', nome: 'Mercado',  pct: 24,  val: 'R$ 784',   p: '12%' },
-              { cor: '#16A34A', nome: 'Casa',     pct: 13,  val: 'R$ 437',   p: '7%' },
-              { cor: '#F59E0B', nome: 'Carro',    pct: 3,   val: 'R$ 94',    p: '1%' },
-              { cor: '#A78BFA', nome: 'Outros',   pct: 4,   val: 'R$ 116',   p: '2%' },
+              { cor: '#EF4444', nome: 'Cartões', pct: 100, val: 'R$ 3.306', p: '50%' },
+              { cor: '#3B82F6', nome: 'Mercado', pct: 24,  val: 'R$ 784',   p: '12%' },
+              { cor: '#16A34A', nome: 'Casa',    pct: 13,  val: 'R$ 437',   p: '7%'  },
+              { cor: '#F59E0B', nome: 'Carro',   pct: 3,   val: 'R$ 94',    p: '1%'  },
+              { cor: '#A78BFA', nome: 'Outros',  pct: 4,   val: 'R$ 116',   p: '2%'  },
             ].map((c, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: i < 4 ? 10 : 0 }}>
                 <div style={{ width: 9, height: 9, borderRadius: 3, background: c.cor, flexShrink: 0 }} />
@@ -503,39 +603,38 @@ export default function DashboardPage() {
             ))}
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #F7F8FA', display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
               <span style={{ color: '#6B7280' }}>Total saídas</span>
-              <span style={{ fontWeight: 700, color: '#DC2626' }}>R$ 6.637</span>
+              <span style={{ fontWeight: 700, color: '#DC2626' }}>{d ? fmt(d.s) : '–'}</span>
             </div>
           </div>
 
           <div style={card}>
             <div style={cardTitle}>Saúde financeira</div>
             {[
-              { lbl: 'Poupança',  val: '8,2%',     cor: '#F59E0B', pct: 41, ctx: 'Meta 20% · Jan–Abr 2026' },
-              { lbl: 'Teto',      val: '94%',       cor: '#F59E0B', pct: 94, ctx: 'R$ 363 disponíveis' },
-              { lbl: 'Metas',     val: '38%',       cor: '#3B82F6', pct: 38, ctx: '3 metas ativas' },
-              { lbl: 'Reserva',   val: '1,8 meses', cor: '#EF4444', pct: 30, ctx: 'Ideal 6 meses · crítico' },
+              { lbl: 'Poupança', val: '8,2%',     cor: '#F59E0B', pct: 41,  ctx: 'Meta 20% · Jan–Abr 2026' },
+              { lbl: 'Teto',     val: `${pct}%`,  cor: gaugeColor, pct: pct, ctx: d ? `${fmt(Math.max(0, valorTeto - d.s))} disponíveis` : '–' },
+              { lbl: 'Metas',    val: '38%',       cor: '#3B82F6', pct: 38,  ctx: '3 metas ativas' },
+              { lbl: 'Reserva',  val: '1,8 meses', cor: '#EF4444', pct: 30,  ctx: 'Ideal 6 meses · crítico' },
             ].map((sf, i) => (
               <div key={i} style={{ marginBottom: i < 3 ? 12 : 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
                   <span style={{ fontSize: 14, color: '#374151', fontWeight: 500 }}>{sf.lbl}</span>
                   <span style={{ fontSize: 15, fontWeight: 700, color: sf.cor }}>{sf.val}</span>
                 </div>
-                <div style={{ height: 6, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${sf.pct}%`, background: sf.cor, borderRadius: 3 }} />
-                </div>
+                <ProgressBar pct={sf.pct} cor={sf.cor} />
                 <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 3 }}>{sf.ctx}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Bottom */}
+        {/* Linha inferior */}
         <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 1fr 190px', gap: 10, marginBottom: 12 }}>
+          {/* Comparativos */}
           <div style={card}>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Comparativos</div>
             {[
-              { lbl: 'vs Março 2026', rows: [{ arrow: '↑', cor: '#16A34A', lbl: 'Entradas', val: '+9%' }, { arrow: '↓', cor: '#16A34A', lbl: 'Saídas', val: '-13%' }, { arrow: '↑', cor: '#3B82F6', lbl: 'Saldo', val: 'melhor' }] },
-              { lbl: 'vs Média Jan–Abr', rows: [{ arrow: '↑', cor: '#16A34A', lbl: 'Entradas', val: '+5%' }, { arrow: '↓', cor: '#16A34A', lbl: 'Saídas', val: '-3%' }, { arrow: '↓', cor: '#F59E0B', lbl: 'Poupança', val: 'abaixo' }] },
+              { lbl: 'vs Março 2026',   rows: [{ arrow: '↑', cor: '#16A34A', lbl: 'Entradas', val: '+9%' }, { arrow: '↓', cor: '#16A34A', lbl: 'Saídas', val: '-13%' }, { arrow: '↑', cor: '#3B82F6', lbl: 'Saldo', val: 'melhor' }] },
+              { lbl: 'vs Média Jan–Abr',rows: [{ arrow: '↑', cor: '#16A34A', lbl: 'Entradas', val: '+5%' }, { arrow: '↓', cor: '#16A34A', lbl: 'Saídas', val: '-3%'  }, { arrow: '↓', cor: '#F59E0B', lbl: 'Poupança', val: 'abaixo' }] },
             ].map((grupo, gi) => (
               <div key={gi} style={{ marginBottom: gi === 0 ? 12 : 0 }}>
                 <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 9 }}>{grupo.lbl}</div>
@@ -553,6 +652,7 @@ export default function DashboardPage() {
 
           <RadarFinanceiro />
 
+          {/* Metas em andamento */}
           <div style={card}>
             <div style={cardTitle}>
               Metas em andamento
@@ -568,31 +668,34 @@ export default function DashboardPage() {
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{m.nome}</span>
                   <span style={{ fontSize: 15, fontWeight: 700, color: m.cor }}>{m.pct}%</span>
                 </div>
-                <div style={{ height: 5, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${m.pct}%`, background: m.cor, borderRadius: 3 }} />
-                </div>
+                <ProgressBar pct={m.pct} cor={m.cor} />
                 <div style={{ fontSize: 12, color: m.ctxCor, marginTop: 3 }}>{m.ctx}</div>
               </div>
             ))}
           </div>
 
-          <div style={{ ...card, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.07em', fontWeight: 600, marginBottom: 10 }}>Score financeiro</div>
-            <div style={{ fontSize: 52, fontWeight: 800, color: '#111827', letterSpacing: '-2px', lineHeight: 1 }}>{d?.score || 71}</div>
-            <div style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 10 }}>/100</div>
-            <div style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 20, marginBottom: 14, display: 'inline-block', background: BG_MAP[status], color: COR_MAP[status] }}>
+          {/* Score gauge */}
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.07em', fontWeight: 600, marginBottom: 8 }}>Score financeiro</div>
+            {loading
+              ? <Skeleton w={120} h={68} r={8} />
+              : <ScoreGauge score={d?.score || 0} cor={d?.cor || '#D1D5DB'} />
+            }
+            <div style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 20, marginTop: 8, marginBottom: 10, display: 'inline-block', background: BG_MAP[status], color: COR_MAP[status] }}>
               {status === 'ok' ? '🟢' : status === 'atencao' ? '🟡' : '🔴'} {BADGE_MAP[status]}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'left' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'left', width: '100%' }}>
               {[
-                { cor: '#16A34A', txt: 'Saldo positivo',  ok: true },
-                { cor: '#16A34A', txt: 'Melhor mês',      ok: true },
+                { cor: '#16A34A', txt: 'Saldo positivo',  ok: true  },
+                { cor: '#16A34A', txt: 'Melhor mês',      ok: true  },
                 { cor: '#F59E0B', txt: 'Teto em 94%',     ok: false },
                 { cor: '#EF4444', txt: 'Reserva crítica', ok: false },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: item.cor, fontWeight: 500 }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-                    {item.ok ? <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/> : <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>}
+                    {item.ok
+                      ? <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      : <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>}
                   </svg>
                   {item.txt}
                 </div>
@@ -601,21 +704,25 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Resumo anual */}
-        <div style={{ background: '#111827', borderRadius: 11, padding: '16px 22px', display: 'grid', gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr auto', gap: 14, alignItems: 'center' }}>
-          <div><div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Resumo 2026</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>Jan – Abr</div></div>
+        {/* Resumo do período — 9 colunas */}
+        <div style={{ background: '#111827', borderRadius: 11, padding: '16px 22px', display: 'grid', gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr', gap: 12, alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Resumo {ano}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>Jan – Abr</div>
+          </div>
           {[
-            { l: 'Entradas',    v: 'R$ 27.382',      cor: '#BFDBFE' },
-            { l: 'Saídas',      v: 'R$ 26.626',      cor: '#FECACA' },
-            { l: 'Saldo',       v: 'R$ 756',         cor: '#86EFAC' },
-            { l: 'Score médio', v: '63/100',          cor: '#FDE68A' },
-            { l: 'Melhor mês',  v: 'Abril →',        cor: 'white'   },
-            { l: 'Pior mês',    v: 'Fevereiro',      cor: '#FECACA' },
-            { l: 'Diagnóstico', v: 'Em recuperação', cor: '#FDE68A' },
+            { l: 'Entradas',    v: 'R$ 27.382', cor: '#BFDBFE' },
+            { l: 'Saídas',      v: 'R$ 26.626', cor: '#FECACA' },
+            { l: 'Saldo',       v: 'R$ 756',    cor: '#86EFAC' },
+            { l: 'Poupança',    v: '8,2%',       cor: '#FDE68A' },
+            { l: 'Score médio', v: '63/100',     cor: '#FDE68A' },
+            { l: 'Teto médio',  v: '91%',        cor: '#FCA5A5' },
+            { l: 'Melhor mês',  v: 'Abril',      cor: 'white'   },
+            { l: 'Pior mês',    v: 'Fevereiro',  cor: '#FECACA' },
           ].map((item, i) => (
             <div key={i} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 4 }}>{item.l}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: item.cor }}>{item.v}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: item.cor }}>{item.v}</div>
             </div>
           ))}
         </div>
@@ -629,15 +736,13 @@ export default function DashboardPage() {
               <div style={{ marginBottom: 12 }}>
                 <label style={{ display: 'block', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Valor do teto (R$)</label>
                 <input type="number" value={valorTeto} onChange={e => setValorTeto(Number(e.target.value))}
-                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' }}
-                  onFocus={e => { e.target.style.borderColor = '#3B82F6'; e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,.1)'; }}
-                  onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }} />
+                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827', boxSizing: 'border-box' }} />
                 <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Use a renda líquida como referência · atual: R$ 7.226</div>
               </div>
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: 'block', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Válido a partir de</label>
-                <input type="month" defaultValue="2026-05"
-                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' }} />
+                <input type="month" defaultValue={`${ano}-${String(mes).padStart(2,'0')}`}
+                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827', boxSizing: 'border-box' }} />
               </div>
               <div style={{ background: '#EFF6FF', borderRadius: 7, padding: '10px 12px', fontSize: 12, color: '#1D4ED8', marginBottom: 16, lineHeight: 1.5 }}>
                 Com renda de R$ 7.226, um teto de R$ {valorTeto.toLocaleString('pt-BR')} deixa R$ {Math.max(0, 7226 - valorTeto).toLocaleString('pt-BR')} de margem.
@@ -650,11 +755,13 @@ export default function DashboardPage() {
           </div>
         )}
         {modalGuardado && (
-          <ModalEdicao titulo="Dinheiro guardado" subtitulo="Investimentos além da reserva de segurança" saldoAtual={saldoGuardado} metaValor={null}
+          <ModalEdicao titulo="Dinheiro guardado" subtitulo="Investimentos além da reserva de segurança"
+            saldoAtual={saldoGuardado} metaValor={null}
             onSalvar={setSaldoGuardado} onClose={() => setModalGuardado(false)} logItems={LOG_GUARDADO} />
         )}
         {modalReserva && (
-          <ModalEdicao titulo="Reserva de segurança" subtitulo="Valor guardado para emergências" saldoAtual={saldoReserva} metaValor={12000}
+          <ModalEdicao titulo="Reserva de segurança" subtitulo="Valor guardado para emergências"
+            saldoAtual={saldoReserva} metaValor={12000}
             onSalvar={setSaldoReserva} onClose={() => setModalReserva(false)} logItems={LOG_RESERVA} />
         )}
 

@@ -329,7 +329,7 @@ function RadarFinanceiro({ insights = [] }) {
     <div style={S.card} onMouseEnter={() => { paused.current = true; }} onMouseLeave={() => { paused.current = false; }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="#3B82F6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-        Radar financeiro <Tooltip text="Insights automáticos baseados nos seus dados financeiros do período">{Ico.info}</Tooltip>
+        Radar financeiro <Tooltip text="Insights automáticos baseados nos seus dados financeiros do período.">{Ico.info}</Tooltip>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, opacity: fade ? 1 : 0, transform: fade ? 'translateY(0)' : 'translateY(4px)', transition: 'opacity .4s, transform .4s' }}>
         {[i1, i2].filter(Boolean).map((ins, i) => {
@@ -369,7 +369,7 @@ function ScoreGauge({ score }) {
   const arc = Math.round((s / 100) * 126);
   return (
     <div style={{ ...S.card, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Score financeiro <Tooltip text="Score calculado com base em saldo, poupança, teto, reserva e metas">{Ico.info}</Tooltip></div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Score financeiro <Tooltip text="Score calculado com base em saldo, poupança, teto, reserva e metas.">{Ico.info}</Tooltip></div>
       <svg width="100" height="56" viewBox="0 0 100 56" style={{ marginBottom: 4 }}>
         <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="#F1F5F9" strokeWidth="9" strokeLinecap="round"/>
         <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke={cor} strokeWidth="9" strokeLinecap="round" strokeDasharray={`${arc} 126`} strokeDashoffset="0"/>
@@ -603,7 +603,7 @@ export default function DashboardPage() {
           <div style={S.card}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-              Investimentos <Tooltip text="Valor investido além da reserva de segurança no período selecionado">{Ico.info}</Tooltip>
+              Investimentos <Tooltip text="Valor investido além da reserva de segurança no período selecionado.">{Ico.info}</Tooltip>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
               <div style={{ paddingRight: 14, borderRight: '1px solid #F3F4F6' }}>
@@ -637,7 +637,7 @@ export default function DashboardPage() {
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#0F766E', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F766E"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-              Reserva de Segurança <Tooltip text="Valor guardado para emergências — meta ideal: 6 meses de despesas">{Ico.info}</Tooltip>
+              Reserva de Segurança <Tooltip text="Valor guardado para emergências — meta ideal: 6 meses de despesas.">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#0F766E', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.reserva?.pctMeta}% da meta · {D.reserva?.mesesCobertos} meses</div>
@@ -651,7 +651,7 @@ export default function DashboardPage() {
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6D28D9', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#6D28D9"><path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/></svg>
-              Metas Ativas <Tooltip text="Progresso das suas metas financeiras ativas">{Ico.info}</Tooltip>
+              Metas Ativas <Tooltip text="Progresso das suas metas financeiras ativas.">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#6D28D9', letterSpacing: '-.5px', marginBottom: 3 }}>{D.metasAtivas?.total} metas</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.metasAtivas?.resumo}</div>
@@ -667,7 +667,7 @@ export default function DashboardPage() {
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#B45309', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#B45309"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
-              Limite Restante <Tooltip text="Quanto ainda pode gastar no mês sem ultrapassar seu teto">{Ico.info}</Tooltip>
+              Limite Restante <Tooltip text="Quanto ainda pode gastar no mês sem ultrapassar seu teto.">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#B45309', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.limiteRestante?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.limiteRestante?.pctRestante}% do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
@@ -693,7 +693,7 @@ export default function DashboardPage() {
           <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0 }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-              Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado" direction="down">{Ico.info}</Tooltip>
+              Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado." direction="down">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706', marginBottom: 2 }}>{gaugePct}%</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>do orçamento utilizado</div>

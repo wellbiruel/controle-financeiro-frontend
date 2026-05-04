@@ -95,12 +95,31 @@ function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, tren
 function Tooltip({ children, text }) {
   const [show, setShow] = useState(false);
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}
+    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
       onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       {children}
       {show && (
-        <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: 6, background: '#111827', color: 'white', fontSize: 11, padding: '6px 10px', borderRadius: 7, whiteSpace: 'nowrap', zIndex: 100, maxWidth: 220, textAlign: 'center', lineHeight: 1.4 }}>
+        <div style={{
+          position: 'absolute',
+          bottom: 'calc(100% + 8px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#111827',
+          color: 'white',
+          fontSize: 12,
+          fontWeight: 400,
+          lineHeight: 1.5,
+          padding: '8px 12px',
+          borderRadius: 8,
+          whiteSpace: 'normal',
+          width: 220,
+          zIndex: 999,
+          textAlign: 'center',
+          boxShadow: '0 4px 16px rgba(0,0,0,.25)',
+          pointerEvents: 'none',
+        }}>
           {text}
+          <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid #111827' }} />
         </div>
       )}
     </div>

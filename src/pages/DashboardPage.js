@@ -104,22 +104,23 @@ function Tooltip({ children, text }) {
           bottom: 'calc(100% + 8px)',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: '#111827',
-          color: 'white',
-          fontSize: 12,
+          background: 'rgba(17, 24, 39, 0.92)',
+          color: 'rgba(255,255,255,.88)',
+          fontSize: 11,
           fontWeight: 400,
-          lineHeight: 1.5,
-          padding: '8px 12px',
-          borderRadius: 8,
+          lineHeight: 1.55,
+          padding: '7px 10px',
+          borderRadius: 7,
           whiteSpace: 'normal',
-          width: 220,
+          width: 180,
           zIndex: 999,
           textAlign: 'center',
-          boxShadow: '0 4px 16px rgba(0,0,0,.25)',
           pointerEvents: 'none',
+          letterSpacing: '0',
+          textTransform: 'none',
         }}>
           {text}
-          <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid #111827' }} />
+          <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid rgba(17,24,39,0.92)' }} />
         </div>
       )}
     </div>
@@ -682,7 +683,7 @@ export default function DashboardPage() {
           <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-              Teto de Gastos <Tooltip text="Percentual do seu limite mensal já utilizado">{Ico.info}</Tooltip>
+              Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706', marginBottom: 2 }}>{gaugePct}%</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>do orçamento utilizado</div>

@@ -78,7 +78,7 @@ function Trend({ val, suffix = '', reverse = false }) {
 
 function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, trendSuffix, trendReverse, children }) {
   return (
-    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+    <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0 }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accentColor, borderRadius: '10px 10px 0 0' }} />
       <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
         {icon}{label}
@@ -92,8 +92,9 @@ function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, tren
 }
 
 // ──
-function Tooltip({ children, text }) {
+function Tooltip({ children, text, direction = 'up' }) {
   const [show, setShow] = useState(false);
+  const isUp = direction === 'up';
   return (
     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
       onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
@@ -101,7 +102,7 @@ function Tooltip({ children, text }) {
       {show && (
         <div style={{
           position: 'absolute',
-          bottom: 'calc(100% + 8px)',
+          ...(isUp ? { bottom: 'calc(100% + 8px)' } : { top: 'calc(100% + 8px)' }),
           left: '50%',
           transform: 'translateX(-50%)',
           background: 'rgba(17, 24, 39, 0.92)',
@@ -116,11 +117,20 @@ function Tooltip({ children, text }) {
           zIndex: 999,
           textAlign: 'center',
           pointerEvents: 'none',
-          letterSpacing: '0',
           textTransform: 'none',
         }}>
           {text}
-          <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid rgba(17,24,39,0.92)' }} />
+          <div style={{
+            position: 'absolute',
+            ...(isUp
+              ? { top: '100%', borderTop: '5px solid rgba(17,24,39,0.92)', borderBottom: 'none' }
+              : { bottom: '100%', borderBottom: '5px solid rgba(17,24,39,0.92)', borderTop: 'none' }),
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+          }} />
         </div>
       )}
     </div>
@@ -680,10 +690,10 @@ export default function DashboardPage() {
           </KpiCard>
 
           {/* Teto de gastos */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+          <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0 }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-              Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado">{Ico.info}</Tooltip>
+              Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado" direction="down">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706', marginBottom: 2 }}>{gaugePct}%</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>do orçamento utilizado</div>

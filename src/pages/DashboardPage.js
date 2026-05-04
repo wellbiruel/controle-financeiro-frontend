@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../Components/Layout/Layout';
 import api from '../services/api';
 
@@ -77,7 +78,7 @@ function Trend({ val, suffix = '', reverse = false }) {
 
 function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, trendSuffix, trendReverse, children }) {
   return (
-    <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accentColor, borderRadius: '10px 10px 0 0' }} />
       <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
         {icon}{label}
@@ -90,7 +91,23 @@ function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, tren
   );
 }
 
-// ── 
+// ──
+function Tooltip({ children, text }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }}
+      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      {children}
+      {show && (
+        <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: 6, background: '#111827', color: 'white', fontSize: 11, padding: '6px 10px', borderRadius: 7, whiteSpace: 'nowrap', zIndex: 100, maxWidth: 220, textAlign: 'center', lineHeight: 1.4 }}>
+          {text}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ──
 const PRIORIDADES_PMA = [
   { chave: 'reserva',   btn: 'Ver reserva' },
   { chave: 'teto',      btn: 'Ver planejamento' },
@@ -99,7 +116,16 @@ const PRIORIDADES_PMA = [
   { chave: 'poupanca',  btn: 'Ver planejamento' },
 ];
 
+const ROTAS_PMA = {
+  'Ver reserva': '/reserva',
+  'Ver planejamento': '/fluxo-anual',
+  'Ver cartões': '/cartoes',
+  'Ver metas': '/metas',
+  'Ver detalhes': '/dashboard',
+};
+
 function PMA({ acaoAgora }) {
+  const navigate = useNavigate();
   const [idx, setIdx]   = useState(0);
   const [fade, setFade] = useState(true);
   const paused          = useRef(false);
@@ -132,7 +158,8 @@ function PMA({ acaoAgora }) {
       <span style={{ fontSize: 13, color: 'white', flex: 1, opacity: fade ? 1 : 0, transform: fade ? 'translateY(0)' : 'translateY(-5px)', transition: 'opacity .3s, transform .3s' }}>
         {typeof m === 'string' ? m : m.txt}
       </span>
-      <span style={{ fontSize: 12, color: '#93C5FD', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 12, color: '#93C5FD', cursor: 'pointer', whiteSpace: 'nowrap' }}
+        onClick={() => { const btn = typeof m === 'object' ? m.btn : 'Ver detalhes'; navigate(ROTAS_PMA[btn] || '/dashboard'); }}>
         {typeof m === 'object' ? m.btn : 'Ver detalhes'} →
       </span>
       {total > 1 && (
@@ -147,9 +174,11 @@ function PMA({ acaoAgora }) {
   );
 }
 
-// ── 
+// ──
 function GraficoSaldo({ meses }) {
+  const navigate = useNavigate();
   const [tooltip, setTooltip] = useState(null);
+  const [filtro, setFiltro] = useState('todos');
   if (!meses?.length) meses = [];
 
   const comDados  = meses.filter(m => m.saldo != null);
@@ -165,24 +194,41 @@ function GraficoSaldo({ meses }) {
     return { label, ...found };
   });
 
+  const toggleFiltro = (tipo) => setFiltro(f => f === tipo ? 'todos' : tipo);
+
+  const pills = [
+    { tipo: 'positivos', baseBg: '#F0FDF4', ativoBg: '#D1FAE5', txt: '#15803D', dotBg: '#86EFAC', border: '#16A34A', label: `${positivos} positivos` },
+    { tipo: 'negativos', baseBg: '#FEF2F2', ativoBg: '#FEE2E2', txt: '#991B1B', dotBg: '#FCA5A5', border: '#EF4444', label: `${negativos} negativo` },
+    { tipo: 'todos',     baseBg: '#F7F8FA', ativoBg: '#F7F8FA', txt: '#6B7280', dotBg: '#D1D5DB', border: 'transparent', label: `${semDados} sem dados` },
+  ];
+
   return (
     <div style={S.card}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>Saldo por mês · 2026</div>
-        <span style={S.cardLink}>Ver fluxo →</span>
+        <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver fluxo →</span>
       </div>
-      <div style={{ display: 'flex', gap: 7, marginBottom: 10, flexWrap: 'wrap' }}>
-        <div style={S.pill('#F0FDF4', '#15803D')}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#86EFAC' }} />{positivos} positivos</div>
-        <div style={S.pill('#FEF2F2', '#991B1B')}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FCA5A5' }} />{negativos} negativo</div>
-        <div style={S.pill('#F7F8FA', '#6B7280')}><div style={{ width: 6, height: 6, borderRadius: '50%', background: '#D1D5DB' }} />{semDados} sem dados</div>
+      <div style={{ display: 'flex', gap: 7, marginBottom: 14, flexWrap: 'wrap' }}>
+        {pills.map(p => {
+          const ativo = filtro === p.tipo && p.tipo !== 'todos';
+          return (
+            <div key={p.tipo}
+              onClick={() => p.tipo === 'todos' ? setFiltro('todos') : toggleFiltro(p.tipo)}
+              style={{ ...S.pill(ativo ? p.ativoBg : p.baseBg, p.txt), cursor: 'pointer', border: `1.5px solid ${ativo ? p.border : 'transparent'}` }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: p.dotBg }} />
+              {p.label}
+            </div>
+          );
+        })}
       </div>
 
       <div style={{ height: 100, display: 'flex', alignItems: 'flex-end', gap: 4, paddingTop: 22, position: 'relative', marginBottom: 6 }}>
         {dadosPorMes.map((m, i) => {
           const fut = m.saldo == null;
           const pos = !fut && m.saldo >= 0;
-          const cor = fut ? '#F1F5F9' : pos ? '#86EFAC' : '#EF4444';
-          const corV = fut ? '#D1D5DB' : pos ? '#16A34A' : '#EF4444';
+          const grayed = !fut && filtro !== 'todos' && ((filtro === 'positivos' && !pos) || (filtro === 'negativos' && pos));
+          const cor  = fut ? '#F1F5F9' : grayed ? '#E5E7EB' : pos ? '#86EFAC' : '#EF4444';
+          const corV = fut ? '#D1D5DB' : grayed ? '#D1D5DB' : pos ? '#16A34A' : '#EF4444';
           const h = fut ? 3 : Math.max(3, Math.round(Math.abs(m.saldo) / absMax * maxH));
           const valTxt = fut ? '' : (pos ? '+' : '-') + 'R$ ' + Math.abs(Math.round(m.saldo)).toLocaleString('pt-BR');
           return (
@@ -202,7 +248,7 @@ function GraficoSaldo({ meses }) {
         )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '0.5px solid #F3F4F6' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, paddingBottom: 12, borderTop: '0.5px solid #F3F4F6' }}>
         <div style={{ display: 'flex', gap: 10 }}>
           {[{ cor: '#86EFAC', txt: 'Positivo' }, { cor: '#FCA5A5', txt: 'Negativo' }, { cor: '#F1F5F9', txt: 'Sem dados' }].map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#6B7280' }}>
@@ -216,10 +262,12 @@ function GraficoSaldo({ meses }) {
   );
 }
 
-// ── 
+// ──
 const COR_RADAR = { alert: { borda: '#FECACA', bg: '#FEF2F2', txt: '#EF4444' }, ok: { borda: '#BBF7D0', bg: '#F0FDF4', txt: '#16A34A' }, warn: { borda: '#FDE68A', bg: '#FFFBEB', txt: '#D97706' }, info: { borda: '#BFDBFE', bg: '#EFF6FF', txt: '#3B82F6' } };
+const ROTAS_RADAR = { 'Ver insights': '/radar', 'Ver metas': '/metas', 'Ver fluxo': '/fluxo-anual', 'Ajustar': '/reserva' };
 
 function RadarFinanceiro({ insights = [] }) {
+  const navigate = useNavigate();
   const [idx, setIdx] = useState(0);
   const [fade, setFade] = useState(true);
   const [timer, setTimer] = useState(10);
@@ -251,7 +299,7 @@ function RadarFinanceiro({ insights = [] }) {
     <div style={S.card} onMouseEnter={() => { paused.current = true; }} onMouseLeave={() => { paused.current = false; }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="#3B82F6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-        Radar financeiro {Ico.info}
+        Radar financeiro <Tooltip text="Insights automáticos baseados nos seus dados financeiros do período">{Ico.info}</Tooltip>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, opacity: fade ? 1 : 0, transform: fade ? 'translateY(0)' : 'translateY(4px)', transition: 'opacity .4s, transform .4s' }}>
         {[i1, i2].filter(Boolean).map((ins, i) => {
@@ -260,7 +308,7 @@ function RadarFinanceiro({ insights = [] }) {
             <div key={i} style={{ padding: '10px 11px', borderRadius: 8, border: `0.5px solid ${c.borda}`, background: c.bg }}>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: c.txt, marginBottom: 4 }}>{ins.cat}</div>
               <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.45, marginBottom: 4 }}>{ins.txt}</div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', cursor: 'pointer' }}>{ins.cta} →</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', cursor: 'pointer' }} onClick={() => navigate(ROTAS_RADAR[ins.cta] || '/dashboard')}>{ins.cta} →</div>
             </div>
           );
         })}
@@ -283,6 +331,7 @@ function RadarFinanceiro({ insights = [] }) {
 
 // ── 
 function ScoreGauge({ score }) {
+  const navigate = useNavigate();
   const s = score || 0;
   const cor = s >= 75 ? '#16A34A' : s >= 55 ? '#F59E0B' : '#EF4444';
   const st = scoreStatus(s);
@@ -290,7 +339,7 @@ function ScoreGauge({ score }) {
   const arc = Math.round((s / 100) * 126);
   return (
     <div style={{ ...S.card, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Score financeiro {Ico.info}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Score financeiro <Tooltip text="Score calculado com base em saldo, poupança, teto, reserva e metas">{Ico.info}</Tooltip></div>
       <svg width="100" height="56" viewBox="0 0 100 56" style={{ marginBottom: 4 }}>
         <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="#F1F5F9" strokeWidth="9" strokeLinecap="round"/>
         <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke={cor} strokeWidth="9" strokeLinecap="round" strokeDasharray={`${arc} 126`} strokeDashoffset="0"/>
@@ -310,12 +359,12 @@ function ScoreGauge({ score }) {
           </div>
         ))}
       </div>
-      <span style={S.cardLink}>Entenda seu score →</span>
+      <span style={S.cardLink} onClick={() => navigate('/relatorios')}>Entenda seu score →</span>
     </div>
   );
 }
 
-// ── 
+// ──
 function PeriodSelector({ mes, ano, onChange }) {
   const [open, setOpen] = useState(false);
   const [tmpMes, setTmpMes] = useState(mes);
@@ -379,7 +428,7 @@ function mockData(mes, ano) {
       { txt: 'Taxa de poupança em 8,2% — meta é 20%. Redirecione R$ 800/mês para metas', btn: 'Ver planejamento' },
       { txt: 'Cartões = 37,8% das saídas — revise o limite deste cartão', btn: 'Ver cartões' },
     ],
-    investimentos: { aporteMes: 800, aportePctRenda: 19, aporteVsAnterior: 200, patrimonioTotal: 42000, patrimonioVsMes: 800, patrimonioVsAno: 12 },
+    investimentos: { aporteMes: 800, aportePctRenda: 19, aporteVsAnterior: 200, patrimonioTotal: 42000, patrimonioVsMes: 800, patrimonioVsAno: 12, vsMediaSemestral: 15 },
     reserva: { valor: 1800, metaValor: 12000, pctMeta: 15, mesesCobertos: 1.8 },
     metasAtivas: { total: 3, resumo: 'Viagem 68% · Carro 32% · Reserva 15%', barras: [{ pct: 68, cor: '#6D28D9' }, { pct: 32, cor: '#DDD6FE' }] },
     limiteRestante: { valor: 363, teto: 7000, pctRestante: 5 },
@@ -441,6 +490,7 @@ function mockData(mes, ano) {
 
 // ── 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const agora = new Date();
   const [mes, setMes] = useState(agora.getMonth() + 1);
   const [ano, setAno] = useState(agora.getFullYear());
@@ -523,7 +573,7 @@ export default function DashboardPage() {
           <div style={S.card}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-              Investimentos {Ico.info}
+              Investimentos <Tooltip text="Valor investido além da reserva de segurança no período selecionado">{Ico.info}</Tooltip>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
               <div style={{ paddingRight: 14, borderRight: '1px solid #F3F4F6' }}>
@@ -533,6 +583,9 @@ export default function DashboardPage() {
                 <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
                 <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
                   {Ico.up} {fmt(D.investimentos?.aporteVsAnterior)} vs Março
+                </div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>
+                  vs média semestral: {(D.investimentos?.vsMediaSemestral ?? 15) >= 0 ? '↑' : '↓'} {Math.abs(D.investimentos?.vsMediaSemestral ?? 15)}% acima da média
                 </div>
               </div>
               <div style={{ paddingLeft: 14 }}>
@@ -554,21 +607,21 @@ export default function DashboardPage() {
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#0F766E', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F766E"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-              Reserva de Segurança {Ico.info}
+              Reserva de Segurança <Tooltip text="Valor guardado para emergências — meta ideal: 6 meses de despesas">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#0F766E', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.reserva?.pctMeta}% da meta · {D.reserva?.mesesCobertos} meses</div>
             <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
               <div style={{ height: '100%', width: `${Math.min(D.reserva?.pctMeta || 0, 100)}%`, background: '#0F766E', borderRadius: 2 }} />
             </div>
-            <span style={S.cardLink}>Ver detalhes da reserva →</span>
+            <span style={S.cardLink} onClick={() => navigate('/reserva')}>Ver detalhes da reserva →</span>
           </div>
 
           {/* Metas */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6D28D9', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#6D28D9"><path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/></svg>
-              Metas Ativas {Ico.info}
+              Metas Ativas <Tooltip text="Progresso das suas metas financeiras ativas">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#6D28D9', letterSpacing: '-.5px', marginBottom: 3 }}>{D.metasAtivas?.total} metas</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.metasAtivas?.resumo}</div>
@@ -577,21 +630,21 @@ export default function DashboardPage() {
                 <div key={i} style={{ height: 3, flex: b.pct, background: b.cor, borderRadius: 1 }} />
               ))}
             </div>
-            <span style={S.cardLink}>Ver todas as metas →</span>
+            <span style={S.cardLink} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
           </div>
 
           {/* Limite */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#B45309', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#B45309"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
-              Limite Restante {Ico.info}
+              Limite Restante <Tooltip text="Quanto ainda pode gastar no mês sem ultrapassar seu teto">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#B45309', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.limiteRestante?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.limiteRestante?.pctRestante}% do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
             <div style={{ height: 3, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
               <div style={{ height: '100%', width: `${Math.min(100 - (D.limiteRestante?.pctRestante || 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
             </div>
-            <span style={S.cardLink}>Ver planejamento →</span>
+            <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>
         </div>
 
@@ -607,10 +660,10 @@ export default function DashboardPage() {
           </KpiCard>
 
           {/* Teto de gastos */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-              {Ico.info} Teto de Gastos {Ico.info}
+              Teto de Gastos <Tooltip text="Percentual do seu limite mensal já utilizado">{Ico.info}</Tooltip>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706', marginBottom: 2 }}>{gaugePct}%</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>do orçamento utilizado</div>
@@ -630,7 +683,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Maior Gasto */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
               {Ico.warn} Maior Gasto
@@ -642,7 +695,7 @@ export default function DashboardPage() {
               {Ico.up} {D.maiorGasto?.tendencia}% vs Março
             </div>
             <div style={S.badge('#FEE2E2', '#B91C1C')}>{Ico.warn} Alto impacto</div>
-            <span style={S.cardLink}>Ver análise do cartão →</span>
+            <span style={S.cardLink} onClick={() => navigate('/cartoes')}>Ver análise do cartão →</span>
           </div>
         </div>
 
@@ -734,12 +787,12 @@ export default function DashboardPage() {
                 ))}
               </>
             )}
-            <span style={S.cardLink}>Ver detalhes e métodos de cálculo →</span>
+            <span style={S.cardLink} onClick={() => navigate('/relatorios')}>Ver detalhes e métodos de cálculo →</span>
           </div>
 
           {/* Comparativo de perfil */}
           <div style={S.card}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>Comparativo de perfil {Ico.info}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>Comparativo de perfil <Tooltip text="Comparação baseada em médias de usuários com perfil semelhante. Dados agregados e anônimos.">{Ico.info}</Tooltip></div>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -764,7 +817,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <span style={S.cardLink}>Entenda esse comparativo →</span>
+            <span style={S.cardLink} onClick={() => navigate('/relatorios')}>Entenda esse comparativo →</span>
           </div>
 
           {/* Radar */}
@@ -774,7 +827,7 @@ export default function DashboardPage() {
           <div style={S.card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>Metas em andamento</div>
-              <span style={{ fontSize: 12, color: '#3B82F6', cursor: 'pointer' }}>Ver todas →</span>
+              <span style={{ fontSize: 12, color: '#3B82F6', cursor: 'pointer' }} onClick={() => navigate('/metas')}>Ver todas →</span>
             </div>
             {(D.metasAndamento || []).map((m, i) => (
               <div key={i} style={{ padding: '7px 0', borderBottom: i < (D.metasAndamento.length - 1) ? '0.5px solid #F3F4F6' : 'none' }}>
@@ -795,39 +848,37 @@ export default function DashboardPage() {
         </div>
 
         {/* RESUMO DO PERÍODO */}
-        <div style={{ background: '#111827', borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'stretch', gap: 0, marginBottom: 4 }}>
-          <div style={{ minWidth: 120, marginRight: 18, borderRight: '1px solid rgba(255,255,255,.08)', paddingRight: 18 }}>
+        <div style={{ background: '#111827', borderRadius: 10, padding: '14px 18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', flexWrap: 'wrap', gap: 0, marginBottom: 4 }}>
+          <div style={{ minWidth: 90, paddingRight: 18, borderRight: '1px solid rgba(255,255,255,.08)', paddingBottom: 4 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{R.titulo || 'Resumo'}</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 1, marginBottom: 8 }}>{R.intervalo}</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Diagnóstico</div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#FCD34D' }}>{R.diagnostico}</div>
           </div>
-          <div style={{ display: 'flex', flex: 1, gap: 0, alignItems: 'stretch', overflow: 'hidden' }}>
-            {[
-              { lbl: 'Entradas',              val: fmt(R.entradasTotal),                         sub: `Média/mês: ${fmt(R.entradasMediaMes)}` },
-              { lbl: 'Saídas',               val: fmt(R.saidasTotal),                            sub: `Média/mês: ${fmt(R.saidasMediaMes)}` },
-              { lbl: 'Saldo',                  val: fmtS(R.saldoPeriodo || 0),                   sub: `Taxa de poupança: ${fmtP(R.taxaPoupancaPeriodo)}`, valCor: '#86EFAC' },
-              { lbl: 'Do mês total',           val: fmtS(R.saldoMesSelecionado || 0),             sub: `Melhor mês: ${R.melhorMes}`, valCor: '#86EFAC' },
-              { lbl: 'Saída que mais impactou', val: R.maiorImpactoNome,                         sub: `${fmt(R.maiorImpactoValor)} (${fmtP(R.maiorImpactoPercentual)})`, isCartao: true },
-              { lbl: 'Investimentos',          val: fmt(R.investimentosPeriodo),                  sub: `${fmtP(R.investimentosPercentualRenda)} da renda` },
-              { lbl: 'Patrimônio',             val: `+${R.patrimonioCrescimentoPercentual || 0}%`, sub: 'Crescimento no período', valCor: '#86EFAC' },
-              { lbl: 'Score médio',            val: `${R.scoreMedio || 0}/100`,                   sub: null, valCor: '#FCD34D' },
-              { lbl: 'Pior mês',               val: R.piorMes,                                    sub: null, valCor: '#FCA5A5', last: true },
-            ].map((item, i) => (
-              <div key={i} style={{ flex: 1, padding: '0 14px', borderRight: item.last ? 'none' : '1px solid rgba(255,255,255,.08)', minWidth: 0 }}>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>{item.lbl}</div>
-                {item.isCartao && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 1 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="rgba(255,255,255,.5)"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'white', whiteSpace: 'nowrap' }}>{item.val}</div>
-                  </div>
-                )}
-                {!item.isCartao && <div style={{ fontSize: 14, fontWeight: 700, color: item.valCor || 'white', whiteSpace: 'nowrap' }}>{item.val}</div>}
-                {item.sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1, whiteSpace: 'nowrap' }}>{item.sub}</div>}
-                {item.isCartao && item.sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1 }}>{item.sub}</div>}
-              </div>
-            ))}
-          </div>
+          {[
+            { lbl: 'Entradas',               val: fmt(R.entradasTotal),                          sub: `Média/mês: ${fmt(R.entradasMediaMes)}` },
+            { lbl: 'Saídas',                 val: fmt(R.saidasTotal),                            sub: `Média/mês: ${fmt(R.saidasMediaMes)}` },
+            { lbl: 'Saldo',                  val: fmtS(R.saldoPeriodo || 0),                     sub: `Taxa de poupança: ${fmtP(R.taxaPoupancaPeriodo)}`, valCor: '#86EFAC' },
+            { lbl: 'Do mês total',           val: fmtS(R.saldoMesSelecionado || 0),              sub: `Melhor mês: ${R.melhorMes}`, valCor: '#86EFAC' },
+            { lbl: 'Saída que mais impactou', val: R.maiorImpactoNome,                           sub: `${fmt(R.maiorImpactoValor)} (${fmtP(R.maiorImpactoPercentual)})`, isCartao: true },
+            { lbl: 'Investimentos',          val: fmt(R.investimentosPeriodo),                   sub: `${fmtP(R.investimentosPercentualRenda)} da renda` },
+            { lbl: 'Patrimônio',             val: `+${R.patrimonioCrescimentoPercentual || 0}%`, sub: 'Crescimento no período', valCor: '#86EFAC' },
+            { lbl: 'Score médio',            val: `${R.scoreMedio || 0}/100`,                    sub: null, valCor: '#FCD34D' },
+            { lbl: 'Pior mês',               val: R.piorMes,                                     sub: null, valCor: '#FCA5A5' },
+          ].map((item, i, arr) => (
+            <div key={i} style={{ padding: '0 14px', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.08)' : 'none', minWidth: 90 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>{item.lbl}</div>
+              {item.isCartao && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 1 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="rgba(255,255,255,.5)"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'white', whiteSpace: 'nowrap' }}>{item.val}</div>
+                </div>
+              )}
+              {!item.isCartao && <div style={{ fontSize: 14, fontWeight: 700, color: item.valCor || 'white', whiteSpace: 'nowrap' }}>{item.val}</div>}
+              {item.sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1, whiteSpace: 'nowrap' }}>{item.sub}</div>}
+              {item.isCartao && item.sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1 }}>{item.sub}</div>}
+            </div>
+          ))}
         </div>
 
         {/* Modal Teto */}

@@ -713,7 +713,7 @@ const fmt = (v) =>
 
 const fmtDate = (d) => {
   if (!d) return '';
-  const dt = new Date(d + 'T00:00:00');
+  const dt = new Date(d.split('T')[0] + 'T12:00:00');
   return dt.toLocaleDateString('pt-BR');
 };
 

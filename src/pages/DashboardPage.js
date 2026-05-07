@@ -211,7 +211,7 @@ function GraficoSaldo({ meses }) {
   const [filtro, setFiltro] = useState('todos');
   if (!meses?.length) meses = [];
 
-  const comDados  = meses.filter(m => m.saldo != null);
+  const comDados  = meses.filter(m => m != null && m.saldo != null);
   const positivos = comDados.filter(m => m.saldo >= 0).length;
   const negativos = comDados.filter(m => m.saldo < 0).length;
   const semDados  = 12 - comDados.length;

@@ -106,6 +106,7 @@ export default function ReservaPage() {
         descricao: form.descricao,
         valor:     modal === 'retirada' ? -v : v,
         tipo:      'investimento',
+        categoria: 'Reserva de Segurança',
         data:      form.data,
       });
       setModal(null);
@@ -129,7 +130,7 @@ export default function ReservaPage() {
         {/* TOPO */}
         <div style={S.topRow}>
           <div>
-            <h1 style={S.title}>Reserva de Emergência</h1>
+            <h1 style={S.title}>Reserva de Segurança</h1>
             <p style={S.sub}>Sua proteção financeira para imprevistos</p>
           </div>
           <div style={S.topBtns}>

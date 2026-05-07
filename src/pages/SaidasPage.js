@@ -36,7 +36,7 @@ const fmt = (v) =>
 
 const fmtDate = (d) => {
   if (!d) return '';
-  return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
+  return new Date(d.split('T')[0] + 'T12:00:00').toLocaleDateString('pt-BR');
 };
 
 const today = () => new Date().toISOString().split('T')[0];
@@ -411,7 +411,7 @@ export default function SaidasPage() {
   };
 
   const handleDuplicate = (s) => {
-    setEditData({ ...s, id: undefined, data: today() });
+    setEditData({ ...s, id: undefined, data: today(), valor: s.valor?.toString() });
     setModalOpen(true);
   };
 

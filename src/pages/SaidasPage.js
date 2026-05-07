@@ -210,12 +210,12 @@ function Skel({ h = 28 }) {
 const emptyForm = { categoria: '', descricao: '', valor: '', data: today(), fonte: '', forma_pagamento: '', recorrencia: 'Única', status: 'Pago', observacao: '' };
 
 function FormSaida({ editData, onSuccess, onCancel }) {
-  const [form, setForm]   = useState(editData || emptyForm);
+  const [form, setForm]   = useState(editData ? { ...emptyForm, ...editData } : emptyForm);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => { setForm(editData || emptyForm); }, [editData]);
+  useEffect(() => { setForm(editData ? { ...emptyForm, ...editData } : emptyForm); }, [editData]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 

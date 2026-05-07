@@ -13,6 +13,7 @@ import EntradasPage from './pages/EntradasPage';
 import SaidasPage from './pages/SaidasPage';
 import MetasPage from './pages/MetasPage';
 import ReservaPage from './pages/ReservaPage';
+import PlaceholderPage from './pages/PlaceholderPage';
 import { getCurrentUser } from './services/auth';
 
 const PrivateRoute = ({ children }) => {
@@ -33,7 +34,7 @@ function App() {
         <Route path="/relatorios" element={<PrivateRoute><RelatoriosPage /></PrivateRoute>} />
         <Route path="/configuracoes" element={<PrivateRoute><ConfiguracoesPage /></PrivateRoute>} />
         <Route path="/fluxo" element={<PrivateRoute><FluxoAnualPage /></PrivateRoute>} />
-        <Route path="/importar" element={<PrivateRoute><ImportacaoPage /></PrivateRoute>} />
+        <Route path="/importacao" element={<PrivateRoute><ImportacaoPage /></PrivateRoute>} />
         <Route path="/entradas" element={<PrivateRoute><EntradasPage /></PrivateRoute>} />
         <Route path="/saidas" element={<PrivateRoute><SaidasPage /></PrivateRoute>} />
         <Route path="/metas" element={<PrivateRoute><MetasPage /></PrivateRoute>} />
@@ -41,6 +42,10 @@ function App() {
         <Route path="/cartoes" element={<PrivateRoute><CartaoCreditoPage /></PrivateRoute>} />
         <Route path="/reserva" element={<PrivateRoute><ReservaPage /></PrivateRoute>} />
         <Route path="/radar" element={<PrivateRoute><RelatoriosPage /></PrivateRoute>} />
+        <Route path="/parcelas"    element={<PrivateRoute><PlaceholderPage title="Parcelas" subtitle="Controle de compras parceladas no cartão de crédito." emoji="📆" /></PrivateRoute>} />
+        <Route path="/assinaturas" element={<PrivateRoute><PlaceholderPage title="Assinaturas" subtitle="Gestão de assinaturas e serviços recorrentes." emoji="🔄" /></PrivateRoute>} />
+        <Route path="/dividas"     element={<PrivateRoute><PlaceholderPage title="Dívidas" subtitle="Acompanhamento de dívidas e prazos de pagamento." emoji="📋" /></PrivateRoute>} />
+        <Route path="/simulacoes"  element={<PrivateRoute><PlaceholderPage title="Simulações" subtitle="Simulador de cenários financeiros e projeções." emoji="🧮" /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

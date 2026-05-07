@@ -903,7 +903,12 @@ function FormEntrada({ editData, onSuccess, onCancel, compact = false, categoria
       <div style={styles.formGroup}>
         <label style={styles.formLabel}>Tipo *</label>
         <select style={styles.formSelect} value={form.tipo}
-          onChange={e => { set('tipo', e.target.value); set('categoria', ''); }}>
+          onChange={e => {
+            const t = e.target.value;
+            const firstCat = (categorias || DEFAULT_CATEGORIAS_ENTRADA)[t]?.[0] || '';
+            set('tipo', t);
+            set('categoria', firstCat);
+          }}>
           <option value="">Selecione o tipo</option>
           {['Salário', 'Renda Extra', 'Outros'].map(t => <option key={t}>{t}</option>)}
         </select>

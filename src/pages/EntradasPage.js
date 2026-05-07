@@ -869,7 +869,7 @@ function FormEntrada({ editData, onSuccess, onCancel, compact = false }) {
     const payload = {
       descricao:         form.descricao,
       valor:             parseFloat(form.valor.toString().replace(',', '.')),
-      tipo:              form.tipo,
+      tipo:              'entrada',
       data:              form.data_recebimento,
       categoria:         form.categoria,
       fonte:             form.fonte,

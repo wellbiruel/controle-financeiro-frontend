@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -12,6 +11,7 @@ import ImportacaoPage from './pages/ImportacaoPage';
 import EntradasPage from './pages/EntradasPage';
 import SaidasPage from './pages/SaidasPage';
 import MetasPage from './pages/MetasPage';
+import ReservaPage from './pages/ReservaPage';
 import { getCurrentUser } from './services/auth';
 
 const PrivateRoute = ({ children }) => {
@@ -37,7 +37,7 @@ function App() {
         <Route path="/metas" element={<PrivateRoute><MetasPage /></PrivateRoute>} />
         <Route path="/fluxo-anual" element={<PrivateRoute><FluxoAnualPage /></PrivateRoute>} />
         <Route path="/cartoes" element={<PrivateRoute><CartaoCreditoPage /></PrivateRoute>} />
-        <Route path="/reserva" element={<PrivateRoute><TransacoesPage /></PrivateRoute>} />
+        <Route path="/reserva" element={<PrivateRoute><ReservaPage /></PrivateRoute>} />
         <Route path="/radar" element={<PrivateRoute><RelatoriosPage /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>

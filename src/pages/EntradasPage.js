@@ -1087,7 +1087,10 @@ export default function EntradasPage() {
   };
 
   const handleDuplicate = (entrada) => {
-    setEditData({ ...entrada, id: undefined, data_recebimento: today() });
+    const tipoUI = Object.keys(CATEGORIAS).find(t =>
+      CATEGORIAS[t].includes(entrada.categoria)
+    ) || '';
+    setEditData({ ...entrada, id: undefined, tipo: tipoUI, data_recebimento: today() });
     setModalOpen(true);
   };
 

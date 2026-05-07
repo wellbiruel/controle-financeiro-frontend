@@ -220,7 +220,7 @@ function GraficoSaldo({ meses }) {
   const maxH      = 100;
 
   const dadosPorMes = MESES_ABREV.map((label, i) => {
-    const found = meses.find(m => m.mes === i + 1);
+    const found = meses.find(m => m != null && m.mes === i + 1);
     return { label, ...found };
   });
 

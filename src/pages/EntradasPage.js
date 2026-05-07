@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Components/Layout/Layout';
 import api from '../services/api';
@@ -697,7 +697,7 @@ const styles = {
 const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const TIPOS = ['Todos', 'Salário', 'Renda Extra', 'Outros'];
 
-const CATEGORIAS = {
+const DEFAULT_CATEGORIAS_ENTRADA = {
   'Salário':     ['Salário principal', 'Adiantamento', 'Comissão CLT', 'Bônus'],
   'Renda Extra': ['Freelance', 'Venda', 'Comissão', 'Bônus', 'Cashback', 'Trabalho Extra'],
   'Outros':      ['Aluguel', 'Dividendos', 'Reembolso', 'Presente', 'Restituição', 'Investimentos'],
@@ -843,7 +843,7 @@ const emptyForm = {
   observacao:        '',
 };
 
-function FormEntrada({ editData, onSuccess, onCancel, compact = false }) {
+function FormEntrada({ editData, onSuccess, onCancel, compact = false, categorias }) {
   const [form, setForm]       = useState(editData ? { ...emptyForm, ...editData } : emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
@@ -855,7 +855,7 @@ function FormEntrada({ editData, onSuccess, onCancel, compact = false }) {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const categoriaOpts = CATEGORIAS[form.tipo] || [];
+  const categoriaOpts = (categorias || DEFAULT_CATEGORIAS_ENTRADA)[form.tipo] || [];
 
   const handleSubmit = async () => {
     setError('');
@@ -1014,10 +1014,24 @@ export default function EntradasPage() {
   const [entradas,   setEntradas]   = useState([]);
   const [loadingResumo,   setLoadingResumo]   = useState(true);
   const [loadingEntradas, setLoadingEntradas] = useState(true);
-  const [editData,   setEditData]   = useState(null);
-  const [modalOpen,  setModalOpen]  = useState(false);
-  const [pagina,     setPagina]     = useState(1);
+  const [editData,      setEditData]      = useState(null);
+  const [modalOpen,     setModalOpen]     = useState(false);
+  const [pagina,        setPagina]        = useState(1);
+  const [categoriasMap, setCategoriasMap] = useState(DEFAULT_CATEGORIAS_ENTRADA);
   const POR_PAGINA = 10;
+
+  useEffect(() => {
+    api.get('/categorias?tipo=entrada').then(r => {
+      const allDefaults = Object.values(DEFAULT_CATEGORIAS_ENTRADA).flat();
+      const custom = r.data.map(c => c.nome).filter(n => !allDefaults.includes(n));
+      if (custom.length > 0) {
+        setCategoriasMap(prev => ({
+          ...prev,
+          'Outros': [...new Set([...prev['Outros'], ...custom])],
+        }));
+      }
+    }).catch(() => {});
+  }, []);
 
   // Carrega KPIs via /entradas/resumo (endpoint dedicado); silencia se não existir
   const carregarResumo = useCallback(async () => {
@@ -1074,8 +1088,8 @@ export default function EntradasPage() {
   };
 
   const handleEdit = (entrada) => {
-    const tipoUI = Object.keys(CATEGORIAS).find(t =>
-      CATEGORIAS[t].includes(entrada.categoria)
+    const tipoUI = Object.keys(categoriasMap).find(t =>
+      categoriasMap[t].includes(entrada.categoria)
     ) || '';
     setEditData({
       ...entrada,
@@ -1087,8 +1101,8 @@ export default function EntradasPage() {
   };
 
   const handleDuplicate = (entrada) => {
-    const tipoUI = Object.keys(CATEGORIAS).find(t =>
-      CATEGORIAS[t].includes(entrada.categoria)
+    const tipoUI = Object.keys(categoriasMap).find(t =>
+      categoriasMap[t].includes(entrada.categoria)
     ) || '';
     setEditData({ ...entrada, id: undefined, tipo: tipoUI, data_recebimento: today() });
     setModalOpen(true);
@@ -1390,7 +1404,7 @@ export default function EntradasPage() {
           {/* COLUNA DIREITA — formulário sempre visível */}
           <div style={styles.formCard}>
             <div style={styles.formTitle}>Adicionar nova entrada</div>
-            <FormEntrada onSuccess={onFormSuccess} />
+            <FormEntrada onSuccess={onFormSuccess} categorias={categoriasMap} />
           </div>
         </div>
 
@@ -1430,6 +1444,7 @@ export default function EntradasPage() {
               editData={editData}
               onSuccess={onFormSuccess}
               onCancel={closeModal}
+              categorias={categoriasMap}
             />
           </div>
         </div>

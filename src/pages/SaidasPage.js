@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Components/Layout/Layout';
 import api from '../services/api';
@@ -7,7 +7,7 @@ import api from '../services/api';
 
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-const CATEGORIAS_SAIDA = ['Todos','Cartões','Casa','Transporte','Alimentação','Saúde','Lazer','Outros'];
+const CATEGORIAS_SAIDA_DEFAULT = ['Cartões','Casa','Transporte','Alimentação','Saúde','Lazer','Outros'];
 
 const FORMAS_PGTO   = ['Débito','Crédito','PIX','Dinheiro','Boleto','TED/DOC','Outro'];
 const RECORRENCIAS  = ['Única','Mensal','Quinzenal','Semanal','Anual'];
@@ -209,7 +209,7 @@ function Skel({ h = 28 }) {
 
 const emptyForm = { categoria: '', descricao: '', valor: '', data: today(), fonte: '', forma_pagamento: '', recorrencia: 'Única', status: 'Pago', observacao: '' };
 
-function FormSaida({ editData, onSuccess, onCancel }) {
+function FormSaida({ editData, onSuccess, onCancel, categorias }) {
   const [form, setForm]   = useState(editData ? { ...emptyForm, ...editData } : emptyForm);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
@@ -258,7 +258,7 @@ function FormSaida({ editData, onSuccess, onCancel }) {
         <label style={S.formLabel}>Categoria</label>
         <select style={S.formSel} value={form.categoria} onChange={e => set('categoria', e.target.value)}>
           <option value="">Selecione a categoria</option>
-          {CATEGORIAS_SAIDA.filter(c => c !== 'Todos').map(c => <option key={c}>{c}</option>)}
+          {(categorias || CATEGORIAS_SAIDA_DEFAULT).filter(c => c !== 'Todos').map(c => <option key={c}>{c}</option>)}
         </select>
       </div>
 
@@ -353,7 +353,16 @@ export default function SaidasPage() {
   const [modalOpen,   setModalOpen]   = useState(false);
   const [banner,      setBanner]      = useState(true);
   const [pagina,      setPagina]      = useState(1);
+  const [categoriasLista, setCategoriasLista] = useState(['Todos', ...CATEGORIAS_SAIDA_DEFAULT]);
   const POR_PAGINA = 10;
+
+  useEffect(() => {
+    api.get('/categorias?tipo=saida').then(r => {
+      const nomes = r.data.map(c => c.nome);
+      const merged = ['Todos', ...new Set([...nomes, ...CATEGORIAS_SAIDA_DEFAULT])].sort((a, b) => a === 'Todos' ? -1 : b === 'Todos' ? 1 : a.localeCompare(b, 'pt-BR'));
+      setCategoriasLista(merged);
+    }).catch(() => {});
+  }, []);
 
   const carregarResumo = useCallback(async () => {
     try {
@@ -519,7 +528,7 @@ export default function SaidasPage() {
         <div style={S.filterRow}>
           <div style={S.filterGroup}>
             <span style={S.filterLabel}>Categoria:</span>
-            {CATEGORIAS_SAIDA.map(c => (
+            {categoriasLista.map(c => (
               <button key={c} style={S.chip(catFiltro === c)} onClick={() => setCatFiltro(c)}>
                 {c !== 'Todos' && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: catDot(c), display: 'inline-block', marginRight: '4px' }} />}
                 {c}
@@ -690,7 +699,7 @@ export default function SaidasPage() {
           {/* FORMULÁRIO LATERAL */}
           <div style={S.formCard}>
             <div style={S.formTitle}>Adicionar nova saída</div>
-            <FormSaida onSuccess={onSuccess} />
+            <FormSaida onSuccess={onSuccess} categorias={categoriasLista} />
           </div>
         </div>
 
@@ -726,7 +735,7 @@ export default function SaidasPage() {
               <span>{editData?.id ? 'Editar saída' : 'Nova saída'}</span>
               <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#6B7280' }} onClick={closeModal}>✕</button>
             </div>
-            <FormSaida editData={editData} onSuccess={onSuccess} onCancel={closeModal} />
+            <FormSaida editData={editData} onSuccess={onSuccess} onCancel={closeModal} categorias={categoriasLista} />
           </div>
         </div>
       )}

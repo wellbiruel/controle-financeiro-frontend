@@ -844,14 +844,13 @@ const emptyForm = {
 };
 
 function FormEntrada({ editData, onSuccess, onCancel, compact = false }) {
-  const [form, setForm]       = useState(editData || emptyForm);
+  const [form, setForm]       = useState(editData ? { ...emptyForm, ...editData } : emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    if (editData) setForm(editData);
-    else setForm(emptyForm);
+    setForm(editData ? { ...emptyForm, ...editData } : emptyForm);
   }, [editData]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -1075,8 +1074,12 @@ export default function EntradasPage() {
   };
 
   const handleEdit = (entrada) => {
+    const tipoUI = Object.keys(CATEGORIAS).find(t =>
+      CATEGORIAS[t].includes(entrada.categoria)
+    ) || '';
     setEditData({
       ...entrada,
+      tipo:             tipoUI,
       valor:            entrada.valor?.toString(),
       data_recebimento: (entrada.data_recebimento || entrada.data || '').split('T')[0],
     });

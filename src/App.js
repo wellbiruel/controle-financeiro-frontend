@@ -13,6 +13,7 @@ import EntradasPage from './pages/EntradasPage';
 import SaidasPage from './pages/SaidasPage';
 import MetasPage from './pages/MetasPage';
 import ReservaPage from './pages/ReservaPage';
+import InvestimentosPage from './pages/InvestimentosPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import { getCurrentUser } from './services/auth';
 
@@ -40,7 +41,8 @@ function App() {
         <Route path="/metas" element={<PrivateRoute><MetasPage /></PrivateRoute>} />
         <Route path="/fluxo-anual" element={<PrivateRoute><FluxoAnualPage /></PrivateRoute>} />
         <Route path="/cartoes" element={<PrivateRoute><CartaoCreditoPage /></PrivateRoute>} />
-        <Route path="/reserva" element={<PrivateRoute><ReservaPage /></PrivateRoute>} />
+        <Route path="/reserva"       element={<PrivateRoute><ReservaPage /></PrivateRoute>} />
+        <Route path="/investimentos" element={<PrivateRoute><InvestimentosPage /></PrivateRoute>} />
         <Route path="/radar" element={<PrivateRoute><RelatoriosPage /></PrivateRoute>} />
         <Route path="/parcelas"    element={<PrivateRoute><PlaceholderPage title="Parcelas" subtitle="Controle de compras parceladas no cartão de crédito." emoji="📆" /></PrivateRoute>} />
         <Route path="/assinaturas" element={<PrivateRoute><PlaceholderPage title="Assinaturas" subtitle="Gestão de assinaturas e serviços recorrentes." emoji="🔄" /></PrivateRoute>} />

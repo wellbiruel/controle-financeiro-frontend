@@ -92,21 +92,17 @@ function PatrimonioChart({ data }) {
       Nenhum dado registrado — clique em um mês abaixo para começar
     </div>
   );
-
   const vals  = valid.map(d => d.valor);
   const maxV  = Math.max(...vals);
   const minV  = Math.min(...vals);
   const range = maxV - minV || maxV || 1;
-
   const W = 620, H = 80, PX = 4, PY = 8, labelH = 16;
   const iH = H - 2 * PY;
-
   const pts = data.map((d, i) => ({
     x: PX + (i / 11) * (W - 2 * PX),
     y: d.valor !== null ? PY + (1 - (d.valor - minV) / range) * iH : null,
     ...d,
   }));
-
   const segs = [];
   let cur = [];
   pts.forEach(p => {
@@ -115,7 +111,6 @@ function PatrimonioChart({ data }) {
   });
   if (cur.length) segs.push(cur);
   const base = PY + iH;
-
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H + labelH}`} style={{ display: 'block' }}>
       {segs.map((seg, si) => {
@@ -140,67 +135,134 @@ function PatrimonioChart({ data }) {
   );
 }
 
-// ─── MODAL — APORTE ───────────────────────────────────────────────────────────
+// ─── MODAL UNIFICADO ─────────────────────────────────────────────────────────
+// Modos: 'aporte' | 'retirada' | 'patrimonio'
 
-function FormModal({ form, setForm, onClose, onSave, saving, editId, error }) {
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+const MODAL_TYPES = [
+  { id: 'aporte',     label: 'Aporte',       cor: '#7C3AED', sub: 'Compra / aplicação' },
+  { id: 'retirada',   label: 'Retirada',      cor: '#DC2626', sub: 'Resgate / venda' },
+  { id: 'patrimonio', label: 'Atualizar PL',  cor: '#059669', sub: 'Saldo total atual' },
+];
+
+function UnifiedModal({
+  mode, onModeChange, editId,
+  form, onFormChange, error, onSave, saving,
+  patMes, patAno, onPatMesChange, onPatAnoChange,
+  patVal, onPatValChange, patError, onSavePat, savingPat,
+  onClose,
+}) {
+  const set = (k, v) => onFormChange(f => ({ ...f, [k]: v }));
+  const isMovimento = mode === 'aporte' || mode === 'retirada';
+  const fromGrid    = patMes !== null;
+
+  const title = editId
+    ? 'Editar Aporte'
+    : mode === 'aporte'
+      ? 'Registrar Aporte'
+      : mode === 'retirada'
+        ? 'Registrar Retirada'
+        : fromGrid
+          ? `PL — ${MESES_F[(patMes || 1) - 1]} ${patAno}`
+          : 'Atualizar Patrimônio Líquido';
+
   return (
     <div style={S.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={S.modal}>
-        <div style={S.modalTitle}>{editId ? 'Editar Aporte' : 'Registrar Aporte'}</div>
-        <div style={S.row2}>
-          <div>
-            <label style={S.label}>Data</label>
-            <input style={S.input} type="date" value={form.data} onChange={e => set('data', e.target.value)} />
-          </div>
-          <div>
-            <label style={S.label}>Valor (R$)</label>
-            <input style={S.input} type="number" step="0.01" min="0.01" value={form.valor}
-              onChange={e => set('valor', e.target.value)} placeholder="0,00" />
-          </div>
-        </div>
-        <div style={S.fgroup}>
-          <label style={S.label}>Categoria</label>
-          <select style={S.select} value={form.categoria} onChange={e => set('categoria', e.target.value)}>
-            {CATS.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        <div style={S.fgroup}>
-          <label style={S.label}>Descrição</label>
-          <input style={S.input} type="text" value={form.descricao}
-            onChange={e => set('descricao', e.target.value)} placeholder="Ex: Tesouro Selic 2029" />
-        </div>
-        {error && <div style={S.errMsg}>{error}</div>}
-        <div style={S.modalBtns}>
-          <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
-          <button style={S.btnSave} onClick={onSave} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-// ─── MODAL — PATRIMÔNIO ───────────────────────────────────────────────────────
-
-function PatrModal({ mes, ano, valorAtual, onClose, onSave, saving, error }) {
-  const [val, setVal] = useState(valorAtual != null ? String(valorAtual) : '');
-  return (
-    <div style={S.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ ...S.modal, maxWidth: 380 }}>
-        <div style={S.modalTitle}>Patrimônio — {MESES_F[mes - 1]} {ano}</div>
-        <div style={S.fgroup}>
-          <label style={S.label}>Valor total do patrimônio (R$)</label>
-          <input style={S.input} type="number" step="0.01" min="0" autoFocus
-            value={val} onChange={e => setVal(e.target.value)} placeholder="Ex: 85000" />
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5 }}>
-            Inclua todos os ativos: renda fixa, ações, FIIs, cripto etc.
+        {/* Seletor de tipo — escondido ao editar transação existente */}
+        {!editId && (
+          <div style={{ display: 'flex', gap: 4, marginBottom: 20, padding: 4, background: '#F3F4F6', borderRadius: 10 }}>
+            {MODAL_TYPES.map(t => (
+              <button key={t.id} onClick={() => onModeChange(t.id)} style={{
+                flex: 1, padding: '7px 4px', borderRadius: 7, border: 'none', fontFamily: 'inherit',
+                background:  mode === t.id ? '#fff' : 'transparent',
+                color:       mode === t.id ? t.cor : '#9CA3AF',
+                fontWeight:  mode === t.id ? 700 : 400,
+                fontSize: 12, cursor: 'pointer',
+                boxShadow:   mode === t.id ? '0 1px 3px rgba(0,0,0,.08)' : 'none',
+                transition: 'all .15s',
+              }}>
+                <div>{t.label}</div>
+                <div style={{ fontSize: 9, fontWeight: 400, color: mode === t.id ? '#9CA3AF' : '#CBD5E1', marginTop: 1 }}>{t.sub}</div>
+              </button>
+            ))}
           </div>
-        </div>
-        {error && <div style={S.errMsg}>{error}</div>}
-        <div style={S.modalBtns}>
-          <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
-          <button style={S.btnSave} onClick={() => onSave(val)} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>
-        </div>
+        )}
+
+        <div style={S.modalTitle}>{title}</div>
+
+        {isMovimento ? (
+          <>
+            <div style={S.row2}>
+              <div>
+                <label style={S.label}>Data</label>
+                <input style={S.input} type="date" value={form.data} onChange={e => set('data', e.target.value)} />
+              </div>
+              <div>
+                <label style={S.label}>Valor (R$)</label>
+                <input style={S.input} type="number" step="0.01" min="0.01" value={form.valor}
+                  onChange={e => set('valor', e.target.value)} placeholder="0,00" />
+                {mode === 'retirada' && (
+                  <div style={{ fontSize: 10, color: '#DC2626', marginTop: 3 }}>Salvo como valor negativo</div>
+                )}
+              </div>
+            </div>
+            <div style={S.fgroup}>
+              <label style={S.label}>Categoria</label>
+              <select style={S.select} value={form.categoria} onChange={e => set('categoria', e.target.value)}>
+                {CATS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div style={S.fgroup}>
+              <label style={S.label}>Descrição</label>
+              <input style={S.input} type="text" value={form.descricao}
+                onChange={e => set('descricao', e.target.value)}
+                placeholder={mode === 'retirada' ? 'Ex: Resgate IPCA+' : 'Ex: Tesouro Selic 2029'} />
+            </div>
+            {error && <div style={S.errMsg}>{error}</div>}
+            <div style={S.modalBtns}>
+              <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
+              <button style={{ ...S.btnSave, background: mode === 'retirada' ? '#DC2626' : '#7C3AED' }}
+                onClick={onSave} disabled={saving}>
+                {saving ? 'Salvando…' : mode === 'retirada' ? 'Salvar Retirada' : 'Salvar Aporte'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Seletor de mês/ano — aparece só quando aberto pelo botão "+" (não pela grade) */}
+            {!fromGrid && (
+              <div style={S.row2}>
+                <div>
+                  <label style={S.label}>Mês</label>
+                  <select style={S.select} value={patMes || new Date().getMonth() + 1} onChange={e => onPatMesChange(parseInt(e.target.value))}>
+                    {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={S.label}>Ano</label>
+                  <input style={S.input} type="number" value={patAno} min="2020" max="2099"
+                    onChange={e => onPatAnoChange(parseInt(e.target.value))} />
+                </div>
+              </div>
+            )}
+            <div style={S.fgroup}>
+              <label style={S.label}>Valor total do patrimônio (R$)</label>
+              <input style={S.input} type="number" step="0.01" min="0" autoFocus
+                value={patVal} onChange={e => onPatValChange(e.target.value)} placeholder="Ex: 85000" />
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5 }}>
+                Inclua todos os ativos: renda fixa, ações, FIIs, cripto etc.
+              </div>
+            </div>
+            {patError && <div style={S.errMsg}>{patError}</div>}
+            <div style={S.modalBtns}>
+              <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
+              <button style={{ ...S.btnSave, background: '#059669' }} onClick={onSavePat} disabled={savingPat}>
+                {savingPat ? 'Salvando…' : 'Salvar PL'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -210,18 +272,26 @@ function PatrModal({ mes, ano, valorAtual, onClose, onSave, saving, error }) {
 
 export default function InvestimentosPage() {
   const now = new Date();
-  const [mes, setMes] = useState(now.getMonth() + 1);
-  const [ano, setAno] = useState(now.getFullYear());
+  const [mes,      setMes]      = useState(now.getMonth() + 1);
+  const [ano,      setAno]      = useState(now.getFullYear());
   const [catFiltro, setCatFiltro] = useState('Todos');
 
   const [dados,   setDados]   = useState({ patrimonioTotal: 0, aporteMes: 0, totalAno: 0, categorias: [], historico: [] });
   const [loading, setLoading] = useState(false);
 
-  const [showModal, setShowModal] = useState(false);
-  const [editId,    setEditId]   = useState(null);
-  const [form,      setForm]     = useState(emptyForm);
-  const [saving,    setSaving]   = useState(false);
-  const [error,     setError]    = useState('');
+  // ── Estado modal unificado ──────────────────────────────────────────────────
+  const [showModal,   setShowModal]   = useState(false);
+  const [modalMode,   setModalMode]   = useState('aporte'); // 'aporte' | 'retirada' | 'patrimonio'
+  const [editId,      setEditId]      = useState(null);
+  const [form,        setForm]        = useState(emptyForm);
+  const [saving,      setSaving]      = useState(false);
+  const [error,       setError]       = useState('');
+  // patrimônio
+  const [patModalMes, setPatModalMes] = useState(null);     // null = user escolhe via select
+  const [patModalAno, setPatModalAno] = useState(now.getFullYear());
+  const [patVal,      setPatVal]      = useState('');
+  const [savingPatr,  setSavingPatr]  = useState(false);
+  const [patError,    setPatError]    = useState('');
 
   // ── Estado patrimônio histórico ─────────────────────────────────────────────
   const [anoPatr,     setAnoPatr]     = useState(now.getFullYear());
@@ -229,9 +299,6 @@ export default function InvestimentosPage() {
     Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, valor: null, manual: false }))
   );
   const [loadingPatr, setLoadingPatr] = useState(false);
-  const [editingPatr, setEditingPatr] = useState(null);
-  const [savingPatr,  setSavingPatr]  = useState(false);
-  const [patError,    setPatError]    = useState('');
 
   // ── Carga ───────────────────────────────────────────────────────────────────
 
@@ -278,16 +345,44 @@ export default function InvestimentosPage() {
     return dados.historico.filter(t => t.categoria === catFiltro);
   }, [dados.historico, catFiltro]);
 
-  // ── Modal aporte ────────────────────────────────────────────────────────────
+  // ── Handlers do modal ───────────────────────────────────────────────────────
 
-  const openNew  = () => { setEditId(null); setForm(emptyForm); setError(''); setShowModal(true); };
-  const openEdit = (t) => {
-    setEditId(t.id);
-    setForm({ data: t.data ? t.data.split('T')[0] : today(), categoria: t.categoria || 'Renda Fixa', descricao: t.descricao || '', valor: String(Math.abs(parseFloat(t.valor)) || '') });
-    setError('');
-    setShowModal(true);
+  const closeModal = () => {
+    setShowModal(false); setEditId(null); setPatModalMes(null);
   };
-  const closeModal  = () => { setShowModal(false); setEditId(null); };
+
+  const changeModalMode = (m) => {
+    setModalMode(m); setError(''); setPatError('');
+    if (m === 'patrimonio' && !patModalMes) {
+      setPatModalMes(now.getMonth() + 1);
+      setPatModalAno(now.getFullYear());
+    }
+  };
+
+  const openNew = () => {
+    setModalMode('aporte'); setEditId(null); setForm(emptyForm);
+    setError(''); setPatVal(''); setShowModal(true);
+  };
+
+  const openEdit = (t) => {
+    setModalMode('aporte'); setEditId(t.id);
+    setForm({
+      data:      t.data ? t.data.split('T')[0] : today(),
+      categoria: t.categoria || 'Renda Fixa',
+      descricao: t.descricao || '',
+      valor:     String(Math.abs(parseFloat(t.valor)) || ''),
+    });
+    setError(''); setShowModal(true);
+  };
+
+  const openPatrimonio = (p) => {
+    setModalMode('patrimonio'); setEditId(null);
+    setPatModalMes(p.mes); setPatModalAno(anoPatr);
+    setPatVal(p.valor != null ? String(p.valor) : '');
+    setPatError(''); setShowModal(true);
+  };
+
+  // ── Salvar aporte / retirada ────────────────────────────────────────────────
 
   const handleSave = async () => {
     if (!form.descricao.trim()) return setError('Informe a descrição.');
@@ -296,7 +391,8 @@ export default function InvestimentosPage() {
     if (!form.data)   return setError('Informe a data.');
     setSaving(true); setError('');
     try {
-      const payload = { descricao: form.descricao.trim(), valor: v, tipo: 'investimento', categoria: form.categoria, data: form.data };
+      const valor   = modalMode === 'retirada' ? -v : v;
+      const payload = { descricao: form.descricao.trim(), valor, tipo: 'investimento', categoria: form.categoria, data: form.data };
       if (editId) await api.put(`/transacoes/${editId}`, payload);
       else        await api.post('/transacoes', payload);
       closeModal(); carregar();
@@ -307,22 +403,18 @@ export default function InvestimentosPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Remover este aporte?')) return;
-    try { await api.delete(`/transacoes/${id}`); carregar(); }
-    catch (e) { console.error(e); }
-  };
+  // ── Salvar / limpar patrimônio ──────────────────────────────────────────────
 
-  // ── Patrimônio histórico ────────────────────────────────────────────────────
-
-  const salvarPatr = async (valStr) => {
-    const v = parseFloat(valStr.toString().replace(',', '.'));
+  const salvarPatr = async () => {
+    const v   = parseFloat(patVal.toString().replace(',', '.'));
     if (isNaN(v) || v < 0) return setPatError('Informe um valor válido (≥ 0).');
+    const mes = patModalMes || (now.getMonth() + 1);
+    const ano = patModalAno;
     setSavingPatr(true); setPatError('');
     try {
-      await api.post('/patrimonio', { mes: editingPatr.mes, ano: anoPatr, valor: v });
-      setEditingPatr(null);
-      carregarPatrimonio();
+      await api.post('/patrimonio', { mes, ano, valor: v });
+      closeModal();
+      if (ano === anoPatr) carregarPatrimonio();
     } catch (e) {
       setPatError(e?.response?.data?.message || 'Erro ao salvar.');
     } finally {
@@ -336,7 +428,14 @@ export default function InvestimentosPage() {
     catch (e) { console.error(e); }
   };
 
-  // ── KPI patrimônio — usa último registro manual do ano exibido ──────────────
+  const handleDelete = async (id) => {
+    if (!window.confirm('Remover este aporte?')) return;
+    try { await api.delete(`/transacoes/${id}`); carregar(); }
+    catch (e) { console.error(e); }
+  };
+
+  // ── KPIs ────────────────────────────────────────────────────────────────────
+
   const ultimoManual  = [...patrimonio].reverse().find(p => p.manual);
   const patrimonioKPI = ultimoManual?.valor ?? dados.patrimonioTotal;
   const catsAtivas    = dados.categorias.length;
@@ -351,9 +450,9 @@ export default function InvestimentosPage() {
         <div style={S.topRow}>
           <div>
             <h1 style={S.title}>Investimentos</h1>
-            <p style={S.sub}>Aportes em renda fixa, variável e outros ativos</p>
+            <p style={S.sub}>Aportes, retiradas e acompanhamento do patrimônio líquido</p>
           </div>
-          <button style={S.btnNew} onClick={openNew}>+ Registrar Aporte</button>
+          <button style={S.btnNew} onClick={openNew}>+ Novo lançamento</button>
         </div>
 
         {/* KPIs */}
@@ -410,7 +509,7 @@ export default function InvestimentosPage() {
             {loading ? (
               <div style={S.empty}>Carregando…</div>
             ) : historico.length === 0 ? (
-              <div style={S.empty}>Nenhum aporte em {MESES[mes - 1]}/{ano}{catFiltro !== 'Todos' ? ` · ${catFiltro}` : ''}.</div>
+              <div style={S.empty}>Nenhum lançamento em {MESES[mes - 1]}/{ano}{catFiltro !== 'Todos' ? ` · ${catFiltro}` : ''}.</div>
             ) : (
               <table style={S.table}>
                 <thead>
@@ -424,7 +523,7 @@ export default function InvestimentosPage() {
                 </thead>
                 <tbody>
                   {historico.map(t => {
-                    const v = parseFloat(t.valor) || 0;
+                    const v   = parseFloat(t.valor) || 0;
                     const cor = catCor(t.categoria);
                     return (
                       <tr key={t.id}>
@@ -475,7 +574,6 @@ export default function InvestimentosPage() {
         {/* ── Patrimônio Líquido — Histórico ───────────────────────────────── */}
         <div style={{ background: '#fff', borderRadius: 10, border: '0.5px solid #E5E7EB', padding: '18px 20px', marginTop: 14 }}>
 
-          {/* Cabeçalho da seção */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Patrimônio Líquido — Histórico</div>
@@ -490,26 +588,23 @@ export default function InvestimentosPage() {
             </div>
           </div>
 
-          {/* Gráfico SVG */}
           {loadingPatr ? (
-            <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 12 }}>
-              Carregando…
-            </div>
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 12 }}>Carregando…</div>
           ) : (
             <PatrimonioChart data={patrimonio} />
           )}
 
-          {/* Grid 12 meses — 6 colunas × 2 linhas */}
+          {/* Grid 12 meses */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginTop: 10 }}>
             {patrimonio.map((p) => {
               const isManual = p.manual;
               const hasVal   = p.valor !== null;
               return (
                 <div key={p.mes} style={{
-                  background:  isManual ? '#F5F3FF' : '#FAFAFA',
-                  border:      `1px solid ${isManual ? '#7C3AED40' : '#E5E7EB'}`,
+                  background:   isManual ? '#F5F3FF' : '#FAFAFA',
+                  border:       `1px solid ${isManual ? '#7C3AED40' : '#E5E7EB'}`,
                   borderRadius: 8,
-                  padding:     '10px 10px 8px',
+                  padding:      '10px 10px 8px',
                 }}>
                   <div style={{ fontSize: 11, color: '#6B7280', fontWeight: 500, marginBottom: 3 }}>{MESES[p.mes - 1]}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: isManual ? '#7C3AED' : hasVal ? '#9CA3AF' : '#D1D5DB', marginBottom: 6 }}>
@@ -521,7 +616,7 @@ export default function InvestimentosPage() {
                     </span>
                     <div style={{ display: 'flex', gap: 2 }}>
                       <button style={{ fontSize: 10, color: '#7C3AED', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: 'inherit' }}
-                        onClick={() => { setEditingPatr(p); setPatError(''); }}>
+                        onClick={() => openPatrimonio(p)}>
                         editar
                       </button>
                       {isManual && (
@@ -537,7 +632,6 @@ export default function InvestimentosPage() {
             })}
           </div>
 
-          {/* Legenda */}
           <div style={{ display: 'flex', gap: 16, marginTop: 12, paddingTop: 10, borderTop: '1px solid #F3F4F6' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#7C3AED' }} />
@@ -553,15 +647,16 @@ export default function InvestimentosPage() {
       </div>
 
       {showModal && (
-        <FormModal form={form} setForm={setForm} onClose={closeModal} onSave={handleSave}
-          saving={saving} editId={editId} error={error} />
-      )}
-
-      {editingPatr && (
-        <PatrModal
-          mes={editingPatr.mes} ano={anoPatr} valorAtual={editingPatr.valor}
-          onClose={() => setEditingPatr(null)}
-          onSave={salvarPatr} saving={savingPatr} error={patError}
+        <UnifiedModal
+          mode={modalMode}        onModeChange={changeModalMode}
+          editId={editId}
+          form={form}             onFormChange={setForm}
+          error={error}           onSave={handleSave}          saving={saving}
+          patMes={patModalMes}    patAno={patModalAno}
+          onPatMesChange={setPatModalMes} onPatAnoChange={setPatModalAno}
+          patVal={patVal}         onPatValChange={setPatVal}
+          patError={patError}     onSavePat={salvarPatr}       savingPat={savingPatr}
+          onClose={closeModal}
         />
       )}
     </Layout>

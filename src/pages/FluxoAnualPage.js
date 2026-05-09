@@ -106,12 +106,8 @@ export default function FluxoAnualPage() {
       ? Math.round(Math.max(0, (totalE - totalS) / totalE * 100))
       : 0;
 
-    const metasMock = [
-      { nome: 'Viagem', total: 5000, guardado: 3400 },
-      { nome: 'Carro', total: 15000, guardado: 4800 },
-      { nome: 'Reserva', total: 12000, guardado: 1800 },
-    ];
-    const metaMaisProxima = [...metasMock].sort((a, b) => (b.guardado / b.total) - (a.guardado / a.total))[0];
+    const mesesPositivos = dados.filter((d, i) => mesesComDados[i] && d.sd > 0).length;
+    const mesesComDadosTotal = dados.filter((_, i) => mesesComDados[i]).length;
 
     return [
       catTop
@@ -122,7 +118,7 @@ export default function FluxoAnualPage() {
         : { titulo: 'Nenhum mês positivo ainda', desc: 'Revise suas entradas e saídas', cor: '#EF4444', bgCor: '#FEE2E2', icone: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z' },
       { titulo: `Taxa de poupança: ${taxaMedia}%`, desc: taxaMedia >= 20 ? 'Acima da meta de 20% — excelente!' : taxaMedia >= 5 ? 'Abaixo de 20% — tente aumentar' : 'Poupança muito baixa — revise gastos', cor: taxaMedia >= 20 ? '#16A34A' : taxaMedia >= 5 ? '#D97706' : '#EF4444', bgCor: taxaMedia >= 20 ? '#DCFCE7' : taxaMedia >= 5 ? '#FEF3C7' : '#FEE2E2', icone: 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z' },
       { titulo: `Saídas ${tendencia === 'caindo' ? 'em queda ↓' : tendencia === 'subindo' ? 'em alta ↑' : 'estáveis →'}`, desc: tendencia === 'caindo' ? 'Boa tendência de controle' : tendencia === 'subindo' ? 'Fique atento ao aumento dos gastos' : 'Sem variação significativa', cor: tendencia === 'caindo' ? '#16A34A' : tendencia === 'subindo' ? '#D97706' : '#60A5FA', bgCor: tendencia === 'caindo' ? '#DCFCE7' : tendencia === 'subindo' ? '#FEF3C7' : '#EFF6FF', icone: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z' },
-      { titulo: `Meta "${metaMaisProxima.nome}" mais próxima`, desc: `${Math.round(metaMaisProxima.guardado / metaMaisProxima.total * 100)}% concluída — faltam R$ ${(metaMaisProxima.total - metaMaisProxima.guardado).toLocaleString('pt-BR')}`, cor: '#3B82F6', bgCor: '#EFF6FF', icone: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z' },
+      { titulo: `${mesesPositivos} de ${mesesComDadosTotal} meses positivos`, desc: mesesComDadosTotal === 0 ? 'Nenhum dado ainda' : mesesPositivos === mesesComDadosTotal ? 'Todos os meses com saldo positivo!' : mesesPositivos > 0 ? `Saldo médio mensal: ${fmt(mesesComDadosTotal > 0 ? saldoAcum / mesesComDadosTotal : 0)}` : 'Nenhum mês positivo ainda', cor: mesesPositivos === mesesComDadosTotal && mesesComDadosTotal > 0 ? '#16A34A' : mesesPositivos > 0 ? '#3B82F6' : '#EF4444', bgCor: mesesPositivos === mesesComDadosTotal && mesesComDadosTotal > 0 ? '#DCFCE7' : mesesPositivos > 0 ? '#EFF6FF' : '#FEE2E2', icone: 'M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z' },
     ];
   };
 
@@ -150,11 +146,6 @@ export default function FluxoAnualPage() {
   const bgTeto = pcTeto < 80 ? '#DCFCE7' : pcTeto <= 100 ? '#FEF3C7' : '#FEE2E2';
   const badgeTeto = pcTeto < 80 ? `✅ ${pcTeto}% — dentro do limite` : pcTeto <= 100 ? `⚠ ${pcTeto}% — atenção` : `❌ Teto ultrapassado!`;
 
-  const metas = [
-    { nome: 'Viagem de férias', icone: '✈️', cor: '#3B82F6', guardado: 3400, total: 5000 },
-    { nome: 'Troca do carro', icone: '🚗', cor: '#16A34A', guardado: 4800, total: 15000 },
-    { nome: 'Reserva de emergência', icone: '🏠', cor: '#F59E0B', guardado: 1800, total: 12000 },
-  ];
 
   const insights = getInsights();
 
@@ -275,23 +266,17 @@ export default function FluxoAnualPage() {
               <span style={{ fontSize: 12, fontWeight: 600, color: '#334155' }}>Metas de saldo</span>
               <span onClick={() => navigate('/metas')} style={{ fontSize: 11, color: '#3B82F6', cursor: 'pointer', fontWeight: 500 }}>ver metas →</span>
             </div>
-            {metas.map((m, i) => {
-              const pct = Math.round(m.guardado / m.total * 100);
-              return (
-                <div key={i} style={{ marginBottom: i < metas.length - 1 ? 12 : 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, color: '#334155', display: 'flex', alignItems: 'center', gap: 5 }}>
-                      {m.icone} {m.nome}
-                    </span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: m.cor }}>{pct}%</span>
-                  </div>
-                  <div style={{ height: 5, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden', marginBottom: 3 }}>
-                    <div style={{ height: '100%', width: pct + '%', background: m.cor, borderRadius: 3 }} />
-                  </div>
-                  <div style={{ fontSize: 10, color: '#94A3B8' }}>R$ {m.guardado.toLocaleString('pt-BR')} / R$ {m.total.toLocaleString('pt-BR')}</div>
-                </div>
-              );
-            })}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 0', gap: 8 }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="#CBD5E1">
+                <path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/>
+              </svg>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8' }}>Nenhuma meta cadastrada</div>
+              <div style={{ fontSize: 11, color: '#CBD5E1', textAlign: 'center' }}>Crie metas para acompanhar seu progresso aqui</div>
+              <button onClick={() => navigate('/metas')}
+                style={{ marginTop: 4, padding: '6px 14px', background: '#EFF6FF', color: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+                Criar primeira meta
+              </button>
+            </div>
           </div>
 
           {/* Card Insights */}

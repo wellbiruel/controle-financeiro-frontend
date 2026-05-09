@@ -163,8 +163,8 @@ function UnifiedModal({
 }) {
   const set = (k, v) => onFormChange(f => ({ ...f, [k]: v }));
   const isMovimento = mode === 'aporte' || mode === 'retirada';
-  const fromGrid    = patMes !== null;
   const tipoAtual   = TIPO_PL.find(t => t.id === patTipo) || TIPO_PL[0];
+  const mesSel      = patMes || new Date().getMonth() + 1;
 
   const title = editId
     ? 'Editar Aporte'
@@ -172,9 +172,7 @@ function UnifiedModal({
       ? 'Registrar Aporte'
       : mode === 'retirada'
         ? 'Registrar Retirada'
-        : fromGrid
-          ? `PL — ${MESES_F[(patMes || 1) - 1]} ${patAno}`
-          : 'Atualizar Patrimônio Líquido';
+        : 'Atualizar Patrimônio Líquido';
 
   return (
     <div style={S.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
@@ -241,22 +239,23 @@ function UnifiedModal({
           </>
         ) : (
           <>
-            {/* Seletor de mês/ano — aparece só quando aberto pelo botão "+" (não pela grade) */}
-            {!fromGrid && (
-              <div style={S.row2}>
-                <div>
-                  <label style={S.label}>Mês</label>
-                  <select style={S.select} value={patMes || new Date().getMonth() + 1} onChange={e => onPatMesChange(parseInt(e.target.value))}>
-                    {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={S.label}>Ano</label>
-                  <input style={S.input} type="number" value={patAno} min="2020" max="2099"
-                    onChange={e => onPatAnoChange(parseInt(e.target.value))} />
-                </div>
+            {/* Período de referência — sempre visível, pré-preenchido ao clicar na grade */}
+            <div style={S.row2}>
+              <div>
+                <label style={S.label}>Mês de referência</label>
+                <select style={S.select} value={mesSel} onChange={e => onPatMesChange(parseInt(e.target.value))}>
+                  {MESES_F.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                </select>
               </div>
-            )}
+              <div>
+                <label style={S.label}>Ano</label>
+                <input style={S.input} type="number" value={patAno} min="2020" max="2099"
+                  onChange={e => onPatAnoChange(parseInt(e.target.value))} />
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: '#6B7280', background: '#F9FAFB', borderRadius: 6, padding: '6px 10px', marginBottom: 12 }}>
+              O valor registrado em <strong>{MESES_F[mesSel - 1]}/{patAno}</strong> será herdado pelos meses seguintes que não tiverem registro próprio.
+            </div>
 
             {/* Seletor de tipo de movimento PL */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>

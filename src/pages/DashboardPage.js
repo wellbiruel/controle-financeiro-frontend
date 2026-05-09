@@ -526,18 +526,20 @@ export default function DashboardPage() {
   const [ano, setAno] = useState(agora.getFullYear());
   const [dados, setDados] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
   const [modalTeto, setModalTeto] = useState(false);
   const [valorTeto, setValorTeto] = useState(7000);
 
   const carregarDados = useCallback(async (m, a) => {
     setLoading(true);
+    setApiError(null);
     try {
       const res = await api.get(`/dashboard/completo?mes=${m}&ano=${a}`);
       setDados(res.data);
       if (res.data?.tetoGastos?.teto) setValorTeto(res.data.tetoGastos.teto);
     } catch (err) {
-      console.warn('API indisponivel, usando dados mock:', err.message);
-      setDados(mockData(m, a));
+      console.error('Erro ao carregar dashboard:', err.message);
+      setApiError(err.message || 'Não foi possível conectar ao servidor.');
     } finally {
       setLoading(false);
     }
@@ -546,6 +548,25 @@ export default function DashboardPage() {
   useEffect(() => { carregarDados(mes, ano); }, [mes, ano, carregarDados]);
 
   const trocarPeriodo = (m, a) => { setMes(m); setAno(a); };
+
+  if (apiError && !dados) {
+    return (
+      <Layout>
+        <div style={{ ...S.page, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #FCA5A5', padding: '40px 44px', textAlign: 'center', maxWidth: '420px', width: '100%' }}>
+            <div style={{ fontSize: '36px', marginBottom: '14px' }}>⚠️</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Backend indisponível</div>
+            <div style={{ fontSize: '13px', color: '#6B7280', marginBottom: '6px' }}>Verifique se o servidor está rodando na porta 3001.</div>
+            <div style={{ fontSize: '12px', color: '#EF4444', background: '#FEF2F2', borderRadius: '6px', padding: '8px 12px', margin: '12px 0 20px', fontFamily: 'monospace', wordBreak: 'break-word' }}>{apiError}</div>
+            <button style={{ padding: '9px 22px', borderRadius: '8px', border: 'none', background: '#2563EB', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => carregarDados(mes, ano)}>
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (loading || !dados) {
     return (

@@ -4,94 +4,143 @@ import api from '../services/api';
 
 // ─── CONSTANTES ──────────────────────────────────────────────────────────────
 
-const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-
-const CATS = ['Renda Fixa','Renda Variável','Fundos Imobiliários','Cripto','Internacional','Outros'];
+const MESES   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES_F = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CATS    = ['Renda Fixa','Renda Variável','Fundos Imobiliários','Cripto','Internacional','Outros'];
 
 const CAT_CORES = {
-  'Renda Fixa':         '#2563EB',
-  'Renda Variável':     '#7C3AED',
-  'Fundos Imobiliários':'#059669',
-  'Cripto':             '#F59E0B',
-  'Internacional':      '#0891B2',
-  'Outros':             '#6B7280',
+  'Renda Fixa':          '#2563EB',
+  'Renda Variável':      '#7C3AED',
+  'Fundos Imobiliários': '#059669',
+  'Cripto':              '#F59E0B',
+  'Internacional':       '#0891B2',
+  'Outros':              '#6B7280',
 };
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-const fmt = (v) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
-
-const fmtDate = (d) => {
-  if (!d) return '';
-  return new Date(d.split('T')[0] + 'T12:00:00').toLocaleDateString('pt-BR');
-};
-
-const today = () => new Date().toISOString().split('T')[0];
-
-const catCor = (nome) => CAT_CORES[nome] || '#6B7280';
+const fmt     = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+const fmtDate = (d) => d ? new Date(d.split('T')[0] + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+const today   = () => new Date().toISOString().split('T')[0];
+const catCor  = (nome) => CAT_CORES[nome] || '#6B7280';
 
 // ─── ESTILOS ─────────────────────────────────────────────────────────────────
 
 const S = {
-  page:    { padding: '0 20px 24px', background: '#F3F4F6', minHeight: '100vh', fontFamily: "'Inter',sans-serif" },
-  topRow:  { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px 0 4px' },
-  title:   { fontSize: '22px', fontWeight: 600, color: '#111827', margin: 0 },
-  sub:     { fontSize: '13px', color: '#6B7280', marginTop: '2px' },
-  btnNew:  { display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 16px', borderRadius: '8px', border: 'none', background: '#7C3AED', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(124,58,237,.3)', fontFamily: 'inherit' },
+  page:      { padding: '0 20px 24px', background: '#F3F4F6', minHeight: '100vh', fontFamily: "'Inter',sans-serif" },
+  topRow:    { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px 0 4px' },
+  title:     { fontSize: '22px', fontWeight: 600, color: '#111827', margin: 0 },
+  sub:       { fontSize: '13px', color: '#6B7280', marginTop: '2px' },
+  btnNew:    { display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 16px', borderRadius: '8px', border: 'none', background: '#7C3AED', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(124,58,237,.3)', fontFamily: 'inherit' },
 
-  kpiRow:   { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px', margin: '14px 0' },
-  kpiCard:  { background: '#fff', borderRadius: '10px', padding: '14px 16px', border: '0.5px solid #E5E7EB', position: 'relative', overflow: 'hidden' },
-  kpiAccent:(c) => ({ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: c }),
-  kpiLabel: { fontSize: '11px', fontWeight: 600, letterSpacing: '.06em', color: '#6B7280', textTransform: 'uppercase', marginTop: '8px', marginBottom: '6px' },
-  kpiValue: (c) => ({ fontSize: '22px', fontWeight: 700, color: c || '#111827', letterSpacing: '-.5px' }),
-  kpiSub:   { fontSize: '12px', color: '#6B7280', marginTop: '3px' },
+  kpiRow:    { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px', margin: '14px 0' },
+  kpiCard:   { background: '#fff', borderRadius: '10px', padding: '14px 16px', border: '0.5px solid #E5E7EB', position: 'relative', overflow: 'hidden' },
+  kpiAccent: (c) => ({ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: c }),
+  kpiLabel:  { fontSize: '11px', fontWeight: 600, letterSpacing: '.06em', color: '#6B7280', textTransform: 'uppercase', marginTop: '8px', marginBottom: '6px' },
+  kpiValue:  (c) => ({ fontSize: '22px', fontWeight: 700, color: c || '#111827', letterSpacing: '-.5px' }),
+  kpiSub:    { fontSize: '12px', color: '#6B7280', marginTop: '3px' },
 
   filterRow:   { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', padding: '12px 16px', marginBottom: '14px' },
   navBtn:      { padding: '4px 8px', borderRadius: '6px', border: '1px solid #E5E7EB', background: '#fff', cursor: 'pointer', color: '#374151', fontSize: '13px', fontFamily: 'inherit' },
   monthChip:   (a) => ({ padding: '4px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', border: 'none', background: a ? '#7C3AED' : 'transparent', color: a ? '#fff' : '#6B7280', transition: 'all .15s', fontFamily: 'inherit' }),
-  chip:        (a, c='#7C3AED') => ({ padding: '5px 11px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', border: a ? 'none' : '1px solid #E5E7EB', background: a ? c : '#F9FAFB', color: a ? '#fff' : '#374151', transition: 'all .15s', fontFamily: 'inherit' }),
+  chip:        (a, c = '#7C3AED') => ({ padding: '5px 11px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', border: a ? 'none' : '1px solid #E5E7EB', background: a ? c : '#F9FAFB', color: a ? '#fff' : '#374151', transition: 'all .15s', fontFamily: 'inherit' }),
   filterLabel: { fontSize: '12px', color: '#6B7280', fontWeight: 500, whiteSpace: 'nowrap' },
   divider:     { width: '1px', height: '20px', background: '#E5E7EB' },
 
-  grid: { display: 'grid', gridTemplateColumns: '1fr 320px', gap: '14px', alignItems: 'start' },
+  grid:      { display: 'grid', gridTemplateColumns: '1fr 320px', gap: '14px', alignItems: 'start' },
+  card:      { background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', overflow: 'hidden' },
+  table:     { width: '100%', borderCollapse: 'collapse' },
+  th:        { padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em', borderBottom: '1px solid #F3F4F6', background: '#FAFAFA' },
+  td:        { padding: '12px 14px', fontSize: '13px', color: '#374151', borderBottom: '1px solid #F9FAFB' },
 
-  card:  { background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th:    { padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em', borderBottom: '1px solid #F3F4F6', background: '#FAFAFA' },
-  td:    { padding: '12px 14px', fontSize: '13px', color: '#374151', borderBottom: '1px solid #F9FAFB' },
+  catCard:   { background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', padding: '16px 18px' },
+  catTitle:  { fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '14px' },
+  catRow:    { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' },
+  catBar:    { height: '5px', borderRadius: '3px', background: '#F3F4F6', margin: '4px 0 8px', overflow: 'hidden' },
+  catFill:   (pct, c) => ({ height: '100%', width: `${Math.min(pct, 100)}%`, background: c, borderRadius: '3px' }),
+  catName:   { fontSize: '13px', color: '#374151', fontWeight: 500 },
+  catVal:    { fontSize: '13px', color: '#111827', fontWeight: 600 },
+  catPct:    { fontSize: '11px', color: '#6B7280' },
 
-  catCard:  { background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', padding: '16px 18px' },
-  catTitle: { fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '14px' },
-  catRow:   { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' },
-  catBar:   { height: '5px', borderRadius: '3px', background: '#F3F4F6', margin: '4px 0 8px', overflow: 'hidden' },
-  catFill:  (pct, c) => ({ height: '100%', width: `${Math.min(pct, 100)}%`, background: c, borderRadius: '3px' }),
-  catName:  { fontSize: '13px', color: '#374151', fontWeight: 500 },
-  catVal:   { fontSize: '13px', color: '#111827', fontWeight: 600 },
-  catPct:   { fontSize: '11px', color: '#6B7280' },
+  badge:     (cor) => ({ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 9px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, background: `${cor}18`, color: cor }),
+  dot:       (cor) => ({ width: '6px', height: '6px', borderRadius: '50%', background: cor, flexShrink: 0 }),
+  btnAction: (c)   => ({ padding: '4px 10px', borderRadius: '6px', border: `1px solid ${c}20`, background: `${c}10`, color: c, fontSize: '12px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }),
+  empty:     { padding: '48px 0', textAlign: 'center', color: '#9CA3AF', fontSize: '14px' },
 
-  badge: (cor) => ({ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 9px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, background: `${cor}18`, color: cor }),
-  dot:   (cor) => ({ width: '6px', height: '6px', borderRadius: '50%', background: cor, flexShrink: 0 }),
-  btnAction: (c) => ({ padding: '4px 10px', borderRadius: '6px', border: `1px solid ${c}20`, background: `${c}10`, color: c, fontSize: '12px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }),
-  empty: { padding: '48px 0', textAlign: 'center', color: '#9CA3AF', fontSize: '14px' },
-
-  overlay:   { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' },
-  modal:     { background: '#fff', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '440px', boxShadow: '0 16px 48px rgba(0,0,0,.18)' },
-  modalTitle:{ fontSize: '17px', fontWeight: 700, color: '#111827', marginBottom: '20px' },
-  label:     { display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '5px' },
-  input:     { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px', color: '#111827', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
-  select:    { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px', color: '#111827', outline: 'none', fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' },
-  fgroup:    { marginBottom: '14px' },
-  row2:      { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' },
-  errMsg:    { fontSize: '12px', color: '#DC2626', marginTop: '10px' },
-  modalBtns: { display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '22px' },
-  btnCancel: { padding: '9px 18px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#fff', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  btnSave:   { padding: '9px 20px', borderRadius: '8px', border: 'none', background: '#7C3AED', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  overlay:    { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' },
+  modal:      { background: '#fff', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '440px', boxShadow: '0 16px 48px rgba(0,0,0,.18)' },
+  modalTitle: { fontSize: '17px', fontWeight: 700, color: '#111827', marginBottom: '20px' },
+  label:      { display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '5px' },
+  input:      { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px', color: '#111827', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' },
+  select:     { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px', color: '#111827', outline: 'none', fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' },
+  fgroup:     { marginBottom: '14px' },
+  row2:       { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' },
+  errMsg:     { fontSize: '12px', color: '#DC2626', marginTop: '10px' },
+  modalBtns:  { display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '22px' },
+  btnCancel:  { padding: '9px 18px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#fff', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
+  btnSave:    { padding: '9px 20px', borderRadius: '8px', border: 'none', background: '#7C3AED', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };
 
 const emptyForm = { data: today(), categoria: 'Renda Fixa', descricao: '', valor: '' };
 
-// ─── MODAL ───────────────────────────────────────────────────────────────────
+// ─── SVG LINE CHART ───────────────────────────────────────────────────────────
+
+function PatrimonioChart({ data }) {
+  const valid = data.filter(d => d.valor !== null);
+  if (valid.length === 0) return (
+    <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 12 }}>
+      Nenhum dado registrado — clique em um mês abaixo para começar
+    </div>
+  );
+
+  const vals  = valid.map(d => d.valor);
+  const maxV  = Math.max(...vals);
+  const minV  = Math.min(...vals);
+  const range = maxV - minV || maxV || 1;
+
+  const W = 620, H = 80, PX = 4, PY = 8, labelH = 16;
+  const iH = H - 2 * PY;
+
+  const pts = data.map((d, i) => ({
+    x: PX + (i / 11) * (W - 2 * PX),
+    y: d.valor !== null ? PY + (1 - (d.valor - minV) / range) * iH : null,
+    ...d,
+  }));
+
+  const segs = [];
+  let cur = [];
+  pts.forEach(p => {
+    if (p.y !== null) cur.push(p);
+    else { if (cur.length) { segs.push(cur); cur = []; } }
+  });
+  if (cur.length) segs.push(cur);
+  const base = PY + iH;
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${H + labelH}`} style={{ display: 'block' }}>
+      {segs.map((seg, si) => {
+        if (seg.length < 2) return null;
+        const line = seg.map(p => `${p.x},${p.y}`).join(' ');
+        const area = `${seg[0].x},${base} ${line} ${seg[seg.length - 1].x},${base}`;
+        return (
+          <g key={si}>
+            <polygon points={area} fill="rgba(124,58,237,0.07)" />
+            <polyline points={line} fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        );
+      })}
+      {pts.filter(p => p.y !== null).map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={p.manual ? 5 : 3.5}
+          fill={p.manual ? '#7C3AED' : '#A78BFA'} stroke="#fff" strokeWidth="1.5" />
+      ))}
+      {pts.map((p, i) => (
+        <text key={i} x={p.x} y={H + labelH - 2} textAnchor="middle" fontSize="9" fill="#9CA3AF">{MESES[i]}</text>
+      ))}
+    </svg>
+  );
+}
+
+// ─── MODAL — APORTE ───────────────────────────────────────────────────────────
 
 function FormModal({ form, setForm, onClose, onSave, saving, editId, error }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -99,7 +148,6 @@ function FormModal({ form, setForm, onClose, onSave, saving, editId, error }) {
     <div style={S.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={S.modal}>
         <div style={S.modalTitle}>{editId ? 'Editar Aporte' : 'Registrar Aporte'}</div>
-
         <div style={S.row2}>
           <div>
             <label style={S.label}>Data</label>
@@ -111,27 +159,47 @@ function FormModal({ form, setForm, onClose, onSave, saving, editId, error }) {
               onChange={e => set('valor', e.target.value)} placeholder="0,00" />
           </div>
         </div>
-
         <div style={S.fgroup}>
           <label style={S.label}>Categoria</label>
           <select style={S.select} value={form.categoria} onChange={e => set('categoria', e.target.value)}>
             {CATS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-
         <div style={S.fgroup}>
           <label style={S.label}>Descrição</label>
           <input style={S.input} type="text" value={form.descricao}
             onChange={e => set('descricao', e.target.value)} placeholder="Ex: Tesouro Selic 2029" />
         </div>
-
         {error && <div style={S.errMsg}>{error}</div>}
-
         <div style={S.modalBtns}>
           <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
-          <button style={S.btnSave} onClick={onSave} disabled={saving}>
-            {saving ? 'Salvando…' : 'Salvar'}
-          </button>
+          <button style={S.btnSave} onClick={onSave} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MODAL — PATRIMÔNIO ───────────────────────────────────────────────────────
+
+function PatrModal({ mes, ano, valorAtual, onClose, onSave, saving, error }) {
+  const [val, setVal] = useState(valorAtual != null ? String(valorAtual) : '');
+  return (
+    <div style={S.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ ...S.modal, maxWidth: 380 }}>
+        <div style={S.modalTitle}>Patrimônio — {MESES_F[mes - 1]} {ano}</div>
+        <div style={S.fgroup}>
+          <label style={S.label}>Valor total do patrimônio (R$)</label>
+          <input style={S.input} type="number" step="0.01" min="0" autoFocus
+            value={val} onChange={e => setVal(e.target.value)} placeholder="Ex: 85000" />
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5 }}>
+            Inclua todos os ativos: renda fixa, ações, FIIs, cripto etc.
+          </div>
+        </div>
+        {error && <div style={S.errMsg}>{error}</div>}
+        <div style={S.modalBtns}>
+          <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
+          <button style={S.btnSave} onClick={() => onSave(val)} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>
         </div>
       </div>
     </div>
@@ -146,16 +214,26 @@ export default function InvestimentosPage() {
   const [ano, setAno] = useState(now.getFullYear());
   const [catFiltro, setCatFiltro] = useState('Todos');
 
-  const [dados, setDados]     = useState({ patrimonioTotal: 0, aporteMes: 0, totalAno: 0, categorias: [], historico: [] });
+  const [dados,   setDados]   = useState({ patrimonioTotal: 0, aporteMes: 0, totalAno: 0, categorias: [], historico: [] });
   const [loading, setLoading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
-  const [editId,   setEditId]    = useState(null);
-  const [form,     setForm]      = useState(emptyForm);
-  const [saving,   setSaving]    = useState(false);
-  const [error,    setError]     = useState('');
+  const [editId,    setEditId]   = useState(null);
+  const [form,      setForm]     = useState(emptyForm);
+  const [saving,    setSaving]   = useState(false);
+  const [error,     setError]    = useState('');
 
-  // ─── Carga ──────────────────────────────────────────────────────────────────
+  // ── Estado patrimônio histórico ─────────────────────────────────────────────
+  const [anoPatr,     setAnoPatr]     = useState(now.getFullYear());
+  const [patrimonio,  setPatrimonio]  = useState(
+    Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, valor: null, manual: false }))
+  );
+  const [loadingPatr, setLoadingPatr] = useState(false);
+  const [editingPatr, setEditingPatr] = useState(null);
+  const [savingPatr,  setSavingPatr]  = useState(false);
+  const [patError,    setPatError]    = useState('');
+
+  // ── Carga ───────────────────────────────────────────────────────────────────
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -169,9 +247,22 @@ export default function InvestimentosPage() {
     }
   }, [mes, ano]);
 
-  useEffect(() => { carregar(); }, [carregar]);
+  const carregarPatrimonio = useCallback(async () => {
+    setLoadingPatr(true);
+    try {
+      const { data } = await api.get('/patrimonio', { params: { ano: anoPatr } });
+      setPatrimonio(data);
+    } catch (e) {
+      console.error('Erro ao carregar patrimônio:', e);
+    } finally {
+      setLoadingPatr(false);
+    }
+  }, [anoPatr]);
 
-  // ─── Navegação mês ──────────────────────────────────────────────────────────
+  useEffect(() => { carregar(); },           [carregar]);
+  useEffect(() => { carregarPatrimonio(); }, [carregarPatrimonio]);
+
+  // ── Navegação mês ───────────────────────────────────────────────────────────
 
   const navMes = (delta) => {
     let m = mes + delta, a = ano;
@@ -180,44 +271,35 @@ export default function InvestimentosPage() {
     setMes(m); setAno(a);
   };
 
-  // ─── Histórico filtrado ─────────────────────────────────────────────────────
+  // ── Histórico filtrado ──────────────────────────────────────────────────────
 
   const historico = useMemo(() => {
     if (catFiltro === 'Todos') return dados.historico;
     return dados.historico.filter(t => t.categoria === catFiltro);
   }, [dados.historico, catFiltro]);
 
-  // ─── Modal ──────────────────────────────────────────────────────────────────
+  // ── Modal aporte ────────────────────────────────────────────────────────────
 
-  const openNew = () => { setEditId(null); setForm(emptyForm); setError(''); setShowModal(true); };
-
+  const openNew  = () => { setEditId(null); setForm(emptyForm); setError(''); setShowModal(true); };
   const openEdit = (t) => {
     setEditId(t.id);
-    setForm({
-      data:      t.data ? t.data.split('T')[0] : today(),
-      categoria: t.categoria || 'Renda Fixa',
-      descricao: t.descricao || '',
-      valor:     String(Math.abs(parseFloat(t.valor)) || ''),
-    });
+    setForm({ data: t.data ? t.data.split('T')[0] : today(), categoria: t.categoria || 'Renda Fixa', descricao: t.descricao || '', valor: String(Math.abs(parseFloat(t.valor)) || '') });
     setError('');
     setShowModal(true);
   };
-
-  const closeModal = () => { setShowModal(false); setEditId(null); };
+  const closeModal  = () => { setShowModal(false); setEditId(null); };
 
   const handleSave = async () => {
     if (!form.descricao.trim()) return setError('Informe a descrição.');
     const v = parseFloat(form.valor.toString().replace(',', '.'));
     if (!v || v <= 0) return setError('Informe um valor válido.');
-    if (!form.data) return setError('Informe a data.');
-    setSaving(true);
-    setError('');
+    if (!form.data)   return setError('Informe a data.');
+    setSaving(true); setError('');
     try {
       const payload = { descricao: form.descricao.trim(), valor: v, tipo: 'investimento', categoria: form.categoria, data: form.data };
-      if (editId) { await api.put(`/transacoes/${editId}`, payload); }
-      else        { await api.post('/transacoes', payload); }
-      closeModal();
-      carregar();
+      if (editId) await api.put(`/transacoes/${editId}`, payload);
+      else        await api.post('/transacoes', payload);
+      closeModal(); carregar();
     } catch (e) {
       setError(e?.response?.data?.message || 'Erro ao salvar.');
     } finally {
@@ -228,12 +310,36 @@ export default function InvestimentosPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Remover este aporte?')) return;
     try { await api.delete(`/transacoes/${id}`); carregar(); }
-    catch (e) { console.error('Erro ao deletar:', e); }
+    catch (e) { console.error(e); }
   };
 
-  // ─── Categorias ativas ──────────────────────────────────────────────────────
+  // ── Patrimônio histórico ────────────────────────────────────────────────────
 
-  const catsAtivas = dados.categorias.length;
+  const salvarPatr = async (valStr) => {
+    const v = parseFloat(valStr.toString().replace(',', '.'));
+    if (isNaN(v) || v < 0) return setPatError('Informe um valor válido (≥ 0).');
+    setSavingPatr(true); setPatError('');
+    try {
+      await api.post('/patrimonio', { mes: editingPatr.mes, ano: anoPatr, valor: v });
+      setEditingPatr(null);
+      carregarPatrimonio();
+    } catch (e) {
+      setPatError(e?.response?.data?.message || 'Erro ao salvar.');
+    } finally {
+      setSavingPatr(false);
+    }
+  };
+
+  const limparPatr = async (mesNum) => {
+    if (!window.confirm('Remover o registro manual? O mês voltará a herdar o valor anterior.')) return;
+    try { await api.delete(`/patrimonio/${mesNum}/${anoPatr}`); carregarPatrimonio(); }
+    catch (e) { console.error(e); }
+  };
+
+  // ── KPI patrimônio — usa último registro manual do ano exibido ──────────────
+  const ultimoManual  = [...patrimonio].reverse().find(p => p.manual);
+  const patrimonioKPI = ultimoManual?.valor ?? dados.patrimonioTotal;
+  const catsAtivas    = dados.categorias.length;
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
 
@@ -255,8 +361,8 @@ export default function InvestimentosPage() {
           <div style={S.kpiCard}>
             <div style={S.kpiAccent('#7C3AED')} />
             <div style={S.kpiLabel}>Patrimônio Total</div>
-            <div style={S.kpiValue('#7C3AED')}>{fmt(dados.patrimonioTotal)}</div>
-            <div style={S.kpiSub}>acumulado</div>
+            <div style={S.kpiValue('#7C3AED')}>{fmt(patrimonioKPI)}</div>
+            <div style={S.kpiSub}>{ultimoManual ? `${MESES[ultimoManual.mes - 1]}/${anoPatr} · manual` : 'soma dos aportes'}</div>
           </div>
           <div style={S.kpiCard}>
             <div style={S.kpiAccent('#2563EB')} />
@@ -288,9 +394,7 @@ export default function InvestimentosPage() {
             <button style={S.navBtn} onClick={() => navMes(1)}>›</button>
             <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginLeft: '4px' }}>{ano}</span>
           </div>
-
           <div style={S.divider} />
-
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
             <span style={S.filterLabel}>Categoria:</span>
             <button style={S.chip(catFiltro === 'Todos')} onClick={() => setCatFiltro('Todos')}>Todos</button>
@@ -300,10 +404,8 @@ export default function InvestimentosPage() {
           </div>
         </div>
 
-        {/* Conteúdo: tabela + breakdown */}
+        {/* Tabela + breakdown */}
         <div style={S.grid}>
-
-          {/* Histórico do mês */}
           <div style={S.card}>
             {loading ? (
               <div style={S.empty}>Carregando…</div>
@@ -322,7 +424,7 @@ export default function InvestimentosPage() {
                 </thead>
                 <tbody>
                   {historico.map(t => {
-                    const v   = parseFloat(t.valor) || 0;
+                    const v = parseFloat(t.valor) || 0;
                     const cor = catCor(t.categoria);
                     return (
                       <tr key={t.id}>
@@ -330,8 +432,7 @@ export default function InvestimentosPage() {
                         <td style={{ ...S.td, fontWeight: 500, color: '#111827' }}>{t.descricao}</td>
                         <td style={S.td}>
                           <span style={S.badge(cor)}>
-                            <span style={S.dot(cor)} />
-                            {t.categoria}
+                            <span style={S.dot(cor)} />{t.categoria}
                           </span>
                         </td>
                         <td style={{ ...S.td, textAlign: 'right', fontWeight: 700, color: v >= 0 ? '#7C3AED' : '#DC2626', fontVariantNumeric: 'tabular-nums' }}>
@@ -351,7 +452,6 @@ export default function InvestimentosPage() {
             )}
           </div>
 
-          {/* Breakdown por categoria */}
           <div style={S.catCard}>
             <div style={S.catTitle}>Distribuição do Patrimônio</div>
             {dados.categorias.length === 0 ? (
@@ -364,23 +464,104 @@ export default function InvestimentosPage() {
                     <span style={S.catName}>{c.nome}</span>
                     <span style={S.catVal}>{fmt(c.total)}</span>
                   </div>
-                  <div style={S.catBar}>
-                    <div style={S.catFill(c.pct, cor)} />
-                  </div>
+                  <div style={S.catBar}><div style={S.catFill(c.pct, cor)} /></div>
                   <div style={{ ...S.catPct, marginBottom: '10px' }}>{c.pct}% do patrimônio</div>
                 </div>
               );
             })}
           </div>
-
         </div>
+
+        {/* ── Patrimônio Líquido — Histórico ───────────────────────────────── */}
+        <div style={{ background: '#fff', borderRadius: 10, border: '0.5px solid #E5E7EB', padding: '18px 20px', marginTop: 14 }}>
+
+          {/* Cabeçalho da seção */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Patrimônio Líquido — Histórico</div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+                Valor total registrado manualmente · meses sem registro herdam o valor anterior
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <button style={S.navBtn} onClick={() => setAnoPatr(a => a - 1)}>‹</button>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#374151', minWidth: 40, textAlign: 'center' }}>{anoPatr}</span>
+              <button style={S.navBtn} onClick={() => setAnoPatr(a => a + 1)}>›</button>
+            </div>
+          </div>
+
+          {/* Gráfico SVG */}
+          {loadingPatr ? (
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 12 }}>
+              Carregando…
+            </div>
+          ) : (
+            <PatrimonioChart data={patrimonio} />
+          )}
+
+          {/* Grid 12 meses — 6 colunas × 2 linhas */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginTop: 10 }}>
+            {patrimonio.map((p) => {
+              const isManual = p.manual;
+              const hasVal   = p.valor !== null;
+              return (
+                <div key={p.mes} style={{
+                  background:  isManual ? '#F5F3FF' : '#FAFAFA',
+                  border:      `1px solid ${isManual ? '#7C3AED40' : '#E5E7EB'}`,
+                  borderRadius: 8,
+                  padding:     '10px 10px 8px',
+                }}>
+                  <div style={{ fontSize: 11, color: '#6B7280', fontWeight: 500, marginBottom: 3 }}>{MESES[p.mes - 1]}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: isManual ? '#7C3AED' : hasVal ? '#9CA3AF' : '#D1D5DB', marginBottom: 6 }}>
+                    {hasVal ? fmt(p.valor) : '—'}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, color: isManual ? '#7C3AED' : '#9CA3AF', background: isManual ? '#EDE9FE' : '#F3F4F6' }}>
+                      {isManual ? 'manual' : hasVal ? 'herdado' : 'vazio'}
+                    </span>
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      <button style={{ fontSize: 10, color: '#7C3AED', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: 'inherit' }}
+                        onClick={() => { setEditingPatr(p); setPatError(''); }}>
+                        editar
+                      </button>
+                      {isManual && (
+                        <button style={{ fontSize: 10, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: 'inherit' }}
+                          onClick={() => limparPatr(p.mes)}>
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legenda */}
+          <div style={{ display: 'flex', gap: 16, marginTop: 12, paddingTop: 10, borderTop: '1px solid #F3F4F6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#7C3AED' }} />
+              <span style={{ fontSize: 11, color: '#6B7280' }}>Manual — valor registrado por você</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#A78BFA' }} />
+              <span style={{ fontSize: 11, color: '#6B7280' }}>Herdado — copiado do último mês com registro</span>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {showModal && (
-        <FormModal
-          form={form} setForm={setForm}
-          onClose={closeModal} onSave={handleSave}
-          saving={saving} editId={editId} error={error}
+        <FormModal form={form} setForm={setForm} onClose={closeModal} onSave={handleSave}
+          saving={saving} editId={editId} error={error} />
+      )}
+
+      {editingPatr && (
+        <PatrModal
+          mes={editingPatr.mes} ano={anoPatr} valorAtual={editingPatr.valor}
+          onClose={() => setEditingPatr(null)}
+          onSave={salvarPatr} saving={savingPatr} error={patError}
         />
       )}
     </Layout>

@@ -141,19 +141,30 @@ function PatrimonioChart({ data }) {
 const MODAL_TYPES = [
   { id: 'aporte',     label: 'Aporte',       cor: '#7C3AED', sub: 'Compra / aplicação' },
   { id: 'retirada',   label: 'Retirada',      cor: '#DC2626', sub: 'Resgate / venda' },
-  { id: 'patrimonio', label: 'Atualizar PL',  cor: '#059669', sub: 'Saldo total atual' },
+  { id: 'patrimonio', label: 'Atualizar PL',  cor: '#059669', sub: 'Definir / ajustar' },
 ];
+
+const TIPO_PL = [
+  { id: 'valor_total', label: 'Definir valor total', cor: '#059669', hint: 'Informe o saldo total atual de todos os seus ativos.' },
+  { id: 'adicionar',   label: 'Adicionar',           cor: '#2563EB', hint: 'Aporte, rendimento ou ganho a somar ao PL atual.' },
+  { id: 'retirada',    label: 'Retirar',              cor: '#DC2626', hint: 'Resgate, perda ou saída a subtrair do PL atual.' },
+];
+
+const TIPO_PL_LABEL = { valor_total: 'total', adicionar: 'adição', retirada: 'retirada' };
 
 function UnifiedModal({
   mode, onModeChange, editId,
   form, onFormChange, error, onSave, saving,
   patMes, patAno, onPatMesChange, onPatAnoChange,
-  patVal, onPatValChange, patError, onSavePat, savingPat,
+  patVal, onPatValChange, patTipo, onPatTipoChange,
+  patMovs, onDeleteMov,
+  patError, onSavePat, savingPat,
   onClose,
 }) {
   const set = (k, v) => onFormChange(f => ({ ...f, [k]: v }));
   const isMovimento = mode === 'aporte' || mode === 'retirada';
   const fromGrid    = patMes !== null;
+  const tipoAtual   = TIPO_PL.find(t => t.id === patTipo) || TIPO_PL[0];
 
   const title = editId
     ? 'Editar Aporte'
@@ -246,21 +257,63 @@ function UnifiedModal({
                 </div>
               </div>
             )}
-            <div style={S.fgroup}>
-              <label style={S.label}>Valor total do patrimônio (R$)</label>
-              <input style={S.input} type="number" step="0.01" min="0" autoFocus
-                value={patVal} onChange={e => onPatValChange(e.target.value)} placeholder="Ex: 85000" />
-              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5 }}>
-                Inclua todos os ativos: renda fixa, ações, FIIs, cripto etc.
-              </div>
+
+            {/* Seletor de tipo de movimento PL */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+              {TIPO_PL.map(t => (
+                <button key={t.id} onClick={() => onPatTipoChange(t.id)} style={{
+                  flex: 1, padding: '7px 6px', borderRadius: 7, fontFamily: 'inherit', fontSize: 11,
+                  border: patTipo === t.id ? `1.5px solid ${t.cor}` : '1.5px solid #E5E7EB',
+                  background: patTipo === t.id ? `${t.cor}15` : '#F9FAFB',
+                  color: patTipo === t.id ? t.cor : '#6B7280',
+                  fontWeight: patTipo === t.id ? 700 : 400, cursor: 'pointer',
+                }}>
+                  {t.label}
+                </button>
+              ))}
             </div>
+
+            <div style={S.fgroup}>
+              <label style={S.label}>
+                {patTipo === 'valor_total' ? 'Valor total atual (R$)' : patTipo === 'adicionar' ? 'Valor a adicionar (R$)' : 'Valor a retirar (R$)'}
+              </label>
+              <input style={S.input} type="number" step="0.01" min="0" autoFocus
+                value={patVal} onChange={e => onPatValChange(e.target.value)} placeholder="0,00" />
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5 }}>{tipoAtual.hint}</div>
+            </div>
+
             {patError && <div style={S.errMsg}>{patError}</div>}
+
             <div style={S.modalBtns}>
               <button style={S.btnCancel} onClick={onClose}>Cancelar</button>
-              <button style={{ ...S.btnSave, background: '#059669' }} onClick={onSavePat} disabled={savingPat}>
-                {savingPat ? 'Salvando…' : 'Salvar PL'}
+              <button style={{ ...S.btnSave, background: tipoAtual.cor }} onClick={onSavePat} disabled={savingPat}>
+                {savingPat ? 'Salvando…' : `Salvar ${TIPO_PL_LABEL[patTipo] || 'PL'}`}
               </button>
             </div>
+
+            {/* Histórico de movimentos do mês */}
+            {patMovs && patMovs.length > 0 && (
+              <div style={{ marginTop: 16, borderTop: '1px solid #F3F4F6', paddingTop: 12 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
+                  Movimentos deste mês
+                </div>
+                {patMovs.map(m => (
+                  <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #F9FAFB' }}>
+                    <div>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 6px', borderRadius: 4, marginRight: 6,
+                        background: m.tipo === 'valor_total' ? '#D1FAE5' : m.tipo === 'adicionar' ? '#DBEAFE' : '#FEE2E2',
+                        color:      m.tipo === 'valor_total' ? '#059669' : m.tipo === 'adicionar' ? '#2563EB' : '#DC2626',
+                      }}>{m.tipo === 'valor_total' ? 'total' : m.tipo === 'adicionar' ? '+' : '−'}</span>
+                      <span style={{ fontSize: 12, color: '#374151' }}>
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.valor)}
+                      </span>
+                      {m.descricao && <span style={{ fontSize: 11, color: '#9CA3AF', marginLeft: 6 }}>{m.descricao}</span>}
+                    </div>
+                    <button onClick={() => onDeleteMov(m.id)} style={{ fontSize: 11, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -290,6 +343,8 @@ export default function InvestimentosPage() {
   const [patModalMes, setPatModalMes] = useState(null);     // null = user escolhe via select
   const [patModalAno, setPatModalAno] = useState(now.getFullYear());
   const [patVal,      setPatVal]      = useState('');
+  const [patTipo,     setPatTipo]     = useState('valor_total'); // 'valor_total'|'adicionar'|'retirada'
+  const [patMovs,     setPatMovs]     = useState([]);            // movimentos do mês aberto no modal
   const [savingPatr,  setSavingPatr]  = useState(false);
   const [patError,    setPatError]    = useState('');
 
@@ -348,7 +403,7 @@ export default function InvestimentosPage() {
   // ── Handlers do modal ───────────────────────────────────────────────────────
 
   const closeModal = () => {
-    setShowModal(false); setEditId(null); setPatModalMes(null);
+    setShowModal(false); setEditId(null); setPatModalMes(null); setPatMovs([]);
   };
 
   const changeModalMode = (m) => {
@@ -356,6 +411,7 @@ export default function InvestimentosPage() {
     if (m === 'patrimonio' && !patModalMes) {
       setPatModalMes(now.getMonth() + 1);
       setPatModalAno(now.getFullYear());
+      setPatTipo('valor_total');
     }
   };
 
@@ -378,7 +434,8 @@ export default function InvestimentosPage() {
   const openPatrimonio = (p) => {
     setModalMode('patrimonio'); setEditId(null);
     setPatModalMes(p.mes); setPatModalAno(anoPatr);
-    setPatVal(p.valor != null ? String(p.valor) : '');
+    setPatVal(''); setPatTipo('valor_total');
+    setPatMovs(p.movimentacoes || []);
     setPatError(''); setShowModal(true);
   };
 
@@ -410,10 +467,13 @@ export default function InvestimentosPage() {
     if (isNaN(v) || v < 0) return setPatError('Informe um valor válido (≥ 0).');
     const mes = patModalMes || (now.getMonth() + 1);
     const ano = patModalAno;
+    // 'retirada' no seletor de tipo PL mapeia para tipo 'retirar' na API
+    const tipo = patTipo === 'retirada' ? 'retirar' : patTipo;
     setSavingPatr(true); setPatError('');
     try {
-      await api.post('/patrimonio', { mes, ano, valor: v });
-      closeModal();
+      const { data: novo } = await api.post('/patrimonio', { mes, ano, tipo, valor: v });
+      setPatMovs(prev => [...prev, { ...novo, valor: v }]);
+      setPatVal('');
       if (ano === anoPatr) carregarPatrimonio();
     } catch (e) {
       setPatError(e?.response?.data?.message || 'Erro ao salvar.');
@@ -422,8 +482,16 @@ export default function InvestimentosPage() {
     }
   };
 
+  const deleteMov = async (id) => {
+    try {
+      await api.delete(`/patrimonio/movimentacoes/${id}`);
+      setPatMovs(prev => prev.filter(m => m.id !== id));
+      carregarPatrimonio();
+    } catch (e) { console.error(e); }
+  };
+
   const limparPatr = async (mesNum) => {
-    if (!window.confirm('Remover o registro manual? O mês voltará a herdar o valor anterior.')) return;
+    if (!window.confirm('Remover todos os movimentos deste mês? O mês voltará a herdar o valor anterior.')) return;
     try { await api.delete(`/patrimonio/${mesNum}/${anoPatr}`); carregarPatrimonio(); }
     catch (e) { console.error(e); }
   };
@@ -612,12 +680,12 @@ export default function InvestimentosPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4, color: isManual ? '#7C3AED' : '#9CA3AF', background: isManual ? '#EDE9FE' : '#F3F4F6' }}>
-                      {isManual ? 'manual' : hasVal ? 'herdado' : 'vazio'}
+                      {isManual ? `${p.movimentacoes?.length || 1} mov.` : hasVal ? 'herdado' : 'vazio'}
                     </span>
                     <div style={{ display: 'flex', gap: 2 }}>
                       <button style={{ fontSize: 10, color: '#7C3AED', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: 'inherit' }}
                         onClick={() => openPatrimonio(p)}>
-                        editar
+                        + mov.
                       </button>
                       {isManual && (
                         <button style={{ fontSize: 10, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: 'inherit' }}
@@ -655,6 +723,8 @@ export default function InvestimentosPage() {
           patMes={patModalMes}    patAno={patModalAno}
           onPatMesChange={setPatModalMes} onPatAnoChange={setPatModalAno}
           patVal={patVal}         onPatValChange={setPatVal}
+          patTipo={patTipo}       onPatTipoChange={setPatTipo}
+          patMovs={patMovs}       onDeleteMov={deleteMov}
           patError={patError}     onSavePat={salvarPatr}       savingPat={savingPatr}
           onClose={closeModal}
         />

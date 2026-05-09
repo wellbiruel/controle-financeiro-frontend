@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Components/Layout/Layout';
 import api from '../services/api';
@@ -9,24 +9,17 @@ const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov'
 
 const CATEGORIAS_SAIDA_DEFAULT = ['Cartões','Casa','Transporte','Alimentação','Saúde','Lazer','Outros'];
 
-const FORMAS_PGTO   = ['Débito','Crédito','PIX','Dinheiro','Boleto','TED/DOC','Outro'];
-const RECORRENCIAS  = ['Única','Mensal','Quinzenal','Semanal','Anual'];
-const STATUS_OPTS   = ['Pago','Pendente','Agendado'];
+const FORMAS_PGTO  = ['Débito','Crédito','PIX','Dinheiro','Boleto','TED/DOC','Outro'];
+const RECORRENCIAS = ['Única','Mensal','Quinzenal','Semanal','Anual'];
 
 const CAT_DOTS = {
-  'Cartões':      '#EF4444',
-  'Casa':         '#F97316',
-  'Transporte':   '#3B82F6',
-  'Alimentação':  '#22C55E',
-  'Saúde':        '#8B5CF6',
-  'Lazer':        '#EC4899',
-  'Outros':       '#6B7280',
-};
-
-const STATUS_BADGE = {
-  'Pago':      { bg: '#DCFCE7', color: '#16A34A' },
-  'Pendente':  { bg: '#FEF3C7', color: '#D97706' },
-  'Agendado':  { bg: '#F3F4F6', color: '#6B7280' },
+  'Cartões':     '#EF4444',
+  'Casa':        '#F97316',
+  'Transporte':  '#3B82F6',
+  'Alimentação': '#22C55E',
+  'Saúde':       '#8B5CF6',
+  'Lazer':       '#EC4899',
+  'Outros':      '#6B7280',
 };
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -40,45 +33,54 @@ const fmtDate = (d) => {
 };
 
 const today = () => new Date().toISOString().split('T')[0];
-
 const catDot = (nome) => CAT_DOTS[nome] || '#6B7280';
 
 // ─── ESTILOS ─────────────────────────────────────────────────────────────────
 
 const S = {
-  page: { padding: '0 20px 24px', background: '#F3F4F6', minHeight: '100vh', fontFamily: "'Inter',sans-serif" },
-
+  page:      { padding: '0 20px 32px', background: '#F3F4F6', minHeight: '100vh', fontFamily: "'Inter',sans-serif" },
   topRow:    { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px 0 4px' },
   pageTitle: { fontSize: '22px', fontWeight: 600, color: '#111827', margin: 0 },
   pageSub:   { fontSize: '13px', color: '#6B7280', marginTop: '2px' },
   topBtns:   { display: 'flex', gap: '10px' },
-
   btnExport: { display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', border: '1px solid #E9ECEF', background: '#fff', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   btnNew:    { display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 16px', borderRadius: '8px', border: 'none', background: '#EF4444', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(239,68,68,.28)', fontFamily: 'inherit' },
 
-  kpiRow:  { display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '10px' },
+  // Category menu
+  catMenu:   { display: 'flex', gap: '6px', overflowX: 'auto', padding: '8px 0', alignItems: 'center', scrollbarWidth: 'none' },
+  catChip:   (active, isTop) => ({
+    display: 'inline-flex', alignItems: 'center', gap: '5px',
+    padding: '5px 12px', borderRadius: '20px', cursor: 'pointer',
+    border: active ? 'none' : isTop ? '1px solid #FECACA' : '1px solid #E5E7EB',
+    background: active ? '#EF4444' : isTop ? '#FEF2F2' : '#fff',
+    color: active ? '#fff' : isTop ? '#DC2626' : '#374151',
+    fontSize: '12px', fontWeight: active ? 600 : 500,
+    whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit',
+    transition: 'all .15s',
+  }),
+
+  // KPIs — 6 colunas
+  kpiRow:  { display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: '10px' },
   kpiCard: { background: '#fff', borderRadius: '10px', padding: '14px 16px', border: '0.5px solid #E5E7EB', position: 'relative', overflow: 'hidden' },
   kpiAccent: (c) => ({ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: c, borderRadius: '10px 10px 0 0' }),
   kpiLabel:  { fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: '4px', marginBottom: '6px' },
-  kpiValue:  (c) => ({ fontSize: '21px', fontWeight: 700, color: c || '#111827', lineHeight: 1.1, letterSpacing: '-.5px' }),
-  kpiSub:    { fontSize: '12px', color: '#6B7280', marginTop: '2px' },
+  kpiValue:  (c) => ({ fontSize: '19px', fontWeight: 700, color: c || '#111827', lineHeight: 1.1, letterSpacing: '-.4px' }),
+  kpiSub:    { fontSize: '11px', color: '#6B7280', marginTop: '3px' },
 
-  filterRow:   { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', padding: '12px 16px' },
+  // Filtros
+  filterRow:   { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', background: '#fff', borderRadius: '10px', border: '0.5px solid #E5E7EB', padding: '10px 16px' },
   filterGroup: { display: 'flex', alignItems: 'center', gap: '5px' },
   filterLabel: { fontSize: '12px', color: '#6B7280', fontWeight: 500, whiteSpace: 'nowrap' },
-  chip: (active) => ({ padding: '5px 11px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', border: active ? 'none' : '1px solid #E5E7EB', background: active ? '#EF4444' : '#F9FAFB', color: active ? '#fff' : '#374151', transition: 'all .15s', fontFamily: 'inherit' }),
-  monthChip: (active) => ({ padding: '4px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', border: 'none', background: active ? '#EF4444' : 'transparent', color: active ? '#fff' : '#6B7280', transition: 'all .15s', fontFamily: 'inherit' }),
+  monthChip:   (active) => ({ padding: '4px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', border: 'none', background: active ? '#EF4444' : 'transparent', color: active ? '#fff' : '#6B7280', transition: 'all .15s', fontFamily: 'inherit' }),
   searchInput: { flex: 1, minWidth: '160px', padding: '7px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px', color: '#111827', outline: 'none', background: '#fff', fontFamily: 'inherit' },
-  btnFilter: { display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 11px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#fff', color: '#374151', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' },
 
-  card: { background: '#fff', borderRadius: '10px', padding: '16px 18px', border: '0.5px solid #E5E7EB' },
+  // Cards genéricos
+  card:       { background: '#fff', borderRadius: '10px', padding: '16px 18px', border: '0.5px solid #E5E7EB' },
   cardTitleRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' },
-  cardTitle: { fontSize: '14px', fontWeight: 600, color: '#111827' },
-  cardLink:  { fontSize: '12px', color: '#EF4444', cursor: 'pointer', fontWeight: 500 },
+  cardTitle:  { fontSize: '14px', fontWeight: 600, color: '#111827' },
+  cardLink:   { fontSize: '12px', color: '#EF4444', cursor: 'pointer', fontWeight: 500 },
 
-  chartsRow: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' },
-
-  // Gráfico barras
+  // Barras
   barsWrap: { display: 'flex', alignItems: 'flex-end', height: '150px', gap: '5px', paddingTop: '22px', position: 'relative' },
   barWrap:  { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' },
   barLabel: { fontSize: '10px', color: '#9CA3AF', marginTop: '5px' },
@@ -96,21 +98,16 @@ const S = {
   // Insights
   insightItem: { display: 'flex', gap: '10px', padding: '10px', borderRadius: '8px', marginBottom: '8px' },
   insightIcon: (c) => ({ width: '32px', height: '32px', borderRadius: '8px', background: c + '18', color: c, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '16px' }),
-  insightTxt: { fontSize: '12px', fontWeight: 600, color: '#111827' },
-  insightSub: { fontSize: '11px', color: '#6B7280', marginTop: '1px' },
+  insightTxt:  { fontSize: '12px', fontWeight: 600, color: '#111827' },
+  insightSub:  { fontSize: '11px', color: '#6B7280', marginTop: '1px' },
 
-  // Banner
-  banner: { background: '#FEF2F2', border: '0.5px solid #FECACA', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' },
-  bannerClose: { marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', fontSize: '16px', lineHeight: 1, padding: '2px' },
-
-  // Grid 2 colunas (tabela + form)
-  mainGrid: { display: 'grid', gridTemplateColumns: '1fr 340px', gap: '16px', alignItems: 'flex-start' },
+  // Grid 2 colunas
+  mainGrid: { display: 'grid', gridTemplateColumns: '1fr 300px', gap: '14px', alignItems: 'flex-start' },
 
   // Tabela
-  tableTitle: { fontSize: '14px', fontWeight: 600, color: '#111827', marginBottom: '14px' },
   table:    { width: '100%', borderCollapse: 'collapse' },
   th:       { textAlign: 'left', fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.5px', padding: '7px 10px', borderBottom: '0.5px solid #F3F4F6', whiteSpace: 'nowrap' },
-  td:       { padding: '11px 10px', fontSize: '13px', color: '#374151', borderBottom: '0.5px solid #F9FAFB', verticalAlign: 'middle' },
+  td:       { padding: '10px 10px', fontSize: '13px', color: '#374151', borderBottom: '0.5px solid #F9FAFB', verticalAlign: 'middle' },
   tdRed:    { color: '#DC2626', fontWeight: 600, fontSize: '13px' },
   actionBtn:{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '3px', borderRadius: '5px', fontSize: '14px' },
   skeleton: { background: '#F1F5F9', borderRadius: '8px', animation: 'pulse 1.5s infinite' },
@@ -128,18 +125,13 @@ const S = {
   formErr:   { color: '#DC2626', fontSize: '12px', padding: '9px 10px', background: '#FEF2F2', borderRadius: '7px', marginBottom: '10px' },
   formOk:    { color: '#16A34A', fontSize: '12px', padding: '9px 10px', background: '#F0FDF4', borderRadius: '7px', marginBottom: '10px' },
   btnSave:   { width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: '#EF4444', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(239,68,68,.22)', fontFamily: 'inherit' },
-
-  // Footer
-  footer:     { background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '0.5px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' },
-  footerMain: { flex: 1, minWidth: '180px' },
-  footerPill: (c) => ({ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '20px', background: c + '12', border: `1px solid ${c}30`, fontSize: '12px', fontWeight: 500, color: c }),
 };
 
 // ─── DONUT CHART ─────────────────────────────────────────────────────────────
 
 function DonutSaidas({ total, categorias }) {
   const CX = 65, CY = 65, R = 50, stroke = 20;
-  const circ = 2 * Math.PI * R;
+  const circ  = 2 * Math.PI * R;
   const slices = (categorias || []).filter(c => c.total > 0).slice(0, 6);
 
   if (!total || slices.length === 0) {
@@ -171,12 +163,11 @@ function DonutSaidas({ total, categorias }) {
   );
 }
 
-// ─── BAR CHART SAÍDAS ────────────────────────────────────────────────────────
+// ─── BAR CHART ANUAL ─────────────────────────────────────────────────────────
 
 function BarChartSaidas({ graficoAnual, mesAtual }) {
   if (!graficoAnual?.length) return null;
   const maxVal = Math.max(...graficoAnual.map(m => m.total || 0), 1);
-
   return (
     <div>
       <div style={S.barsWrap}>
@@ -205,14 +196,14 @@ function Skel({ h = 28 }) {
   return <div style={{ ...S.skeleton, height: h }} />;
 }
 
-// ─── RADAR FINANCEIRO ────────────────────────────────────────────────────────
+// ─── RADAR ───────────────────────────────────────────────────────────────────
 
 function SpiderRadar({ cats }) {
   const N  = cats.length;
   const CX = 100, CY = 100, R = 78;
   const MAX = Math.max(...cats.map(c => parseFloat(c.pct)), 40);
 
-  const angle = (i) => (i / N) * 2 * Math.PI - Math.PI / 2;
+  const angle  = (i) => (i / N) * 2 * Math.PI - Math.PI / 2;
   const ringPts = (f) => cats.map((_, i) => {
     const r = f * R;
     return `${(CX + r * Math.cos(angle(i))).toFixed(1)},${(CY + r * Math.sin(angle(i))).toFixed(1)}`;
@@ -235,7 +226,7 @@ function SpiderRadar({ cats }) {
       <polygon points={refPts}  fill="none" stroke="#FCA5A5" strokeWidth="1" strokeDasharray="4 3" />
       <polygon points={dataPts} fill="rgba(239,68,68,.12)" stroke="#EF4444" strokeWidth="1.5" />
       {cats.map((c, i) => {
-        const r = (Math.min(parseFloat(c.pct), MAX) / MAX) * R;
+        const r  = (Math.min(parseFloat(c.pct), MAX) / MAX) * R;
         const px = CX + r * Math.cos(angle(i));
         const py = CY + r * Math.sin(angle(i));
         const lx = CX + (R + 18) * Math.cos(angle(i));
@@ -278,25 +269,77 @@ function ComparativoBarras({ cats }) {
   );
 }
 
-function RadarCarrossel({ categorias, total }) {
-  const [slide, setSlide] = useState(0);
+// ─── RADAR CARROSSEL COM TIMER 10s ───────────────────────────────────────────
+
+const SLIDES = ['Radar', 'Barras'];
+const TIMER_MS = 10000;
+
+function RadarCarrossel({ categorias }) {
+  const [slide,    setSlide]    = useState(0);
+  const [progress, setProgress] = useState(0);
   const cats = (categorias || []).filter(c => parseFloat(c.total) > 0).slice(0, 6);
 
+  const intervalRef  = useRef(null);
+  const progressRef  = useRef(null);
+  const startTimeRef = useRef(Date.now());
+
+  const resetTimer = (nextSlide) => {
+    clearInterval(intervalRef.current);
+    clearInterval(progressRef.current);
+    startTimeRef.current = Date.now();
+    setProgress(0);
+
+    progressRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      setProgress(Math.min((elapsed / TIMER_MS) * 100, 100));
+    }, 80);
+
+    intervalRef.current = setInterval(() => {
+      setSlide(s => {
+        const next = (s + 1) % SLIDES.length;
+        startTimeRef.current = Date.now();
+        setProgress(0);
+        return next;
+      });
+    }, TIMER_MS);
+  };
+
+  useEffect(() => {
+    if (cats.length < 3) return;
+    resetTimer(slide);
+    return () => { clearInterval(intervalRef.current); clearInterval(progressRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cats.length]);
+
+  const handleSlide = (i) => {
+    setSlide(i);
+    resetTimer(i);
+  };
+
   return (
-    <div style={{ background: '#fff', borderRadius: 10, border: '0.5px solid #E5E7EB', padding: '16px 18px' }}>
+    <div style={S.card}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Radar de Gastos</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>Distribuição por categoria · {MESES[new Date().getMonth()]}</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>
+            Distribuição por categoria · {MESES[new Date().getMonth()]}
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 3 }}>
-          {['Radar', 'Barras'].map((lbl, i) => (
-            <button key={i} onClick={() => setSlide(i)} style={{
-              padding: '4px 10px', borderRadius: 20, border: 'none', fontFamily: 'inherit', fontSize: 11,
-              background: slide === i ? '#EF4444' : '#F3F4F6',
-              color: slide === i ? '#fff' : '#6B7280', cursor: 'pointer',
-            }}>{lbl}</button>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
+          <div style={{ display: 'flex', gap: 3 }}>
+            {SLIDES.map((lbl, i) => (
+              <button key={i} onClick={() => handleSlide(i)} style={{
+                padding: '4px 10px', borderRadius: 20, border: 'none', fontFamily: 'inherit', fontSize: 11,
+                background: slide === i ? '#EF4444' : '#F3F4F6',
+                color: slide === i ? '#fff' : '#6B7280', cursor: 'pointer',
+              }}>{lbl}</button>
+            ))}
+          </div>
+          {cats.length >= 3 && (
+            <div style={{ width: 80, height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${progress}%`, background: '#EF4444', borderRadius: 2, transition: 'width .08s linear' }} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -332,12 +375,92 @@ function RadarCarrossel({ categorias, total }) {
   );
 }
 
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+
+function Sidebar({ proximasSaidas, categorias, mes, ano }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+      {/* Próximas saídas */}
+      <div style={S.card}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 12 }}>
+          Próximas saídas
+        </div>
+        {!proximasSaidas?.length ? (
+          <div style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>
+            Nenhuma saída futura registrada.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {proximasSaidas.map(s => (
+              <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '0.5px solid #F9FAFB' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 130 }}>
+                    {s.descricao}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: catDot(s.categoria), display: 'inline-block', marginRight: 4 }} />
+                    {fmtDate(s.data)}
+                  </div>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', flexShrink: 0 }}>
+                  {fmt(s.valor)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Comparativo por categoria */}
+      <div style={S.card}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>
+          Comparativo
+        </div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>
+          {MESES[mes - 1]} vs mês anterior
+        </div>
+        {!categorias?.length ? (
+          <div style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>
+            Nenhum dado disponível.
+          </div>
+        ) : (
+          <div>
+            {categorias.slice(0, 7).map((c, i) => (
+              <div key={i} style={{ padding: '7px 0', borderBottom: i < categorias.length - 1 ? '0.5px solid #F9FAFB' : 'none' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#374151' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: catDot(c.nome), flexShrink: 0 }} />
+                    {c.nome}
+                  </span>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#DC2626' }}>{fmt(c.total)}</div>
+                    {c.variacaoPct !== null && (
+                      <div style={{ fontSize: 10, color: c.variacaoPct > 0 ? '#EF4444' : '#16A34A', fontWeight: 500 }}>
+                        {c.variacaoPct > 0 ? '+' : ''}{c.variacaoPct}%
+                      </div>
+                    )}
+                    {c.variacaoPct === null && c.totalAnt === 0 && (
+                      <div style={{ fontSize: 10, color: '#9CA3AF' }}>novo</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
+  );
+}
+
 // ─── FORMULÁRIO NOVA SAÍDA ───────────────────────────────────────────────────
 
-const emptyForm = { categoria: '', descricao: '', valor: '', data: today(), fonte: '', forma_pagamento: '', recorrencia: 'Única', status: 'Pago', observacao: '' };
+const emptyForm = { categoria: '', descricao: '', valor: '', data: today(), forma_pagamento: '', recorrencia: 'Única' };
 
 function FormSaida({ editData, onSuccess, onCancel, categorias }) {
-  const [form, setForm]   = useState(editData ? { ...emptyForm, ...editData } : emptyForm);
+  const [form,    setForm]    = useState(editData ? { ...emptyForm, ...editData } : emptyForm);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
   const [success, setSuccess] = useState('');
@@ -353,11 +476,11 @@ function FormSaida({ editData, onSuccess, onCancel, categorias }) {
     if (!form.data) return setError('Informe a data.');
 
     const payload = {
-      descricao:  form.descricao,
-      valor:      parseFloat(form.valor.toString().replace(',', '.')),
-      tipo:       'saida',
-      data:       form.data,
-      categoria:  form.categoria || 'Outros',
+      descricao: form.descricao,
+      valor:     parseFloat(form.valor.toString().replace(',', '.')),
+      tipo:      'saida',
+      data:      form.data,
+      categoria: form.categoria || 'Outros',
     };
 
     try {
@@ -409,38 +532,18 @@ function FormSaida({ editData, onSuccess, onCancel, categorias }) {
 
       <div style={S.formRow}>
         <div style={ig}>
-          <label style={S.formLabel}>Fonte / Origem</label>
-          <input style={S.formInput} placeholder="Ex: Bradesco, Nubank..."
-            value={form.fonte} onChange={e => set('fonte', e.target.value)} />
-        </div>
-        <div style={ig}>
           <label style={S.formLabel}>Forma de pagamento</label>
           <select style={S.formSel} value={form.forma_pagamento} onChange={e => set('forma_pagamento', e.target.value)}>
             <option value="">Selecione</option>
             {FORMAS_PGTO.map(f => <option key={f}>{f}</option>)}
           </select>
         </div>
-      </div>
-
-      <div style={S.formRow}>
         <div style={ig}>
           <label style={S.formLabel}>Recorrência</label>
           <select style={S.formSel} value={form.recorrencia} onChange={e => set('recorrencia', e.target.value)}>
             {RECORRENCIAS.map(r => <option key={r}>{r}</option>)}
           </select>
         </div>
-        <div style={ig}>
-          <label style={S.formLabel}>Status</label>
-          <select style={S.formSel} value={form.status} onChange={e => set('status', e.target.value)}>
-            {STATUS_OPTS.map(s => <option key={s}>{s}</option>)}
-          </select>
-        </div>
-      </div>
-
-      <div style={S.formGroup}>
-        <label style={S.formLabel}>Observação (opcional)</label>
-        <input style={S.formInput} placeholder="Adicionar observação..."
-          value={form.observacao} onChange={e => set('observacao', e.target.value)} />
       </div>
 
       {error   && <div style={S.formErr}>{error}</div>}
@@ -468,27 +571,27 @@ export default function SaidasPage() {
   const navigate = useNavigate();
   const hoje = new Date();
 
-  const [mes,         setMes]         = useState(hoje.getMonth() + 1);
-  const [ano]                         = useState(hoje.getFullYear());
-  const [catFiltro,   setCatFiltro]   = useState('Todos');
-  const [busca,       setBusca]       = useState('');
-  const [resumo,      setResumo]      = useState(null);
-  const [saidas,      setSaidas]      = useState([]);
-  const [loadingRes,  setLoadingRes]  = useState(true);
-  const [loadingList, setLoadingList] = useState(true);
-  const [editData,    setEditData]    = useState(null);
-  const [modalOpen,   setModalOpen]   = useState(false);
-  const [banner,      setBanner]      = useState(true);
-  const [pagina,      setPagina]      = useState(1);
-  const [porPagina,   setPorPagina]   = useState(10);
-  const [agrupado,    setAgrupado]    = useState(false);
-  const [expandedCats, setExpandedCats] = useState(new Set());
+  const [mes,           setMes]           = useState(hoje.getMonth() + 1);
+  const [ano]                             = useState(hoje.getFullYear());
+  const [catFiltro,     setCatFiltro]     = useState('Todos');
+  const [busca,         setBusca]         = useState('');
+  const [resumo,        setResumo]        = useState(null);
+  const [saidas,        setSaidas]        = useState([]);
+  const [loadingRes,    setLoadingRes]    = useState(true);
+  const [loadingList,   setLoadingList]   = useState(true);
+  const [editData,      setEditData]      = useState(null);
+  const [modalOpen,     setModalOpen]     = useState(false);
+  const [pagina,        setPagina]        = useState(1);
+  const [porPagina,     setPorPagina]     = useState(10);
+  const [agrupado,      setAgrupado]      = useState(false);
+  const [expandedCats,  setExpandedCats]  = useState(new Set());
   const [categoriasLista, setCategoriasLista] = useState(['Todos', ...CATEGORIAS_SAIDA_DEFAULT]);
 
   useEffect(() => {
     api.get('/categorias?tipo=saida').then(r => {
-      const nomes = r.data.map(c => c.nome);
-      const merged = ['Todos', ...new Set([...nomes, ...CATEGORIAS_SAIDA_DEFAULT])].sort((a, b) => a === 'Todos' ? -1 : b === 'Todos' ? 1 : a.localeCompare(b, 'pt-BR'));
+      const nomes  = r.data.map(c => c.nome);
+      const merged = ['Todos', ...new Set([...nomes, ...CATEGORIAS_SAIDA_DEFAULT])]
+        .sort((a, b) => a === 'Todos' ? -1 : b === 'Todos' ? 1 : a.localeCompare(b, 'pt-BR'));
       setCategoriasLista(merged);
     }).catch(() => {});
   }, []);
@@ -496,7 +599,7 @@ export default function SaidasPage() {
   const carregarResumo = useCallback(async () => {
     try {
       setLoadingRes(true);
-      const r = await api.get(`/transacoes/resumo-saidas?mes=${mes}&ano=${ano}`);
+      const r = await api.get(`/saidas/resumo-completo?mes=${mes}&ano=${ano}`);
       setResumo(r.data);
     } catch {
       setResumo(null);
@@ -519,7 +622,7 @@ export default function SaidasPage() {
     }
   }, [mes, ano, catFiltro]);
 
-  useEffect(() => { carregarResumo(); },  [carregarResumo]);
+  useEffect(() => { carregarResumo(); },               [carregarResumo]);
   useEffect(() => { carregarSaidas(); setPagina(1); }, [carregarSaidas]);
 
   const saidasFiltradas = useMemo(() => {
@@ -527,7 +630,7 @@ export default function SaidasPage() {
     const q = busca.toLowerCase();
     return saidas.filter(s =>
       (s.descricao || '').toLowerCase().includes(q) ||
-      (s.categoria || '').toLowerCase().includes(q)
+      (s.categoria  || '').toLowerCase().includes(q)
     );
   }, [saidas, busca]);
 
@@ -571,23 +674,24 @@ export default function SaidasPage() {
   };
 
   const closeModal = () => { setModalOpen(false); setEditData(null); };
+  const onSuccess  = () => { carregarSaidas(); carregarResumo(); closeModal(); };
 
-  const onSuccess = () => { carregarSaidas(); carregarResumo(); closeModal(); };
+  // Derivados do resumo
+  const R          = resumo || {};
+  const total      = R.totalMes    || 0;
+  const totalAnt   = R.totalAnt    || 0;
+  const variacao   = R.variacao    || 0;
+  const media      = R.mediaMensal || 0;
+  const diasGasto  = R.diasComGasto || 0;
+  const maiorG     = R.maiorGasto  || null;
+  const cats       = R.categorias  || [];
+  const graf       = R.graficoAnual || [];
+  const proximas   = R.proximasSaidas || [];
 
-  // Dados derivados do resumo
-  const R        = resumo || {};
-  const total    = R.totalMes || 0;
-  const maiorCat = R.maiorCategoria || null;
-  const maiorG   = R.maiorGasto || null;
-  const variacao = R.variacao || { valor: 0, pct: 0 };
-  const media    = R.mediaMensalAno || 0;
-  const graf     = R.graficoAnual || [];
-  const cats     = R.categorias || [];
-
-  const variacaoPos = variacao.valor <= 0; // reduziu = positivo
+  const variacaoPos = variacao <= 0;
   const variacaoCor = variacaoPos ? '#16A34A' : '#EF4444';
+  const maiorCat    = cats[0] || null;
 
-  // Insights dinâmicos
   const insights = [
     maiorCat
       ? { icon: '📊', color: '#EF4444', bg: '#FEF2F2', txt: `${maiorCat.nome} é sua maior categoria`, sub: `${fmt(maiorCat.total)} — ${maiorCat.pct}% do total` }
@@ -596,13 +700,13 @@ export default function SaidasPage() {
       ? { icon: '⚠️', color: '#F59E0B', bg: '#FFFBEB', txt: `Maior gasto: ${maiorG.descricao}`, sub: `${fmt(maiorG.valor)} — ${maiorG.pct}% do total` }
       : { icon: '✅', color: '#16A34A', bg: '#F0FDF4', txt: 'Sem gastos registrados', sub: 'O mês ainda está limpo!' },
     variacaoPos
-      ? { icon: '📉', color: '#16A34A', bg: '#F0FDF4', txt: 'Gastos reduziram vs mês anterior', sub: `${fmt(Math.abs(variacao.valor))} a menos (${Math.abs(variacao.pct)}%)` }
-      : { icon: '📈', color: '#EF4444', bg: '#FEF2F2', txt: 'Gastos aumentaram vs mês anterior', sub: `${fmt(Math.abs(variacao.valor))} a mais (${Math.abs(variacao.pct)}%)` },
+      ? { icon: '📉', color: '#16A34A', bg: '#F0FDF4', txt: 'Gastos reduziram vs mês anterior', sub: `${fmt(Math.abs(total - totalAnt))} a menos (${Math.abs(variacao)}%)` }
+      : { icon: '📈', color: '#EF4444', bg: '#FEF2F2', txt: 'Gastos aumentaram vs mês anterior', sub: `${fmt(Math.abs(total - totalAnt))} a mais (${Math.abs(variacao)}%)` },
   ];
 
   return (
     <Layout>
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}} .catmenu::-webkit-scrollbar{display:none}`}</style>
       <div style={S.page}>
 
         {/* HEADER */}
@@ -623,9 +727,27 @@ export default function SaidasPage() {
           </div>
         </div>
 
-        {/* 5 KPIs */}
+        {/* MENU HORIZONTAL DE CATEGORIAS */}
+        <div className="catmenu" style={S.catMenu}>
+          <button style={S.catChip(catFiltro === 'Todos', false)} onClick={() => setCatFiltro('Todos')}>
+            Todos
+            <span style={{ fontWeight: 400, fontSize: 10, opacity: .7 }}>100%</span>
+          </button>
+          {cats.map((c, i) => {
+            const isTop    = i === 0;
+            const isActive = catFiltro === c.nome;
+            return (
+              <button key={c.nome} style={S.catChip(isActive, isTop && !isActive)} onClick={() => setCatFiltro(c.nome)}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: isActive ? 'rgba(255,255,255,.7)' : catDot(c.nome), flexShrink: 0 }} />
+                {c.nome}
+                <span style={{ fontWeight: 400, fontSize: 10 }}>{c.pct}%</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 6 KPIs */}
         <div style={S.kpiRow}>
-          {/* Total */}
           <div style={S.kpiCard}>
             <div style={S.kpiAccent('#EF4444')} />
             <div style={S.kpiLabel}>Total no mês</div>
@@ -633,54 +755,48 @@ export default function SaidasPage() {
             <div style={S.kpiSub}>{MESES[mes - 1]} {ano}</div>
           </div>
 
-          {/* Maior categoria */}
           <div style={S.kpiCard}>
-            <div style={S.kpiAccent('#F97316')} />
-            <div style={S.kpiLabel}>Maior categoria</div>
-            {loadingRes ? <Skel /> : <div style={S.kpiValue('#D97706')}>{maiorCat?.nome || '—'}</div>}
-            <div style={S.kpiSub}>{maiorCat ? `${fmt(maiorCat.total)} · ${maiorCat.pct}%` : 'Sem dados'}</div>
+            <div style={S.kpiAccent('#9CA3AF')} />
+            <div style={S.kpiLabel}>Mês anterior</div>
+            {loadingRes ? <Skel /> : <div style={S.kpiValue('#374151')}>{fmt(totalAnt)}</div>}
+            <div style={S.kpiSub}>{MESES[mes === 1 ? 11 : mes - 2]}</div>
           </div>
 
-          {/* Maior gasto */}
           <div style={S.kpiCard}>
-            <div style={S.kpiAccent('#EF4444')} />
+            <div style={S.kpiAccent(variacaoCor)} />
+            <div style={S.kpiLabel}>Variação</div>
+            {loadingRes ? <Skel /> : (
+              <div style={S.kpiValue(variacaoCor)}>
+                {variacao > 0 ? '+' : ''}{variacao}%
+              </div>
+            )}
+            <div style={S.kpiSub}>{variacaoPos ? 'Reduziu ✓' : 'Aumentou ↑'}</div>
+          </div>
+
+          <div style={S.kpiCard}>
+            <div style={S.kpiAccent('#F59E0B')} />
             <div style={S.kpiLabel}>Maior gasto</div>
-            {loadingRes ? <Skel /> : <div style={{ ...S.kpiValue('#DC2626'), fontSize: '18px' }}>{maiorG?.descricao || '—'}</div>}
+            {loadingRes ? <Skel /> : <div style={{ ...S.kpiValue('#D97706'), fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{maiorG?.descricao || '—'}</div>}
             <div style={S.kpiSub}>{maiorG ? fmt(maiorG.valor) : 'Sem dados'}</div>
           </div>
 
-          {/* Variação */}
           <div style={S.kpiCard}>
-            <div style={S.kpiAccent(variacaoCor)} />
-            <div style={S.kpiLabel}>Variação vs mês ant.</div>
-            {loadingRes ? <Skel /> : (
-              <div style={S.kpiValue(variacaoCor)}>
-                {variacao.pct > 0 ? '+' : ''}{variacao.pct}%
-              </div>
-            )}
-            <div style={S.kpiSub}>{variacaoPos ? 'Gastos reduziram ✓' : 'Gastos aumentaram ↑'}</div>
+            <div style={S.kpiAccent('#8B5CF6')} />
+            <div style={S.kpiLabel}>Dias com gasto</div>
+            {loadingRes ? <Skel /> : <div style={S.kpiValue('#7C3AED')}>{diasGasto}</div>}
+            <div style={S.kpiSub}>de {MESES[mes - 1]}</div>
           </div>
 
-          {/* Média mensal */}
           <div style={S.kpiCard}>
             <div style={S.kpiAccent('#3B82F6')} />
-            <div style={S.kpiLabel}>Média mensal ({ano})</div>
+            <div style={S.kpiLabel}>Média mensal</div>
             {loadingRes ? <Skel /> : <div style={S.kpiValue('#2563EB')}>{fmt(media)}</div>}
-            <div style={S.kpiSub}>Base: Jan a {MESES[mes - 1]}/{ano}</div>
+            <div style={S.kpiSub}>Base: Jan–{MESES[mes - 1]}</div>
           </div>
         </div>
 
         {/* FILTROS */}
         <div style={S.filterRow}>
-          <div style={S.filterGroup}>
-            <span style={S.filterLabel}>Categoria:</span>
-            {categoriasLista.map(c => (
-              <button key={c} style={S.chip(catFiltro === c)} onClick={() => setCatFiltro(c)}>
-                {c !== 'Todos' && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: catDot(c), display: 'inline-block', marginRight: '4px' }} />}
-                {c}
-              </button>
-            ))}
-          </div>
           <div style={S.filterGroup}>
             <span style={S.filterLabel}>Mês:</span>
             {MESES.map((m, i) => (
@@ -688,15 +804,10 @@ export default function SaidasPage() {
             ))}
           </div>
           <input style={S.searchInput} placeholder="Buscar descrição ou categoria…" value={busca} onChange={e => setBusca(e.target.value)} />
-          <button style={S.btnFilter}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            Filtros
-          </button>
         </div>
 
-        {/* GRÁFICOS — 3 colunas */}
-        <div style={S.chartsRow}>
-          {/* Barra */}
+        {/* GRÁFICOS */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
           <div style={S.card}>
             <div style={S.cardTitleRow}>
               <span style={S.cardTitle}>Evolução das saídas ({ano})</span>
@@ -705,7 +816,6 @@ export default function SaidasPage() {
             {loadingRes ? <Skel h={170} /> : <BarChartSaidas graficoAnual={graf} mesAtual={mes} />}
           </div>
 
-          {/* Donut */}
           <div style={S.card}>
             <div style={S.cardTitleRow}>
               <span style={S.cardTitle}>Gastos por categoria</span>
@@ -738,7 +848,6 @@ export default function SaidasPage() {
             )}
           </div>
 
-          {/* Insights */}
           <div style={S.card}>
             <div style={{ ...S.cardTitle, marginBottom: '14px' }}>Insights rápidos</div>
             {insights.map((ins, i) => (
@@ -756,28 +865,24 @@ export default function SaidasPage() {
         {/* RADAR CARROSSEL */}
         {!loadingRes && cats.length > 0 && (
           <div style={{ marginTop: 14 }}>
-            <RadarCarrossel categorias={cats} total={total} />
+            <RadarCarrossel categorias={cats} />
           </div>
         )}
 
-        {/* BANNER HORIZONTAL */}
-        {banner && (
-          <div style={S.banner}>
-            <span style={{ fontSize: '18px', flexShrink: 0 }}>💡</span>
-            <span style={{ fontSize: '13px', color: '#991B1B', fontWeight: 500 }}>
-              Classifique cada saída por categoria para obter relatórios mais precisos e insights personalizados.
-            </span>
-            <button style={S.bannerClose} onClick={() => setBanner(false)}>✕</button>
-          </div>
-        )}
-
-        {/* GRID 2 COLUNAS: tabela + form */}
+        {/* GRID: tabela (esquerda) + sidebar (direita) */}
         <div style={S.mainGrid}>
 
           {/* TABELA */}
           <div style={S.card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={S.tableTitle}>Saídas do mês</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                Saídas de {MESES[mes - 1]}
+                {saidasFiltradas.length > 0 && (
+                  <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 400, marginLeft: 8 }}>
+                    {saidasFiltradas.length} lançamento{saidasFiltradas.length !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: 2 }}>
                   {[5, 10, 20].map(n => (
@@ -796,8 +901,9 @@ export default function SaidasPage() {
                 </button>
               </div>
             </div>
+
             {loadingList ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[1, 2, 3].map(i => <Skel key={i} h={44} />)}
               </div>
             ) : agrupado ? (
@@ -822,7 +928,9 @@ export default function SaidasPage() {
                         <table style={S.table}>
                           <tbody>
                             {g.itens.map(s => (
-                              <tr key={s.id} onMouseEnter={e => e.currentTarget.style.background='#FAFAFA'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                              <tr key={s.id}
+                                onMouseEnter={e => e.currentTarget.style.background = '#FAFAFA'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                 <td style={S.td}>{fmtDate(s.data)}</td>
                                 <td style={S.td}>{s.descricao}</td>
                                 <td style={{ ...S.td, ...S.tdRed }}>{fmt(s.valor)}</td>
@@ -848,92 +956,67 @@ export default function SaidasPage() {
                 <table style={S.table}>
                   <thead>
                     <tr>
-                      {['Data', 'Descrição', 'Categoria', 'Fonte', 'Forma pgto.', 'Valor', 'Status', 'Ações'].map(h => (
+                      {['Data', 'Descrição', 'Categoria', 'Valor', 'Ações'].map(h => (
                         <th key={h} style={S.th}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {saidasPag.map(s => {
-                      const badgeSt = STATUS_BADGE[s.status] || STATUS_BADGE['Pago'];
-                      return (
-                        <tr key={s.id}
-                          onMouseEnter={e => e.currentTarget.style.background = '#FAFAFA'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <td style={S.td}>{fmtDate(s.data)}</td>
-                          <td style={S.td}>{s.descricao}</td>
-                          <td style={S.td}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: catDot(s.categoria), flexShrink: 0 }} />
-                              {s.categoria || 'Outros'}
-                            </span>
-                          </td>
-                          <td style={S.td}>{s.fonte || '—'}</td>
-                          <td style={S.td}>{s.forma_pagamento || '—'}</td>
-                          <td style={{ ...S.td, ...S.tdRed }}>{fmt(s.valor)}</td>
-                          <td style={S.td}>
-                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, background: badgeSt.bg, color: badgeSt.color }}>
-                              {s.status || 'Pago'}
-                            </span>
-                          </td>
-                          <td style={S.td}>
-                            <div style={{ display: 'flex', gap: '2px' }}>
-                              <button style={S.actionBtn} title="Editar"   onClick={() => handleEdit(s)}>✏️</button>
-                              <button style={S.actionBtn} title="Duplicar" onClick={() => handleDuplicate(s)}>📋</button>
-                              <button style={S.actionBtn} title="Excluir"  onClick={() => handleDelete(s.id)}>🗑️</button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {saidasPag.map(s => (
+                      <tr key={s.id}
+                        onMouseEnter={e => e.currentTarget.style.background = '#FAFAFA'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={S.td}>{fmtDate(s.data)}</td>
+                        <td style={S.td}>{s.descricao}</td>
+                        <td style={S.td}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: catDot(s.categoria), flexShrink: 0 }} />
+                            {s.categoria || 'Outros'}
+                          </span>
+                        </td>
+                        <td style={{ ...S.td, ...S.tdRed }}>{fmt(s.valor)}</td>
+                        <td style={S.td}>
+                          <div style={{ display: 'flex', gap: 2 }}>
+                            <button style={S.actionBtn} title="Editar"   onClick={() => handleEdit(s)}>✏️</button>
+                            <button style={S.actionBtn} title="Duplicar" onClick={() => handleDuplicate(s)}>📋</button>
+                            <button style={S.actionBtn} title="Excluir"  onClick={() => handleDelete(s.id)}>🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
 
                 {totalPages > 1 && (
-                  <div style={{ display: 'flex', gap: '6px', marginTop: '14px', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 14, justifyContent: 'center' }}>
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                       <button key={p} onClick={() => setPagina(p)} style={{
-                        padding: '5px 10px', borderRadius: '7px', border: '1px solid #E5E7EB',
+                        padding: '5px 10px', borderRadius: 7, border: '1px solid #E5E7EB',
                         background: pagina === p ? '#EF4444' : '#fff',
                         color: pagina === p ? '#fff' : '#374151',
-                        cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit',
+                        cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
                       }}>{p}</button>
                     ))}
                   </div>
                 )}
               </>
             )}
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#EF4444', fontSize: '12px', fontWeight: 500, cursor: 'pointer', marginTop: '12px' }}
+
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#EF4444', fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 12 }}
               onClick={() => navigate('/transacoes')}>
               Ver todas as transações →
             </span>
           </div>
 
-          {/* FORMULÁRIO LATERAL */}
-          <div style={S.formCard}>
-            <div style={S.formTitle}>Adicionar nova saída</div>
-            <FormSaida onSuccess={onSuccess} categorias={categoriasLista} />
-          </div>
+          {/* SIDEBAR */}
+          <Sidebar proximasSaidas={proximas} categorias={cats} mes={mes} ano={ano} />
         </div>
 
-        {/* FOOTER */}
-        <div style={S.footer}>
-          <div style={S.footerMain}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Tenha controle e clareza sobre seus gastos</div>
-            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '3px' }}>
-              Classificar suas saídas ajuda a identificar padrões e tomar decisões melhores.
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            {[
-              { label: 'Classifique por categoria', color: '#EF4444' },
-              { label: 'Acompanhe tendências',      color: '#F59E0B' },
-              { label: 'Tome decisões melhores',    color: '#3B82F6' },
-            ].map(p => (
-              <div key={p.label} style={S.footerPill(p.color)}>
-                {p.label}
-              </div>
-            ))}
+        {/* FORMULÁRIO — nova saída (abaixo da tabela em tela cheia) */}
+        <div style={{ ...S.card, marginTop: 14 }}>
+          <div style={S.formTitle}>Adicionar nova saída</div>
+          <div style={{ maxWidth: 600 }}>
+            <FormSaida onSuccess={onSuccess} categorias={categoriasLista} />
           </div>
         </div>
 
@@ -943,10 +1026,10 @@ export default function SaidasPage() {
       {modalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
           onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
-          <div style={{ background: '#fff', borderRadius: '14px', padding: '24px', width: '500px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.18)' }}>
-            <div style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: 24, width: 500, maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.18)' }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>{editData?.id ? 'Editar saída' : 'Nova saída'}</span>
-              <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#6B7280' }} onClick={closeModal}>✕</button>
+              <button style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#6B7280' }} onClick={closeModal}>✕</button>
             </div>
             <FormSaida editData={editData} onSuccess={onSuccess} onCancel={closeModal} categorias={categoriasLista} />
           </div>

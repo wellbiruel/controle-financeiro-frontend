@@ -205,6 +205,133 @@ function Skel({ h = 28 }) {
   return <div style={{ ...S.skeleton, height: h }} />;
 }
 
+// ─── RADAR FINANCEIRO ────────────────────────────────────────────────────────
+
+function SpiderRadar({ cats }) {
+  const N  = cats.length;
+  const CX = 100, CY = 100, R = 78;
+  const MAX = Math.max(...cats.map(c => parseFloat(c.pct)), 40);
+
+  const angle = (i) => (i / N) * 2 * Math.PI - Math.PI / 2;
+  const ringPts = (f) => cats.map((_, i) => {
+    const r = f * R;
+    return `${(CX + r * Math.cos(angle(i))).toFixed(1)},${(CY + r * Math.sin(angle(i))).toFixed(1)}`;
+  }).join(' ');
+
+  const dataPts = cats.map((c, i) => {
+    const r = (Math.min(parseFloat(c.pct), MAX) / MAX) * R;
+    return `${(CX + r * Math.cos(angle(i))).toFixed(1)},${(CY + r * Math.sin(angle(i))).toFixed(1)}`;
+  }).join(' ');
+
+  const refPts = cats.map((_, i) => {
+    const r = (30 / MAX) * R;
+    return `${(CX + r * Math.cos(angle(i))).toFixed(1)},${(CY + r * Math.sin(angle(i))).toFixed(1)}`;
+  }).join(' ');
+
+  return (
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      {[0.25, 0.5, 0.75, 1].map((f, i) => <polygon key={i} points={ringPts(f)} fill="none" stroke="#F3F4F6" strokeWidth="1" />)}
+      {cats.map((_, i) => <line key={i} x1={CX} y1={CY} x2={CX + R * Math.cos(angle(i))} y2={CY + R * Math.sin(angle(i))} stroke="#F3F4F6" strokeWidth="1" />)}
+      <polygon points={refPts}  fill="none" stroke="#FCA5A5" strokeWidth="1" strokeDasharray="4 3" />
+      <polygon points={dataPts} fill="rgba(239,68,68,.12)" stroke="#EF4444" strokeWidth="1.5" />
+      {cats.map((c, i) => {
+        const r = (Math.min(parseFloat(c.pct), MAX) / MAX) * R;
+        const px = CX + r * Math.cos(angle(i));
+        const py = CY + r * Math.sin(angle(i));
+        const lx = CX + (R + 18) * Math.cos(angle(i));
+        const ly = CY + (R + 18) * Math.sin(angle(i));
+        return (
+          <g key={i}>
+            <circle cx={px} cy={py} r="3.5" fill="#EF4444" />
+            <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="#374151" fontFamily="Inter,sans-serif">
+              {c.nome.length > 9 ? c.nome.slice(0, 8) + '…' : c.nome}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function ComparativoBarras({ cats }) {
+  const maxTotal = Math.max(...cats.map(c => parseFloat(c.total)), 1);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {cats.map((c, i) => {
+        const pct = Math.round((parseFloat(c.total) / maxTotal) * 100);
+        return (
+          <div key={i}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#374151', marginBottom: 3 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: catDot(c.nome) }} />
+                {c.nome}
+              </span>
+              <span style={{ fontWeight: 600, color: '#DC2626' }}>{c.pct}% · {fmt(c.total)}</span>
+            </div>
+            <div style={{ height: 6, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: catDot(c.nome), borderRadius: 3, transition: 'width .4s' }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RadarCarrossel({ categorias, total }) {
+  const [slide, setSlide] = useState(0);
+  const cats = (categorias || []).filter(c => parseFloat(c.total) > 0).slice(0, 6);
+
+  return (
+    <div style={{ background: '#fff', borderRadius: 10, border: '0.5px solid #E5E7EB', padding: '16px 18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Radar de Gastos</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>Distribuição por categoria · {MESES[new Date().getMonth()]}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 3 }}>
+          {['Radar', 'Barras'].map((lbl, i) => (
+            <button key={i} onClick={() => setSlide(i)} style={{
+              padding: '4px 10px', borderRadius: 20, border: 'none', fontFamily: 'inherit', fontSize: 11,
+              background: slide === i ? '#EF4444' : '#F3F4F6',
+              color: slide === i ? '#fff' : '#6B7280', cursor: 'pointer',
+            }}>{lbl}</button>
+          ))}
+        </div>
+      </div>
+
+      {cats.length < 3 ? (
+        <div style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center', padding: '24px 0' }}>
+          Registre ao menos 3 categorias para ver o radar.
+        </div>
+      ) : slide === 0 ? (
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+          <SpiderRadar cats={cats} />
+          <div style={{ flex: 1 }}>
+            {cats.map((c, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#374151' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: catDot(c.nome), flexShrink: 0 }} />
+                  {c.nome}
+                </span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>{c.pct}%</div>
+                  <div style={{ fontSize: 10, color: '#9CA3AF' }}>{fmt(c.total)}</div>
+                </div>
+              </div>
+            ))}
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 6, borderTop: '1px solid #F3F4F6', paddingTop: 6 }}>
+              — Referência: 30% por categoria
+            </div>
+          </div>
+        </div>
+      ) : (
+        <ComparativoBarras cats={cats} />
+      )}
+    </div>
+  );
+}
+
 // ─── FORMULÁRIO NOVA SAÍDA ───────────────────────────────────────────────────
 
 const emptyForm = { categoria: '', descricao: '', valor: '', data: today(), fonte: '', forma_pagamento: '', recorrencia: 'Única', status: 'Pago', observacao: '' };
@@ -353,8 +480,10 @@ export default function SaidasPage() {
   const [modalOpen,   setModalOpen]   = useState(false);
   const [banner,      setBanner]      = useState(true);
   const [pagina,      setPagina]      = useState(1);
+  const [porPagina,   setPorPagina]   = useState(10);
+  const [agrupado,    setAgrupado]    = useState(false);
+  const [expandedCats, setExpandedCats] = useState(new Set());
   const [categoriasLista, setCategoriasLista] = useState(['Todos', ...CATEGORIAS_SAIDA_DEFAULT]);
-  const POR_PAGINA = 10;
 
   useEffect(() => {
     api.get('/categorias?tipo=saida').then(r => {
@@ -402,8 +531,25 @@ export default function SaidasPage() {
     );
   }, [saidas, busca]);
 
-  const totalPages = Math.ceil(saidasFiltradas.length / POR_PAGINA);
-  const saidasPag  = saidasFiltradas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  const totalPages = Math.ceil(saidasFiltradas.length / porPagina);
+  const saidasPag  = saidasFiltradas.slice((pagina - 1) * porPagina, pagina * porPagina);
+
+  const saidasAgrupadas = useMemo(() => {
+    const groups = {};
+    saidasFiltradas.forEach(s => {
+      const cat = s.categoria || 'Outros';
+      if (!groups[cat]) groups[cat] = { nome: cat, total: 0, itens: [] };
+      groups[cat].total += Math.abs(parseFloat(s.valor) || 0);
+      groups[cat].itens.push(s);
+    });
+    return Object.values(groups).sort((a, b) => b.total - a.total);
+  }, [saidasFiltradas]);
+
+  const toggleCat = (nome) => setExpandedCats(prev => {
+    const next = new Set(prev);
+    next.has(nome) ? next.delete(nome) : next.add(nome);
+    return next;
+  });
 
   const handleDelete = async (id) => {
     if (!window.confirm('Excluir esta saída?')) return;
@@ -607,6 +753,13 @@ export default function SaidasPage() {
           </div>
         </div>
 
+        {/* RADAR CARROSSEL */}
+        {!loadingRes && cats.length > 0 && (
+          <div style={{ marginTop: 14 }}>
+            <RadarCarrossel categorias={cats} total={total} />
+          </div>
+        )}
+
         {/* BANNER HORIZONTAL */}
         {banner && (
           <div style={S.banner}>
@@ -623,11 +776,71 @@ export default function SaidasPage() {
 
           {/* TABELA */}
           <div style={S.card}>
-            <div style={S.tableTitle}>Últimas saídas</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={S.tableTitle}>Saídas do mês</div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 2 }}>
+                  {[5, 10, 20].map(n => (
+                    <button key={n} onClick={() => { setPorPagina(n); setPagina(1); }} style={{
+                      padding: '3px 8px', borderRadius: 5, border: '1px solid #E5E7EB', fontFamily: 'inherit', fontSize: 11,
+                      background: porPagina === n ? '#EF4444' : '#fff',
+                      color: porPagina === n ? '#fff' : '#6B7280', cursor: 'pointer',
+                    }}>{n}</button>
+                  ))}
+                </div>
+                <button onClick={() => setAgrupado(a => !a)} style={{
+                  padding: '3px 10px', borderRadius: 5, border: '1px solid #E5E7EB', fontFamily: 'inherit', fontSize: 11,
+                  background: agrupado ? '#111827' : '#fff', color: agrupado ? '#fff' : '#6B7280', cursor: 'pointer',
+                }}>
+                  {agrupado ? 'Agrupar ✓' : 'Agrupar'}
+                </button>
+              </div>
+            </div>
             {loadingList ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[1, 2, 3].map(i => <Skel key={i} h={44} />)}
               </div>
+            ) : agrupado ? (
+              saidasAgrupadas.length === 0 ? (
+                <div style={S.empty}>Nenhuma saída encontrada.</div>
+              ) : (
+                <div>
+                  {saidasAgrupadas.map(g => (
+                    <div key={g.nome} style={{ marginBottom: 8, border: '1px solid #F3F4F6', borderRadius: 8, overflow: 'hidden' }}>
+                      <div onClick={() => toggleCat(g.nome)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#FAFAFA', cursor: 'pointer' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ width: 9, height: 9, borderRadius: '50%', background: catDot(g.nome), flexShrink: 0 }} />
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{g.nome}</span>
+                          <span style={{ fontSize: 11, color: '#9CA3AF' }}>{g.itens.length} lançamento{g.itens.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#DC2626' }}>{fmt(g.total)}</span>
+                          <span style={{ fontSize: 12, color: '#9CA3AF' }}>{expandedCats.has(g.nome) ? '▲' : '▼'}</span>
+                        </div>
+                      </div>
+                      {expandedCats.has(g.nome) && (
+                        <table style={S.table}>
+                          <tbody>
+                            {g.itens.map(s => (
+                              <tr key={s.id} onMouseEnter={e => e.currentTarget.style.background='#FAFAFA'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                                <td style={S.td}>{fmtDate(s.data)}</td>
+                                <td style={S.td}>{s.descricao}</td>
+                                <td style={{ ...S.td, ...S.tdRed }}>{fmt(s.valor)}</td>
+                                <td style={S.td}>
+                                  <div style={{ display: 'flex', gap: 2 }}>
+                                    <button style={S.actionBtn} onClick={() => handleEdit(s)}>✏️</button>
+                                    <button style={S.actionBtn} onClick={() => handleDelete(s.id)}>🗑️</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
             ) : saidasPag.length === 0 ? (
               <div style={S.empty}>Nenhuma saída encontrada para o período selecionado.</div>
             ) : (

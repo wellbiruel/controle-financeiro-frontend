@@ -505,7 +505,7 @@ export default function InvestimentosPage() {
 
   // Só considera meses já passados — não herda de meses futuros
   const anoHoje = now.getFullYear(), mesHoje = now.getMonth() + 1;
-  const limiteMes = anoPatr < anoHoje ? 12 : anoPatr > anoHoje ? 0 : mesHoje;
+  const limiteMes = anoPatr < anoHoje ? 12 : anoPatr > anoHoje ? 0 : Math.min(mes, mesHoje);
   const ultimoManual  = patrimonio.slice(0, limiteMes).reverse().find(p => p.manual);
   const patrimonioKPI = ultimoManual?.valor ?? dados.patrimonioTotal;
   const catsAtivas    = dados.categorias.length;

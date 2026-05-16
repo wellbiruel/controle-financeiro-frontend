@@ -699,7 +699,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 24, fontWeight: 700, color: '#B45309', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.limiteRestante?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.limiteRestante?.pctRestante}% do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
             <div style={{ height: 3, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
+              <div style={{ height: '100%', width: `${Math.min(Math.max(D.limiteRestante?.teto > 0 && isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
             </div>
             <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>

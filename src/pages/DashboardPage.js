@@ -669,8 +669,13 @@ export default function DashboardPage() {
             <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Saldo acumulado</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#0F766E', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.reserva?.pctMeta}% da meta · {D.reserva?.mesesCobertos} meses</div>
-            <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
               <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: '#0F766E', borderRadius: 2 }} />
+            </div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>
+              {(D.reserva?.pctMeta ?? 0) >= 100
+                ? 'Meta atingida ✓'
+                : `Faltam ${fmt((D.reserva?.metaValor ?? 0) - (D.reserva?.valor ?? 0))} para a meta de ${fmt(D.reserva?.metaValor)}`}
             </div>
             {D.reserva?.estado && D.reserva.estado !== 'estavel' && (
               <div style={{ fontSize: 12, color: D.reserva.estado === 'crescendo' ? '#16A34A' : D.reserva.estado === 'reduzindo' ? '#EF4444' : '#6B7280', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>

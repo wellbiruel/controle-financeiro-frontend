@@ -621,7 +621,7 @@ export default function DashboardPage() {
         <PMA acaoAgora={D.acaoAgora} />
 
         {/* ROW 1 – Investimentos + Reserva + Metas + Limite */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
 
           {/* Investimentos (duplo) */}
           <div style={S.card}>
@@ -686,7 +686,7 @@ export default function DashboardPage() {
             {D.reserva?.estado === 'zerado' && (
               <div style={{ fontSize: 12, color: '#EF4444', marginBottom: 6 }}>Sem reserva de emergência</div>
             )}
-            <span style={S.cardLink} onClick={() => navigate('/reserva')}>Ver detalhes da reserva →</span>
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes da reserva →</span>
           </div>
 
           {/* Metas */}
@@ -703,7 +703,7 @@ export default function DashboardPage() {
                 <div key={i} style={{ height: 3, flex: b.pct, background: b.cor, borderRadius: 1 }} />
               ))}
             </div>
-            <span style={S.cardLink} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
           </div>
 
           {/* Limite */}
@@ -718,7 +718,7 @@ export default function DashboardPage() {
             <div style={{ height: 3, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
               <div style={{ height: '100%', width: `${Math.min(Math.max(D.limiteRestante?.teto > 0 && isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
             </div>
-            <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>
         </div>
 

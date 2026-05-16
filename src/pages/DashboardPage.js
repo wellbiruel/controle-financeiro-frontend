@@ -672,6 +672,15 @@ export default function DashboardPage() {
             <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
               <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: '#0F766E', borderRadius: 2 }} />
             </div>
+            {D.reserva?.estado && D.reserva.estado !== 'estavel' && (
+              <div style={{ fontSize: 12, color: D.reserva.estado === 'crescendo' ? '#16A34A' : D.reserva.estado === 'reduzindo' ? '#EF4444' : '#6B7280', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>
+                {D.reserva.estado === 'crescendo' ? Ico.up : D.reserva.estado === 'reduzindo' ? Ico.down : '–'}
+                {D.reserva.variacao > 0 ? '+' : ''}{fmt(D.reserva.variacao)} ({D.reserva.variacaoPct > 0 ? '+' : ''}{D.reserva.variacaoPct}%) vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+              </div>
+            )}
+            {D.reserva?.estado === 'zerado' && (
+              <div style={{ fontSize: 12, color: '#EF4444', marginBottom: 6 }}>Sem reserva de emergência</div>
+            )}
             <span style={S.cardLink} onClick={() => navigate('/reserva')}>Ver detalhes da reserva →</span>
           </div>
 

@@ -621,7 +621,7 @@ export default function DashboardPage() {
         <PMA acaoAgora={D.acaoAgora} />
 
         {/* ROW 1 + ROW 2 – grid unificado 5 colunas; Investimentos ocupa span 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
 
           {/* Investimentos (duplo) */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>

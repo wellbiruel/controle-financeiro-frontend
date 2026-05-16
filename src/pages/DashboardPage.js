@@ -620,11 +620,11 @@ export default function DashboardPage() {
         {/* PMA */}
         <PMA acaoAgora={D.acaoAgora} />
 
-        {/* ROW 1 – Investimentos + Reserva + Metas + Limite */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
+        {/* ROW 1 + ROW 2 – grid unificado 5 colunas; Investimentos ocupa span 2 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
 
           {/* Investimentos (duplo) */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
               Investimentos <Tooltip text="Valor investido além da reserva de segurança no período selecionado.">{Ico.info}</Tooltip>
@@ -721,10 +721,6 @@ export default function DashboardPage() {
             </div>
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>
-        </div>
-
-        {/* ROW 2 – 5 KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           <KpiCard accentColor="#3B82F6" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>} label="Entradas" value={fmt(D.entradas?.valor)} sub={D.entradas?.sub} trend={D.entradas?.tendencia} trendSuffix="% vs mês anterior" />
 

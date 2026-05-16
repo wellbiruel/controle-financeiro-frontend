@@ -635,8 +635,9 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 26, fontWeight: 700, color: '#2563EB', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.investimentos?.aporteMes)}</div>
                 <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda do mês</div>
                 <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
-                <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {Ico.up} {fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                <div style={{ fontSize: 12, color: (D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                  {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? Ico.up : Ico.down}
+                  {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>
                   vs média semestral: {(D.investimentos?.vsMediaSemestral ?? 15) >= 0 ? '↑' : '↓'} {Math.abs(D.investimentos?.vsMediaSemestral ?? 15)}% acima da média
@@ -647,11 +648,13 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 26, fontWeight: 700, color: '#2563EB', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                 <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Total acumulado</div>
                 <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
-                <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {Ico.up} {fmt(D.investimentos?.patrimonioVsMes)} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                <div style={{ fontSize: 12, color: (D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                  {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? Ico.up : Ico.down}
+                  {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)}{D.investimentos?.patrimonioVsMesPct != null ? ` (${D.investimentos.patrimonioVsMesPct >= 0 ? '+' : ''}${D.investimentos.patrimonioVsMesPct}%)` : ''} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
-                <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {Ico.up} {D.investimentos?.patrimonioVsAno}% em {ano}
+                <div style={{ fontSize: 12, color: (D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                  {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? Ico.up : Ico.down}
+                  {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
                 </div>
               </div>
             </div>

@@ -229,7 +229,7 @@ function GraficoSaldo({ meses }) {
   const pills = [
     { tipo: 'positivos', baseBg: '#F0FDF4', ativoBg: '#D1FAE5', txt: '#15803D', dotBg: '#86EFAC', border: '#16A34A', label: `${positivos} positivos` },
     { tipo: 'negativos', baseBg: '#FEF2F2', ativoBg: '#FEE2E2', txt: '#991B1B', dotBg: '#FCA5A5', border: '#EF4444', label: `${negativos} negativo` },
-    { tipo: 'todos',     baseBg: '#F7F8FA', ativoBg: '#F7F8FA', txt: '#6B7280', dotBg: '#D1D5DB', border: 'transparent', label: `${semDados} sem dados` },
+    { tipo: 'semDados',  baseBg: '#F7F8FA', ativoBg: '#F3F4F6', txt: '#6B7280', dotBg: '#D1D5DB', border: '#9CA3AF', label: `${semDados} sem dados` },
   ];
 
   return (
@@ -240,10 +240,10 @@ function GraficoSaldo({ meses }) {
       </div>
       <div style={{ display: 'flex', gap: 7, marginBottom: 14, flexWrap: 'wrap' }}>
         {pills.map(p => {
-          const ativo = filtro === p.tipo && p.tipo !== 'todos';
+          const ativo = filtro === p.tipo;
           return (
             <div key={p.tipo}
-              onClick={() => p.tipo === 'todos' ? setFiltro('todos') : toggleFiltro(p.tipo)}
+              onClick={() => toggleFiltro(p.tipo)}
               style={{ ...S.pill(ativo ? p.ativoBg : p.baseBg, p.txt), cursor: 'pointer', border: `1.5px solid ${ativo ? p.border : 'transparent'}` }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: p.dotBg }} />
               {p.label}
@@ -256,7 +256,10 @@ function GraficoSaldo({ meses }) {
         {dadosPorMes.map((m, i) => {
           const fut = m.saldo == null;
           const pos = !fut && m.saldo >= 0;
-          const grayed = !fut && filtro !== 'todos' && ((filtro === 'positivos' && !pos) || (filtro === 'negativos' && pos));
+          const grayed = filtro !== 'todos' && (
+            filtro === 'semDados' ? !fut :
+            !fut && ((filtro === 'positivos' && !pos) || (filtro === 'negativos' && pos))
+          );
           const cor  = fut ? '#F1F5F9' : grayed ? '#E5E7EB' : pos ? '#86EFAC' : '#EF4444';
           const corV = fut ? '#D1D5DB' : grayed ? '#D1D5DB' : pos ? '#16A34A' : '#EF4444';
           const h = fut ? 3 : Math.max(3, Math.round(Math.abs(m.saldo) / absMax * maxH));

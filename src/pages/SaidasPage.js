@@ -823,14 +823,6 @@ export default function SaidasPage() {
           <Sidebar proximas={proxs} cats={cats} faturas={faturas} loadingFat={loadingFat} mes={mes} />
         </div>
 
-        {/* FORMULÁRIO NOVA SAÍDA */}
-        <div style={{ ...S.card, marginTop:14 }}>
-          <div style={{ fontSize:13,fontWeight:600,color:'#111827',marginBottom:14 }}>Adicionar nova saída</div>
-          <div style={{ maxWidth:560 }}>
-            <FormSaida onSuccess={onSuccess} categoriasLista={categoriasLista} />
-          </div>
-        </div>
-
       </div>
 
       {/* MODAL */}

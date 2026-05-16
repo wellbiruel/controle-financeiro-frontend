@@ -57,7 +57,7 @@ const S = {
   catTitle:  { fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '14px' },
   catRow:    { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' },
   catBar:    { height: '5px', borderRadius: '3px', background: '#F3F4F6', margin: '4px 0 8px', overflow: 'hidden' },
-  catFill:   (pct, c) => ({ height: '100%', width: `${Math.min(pct, 100)}%`, background: c, borderRadius: '3px' }),
+  catFill:   (pct, c) => ({ height: '100%', width: `${Math.min(Math.max(isFinite(pct) ? pct : 0, 0), 100)}%`, background: c, borderRadius: '3px' }),
   catName:   { fontSize: '13px', color: '#374151', fontWeight: 500 },
   catVal:    { fontSize: '13px', color: '#111827', fontWeight: 600 },
   catPct:    { fontSize: '11px', color: '#6B7280' },

@@ -633,7 +633,7 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda do mês</div>
                 <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
                 <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {Ico.up} {fmt(D.investimentos?.aporteVsAnterior)} vs Março
+                  {Ico.up} {fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>
                   vs média semestral: {(D.investimentos?.vsMediaSemestral ?? 15) >= 0 ? '↑' : '↓'} {Math.abs(D.investimentos?.vsMediaSemestral ?? 15)}% acima da média
@@ -645,10 +645,10 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Total acumulado</div>
                 <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
                 <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {Ico.up} {fmt(D.investimentos?.patrimonioVsMes)} em Abril
+                  {Ico.up} {fmt(D.investimentos?.patrimonioVsMes)} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
                 <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {Ico.up} {D.investimentos?.patrimonioVsAno}% em 2026
+                  {Ico.up} {D.investimentos?.patrimonioVsAno}% em {ano}
                 </div>
               </div>
             </div>

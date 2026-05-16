@@ -843,24 +843,61 @@ export default function DashboardPage() {
             })()}
           </div>
 
-          {/* Saúde financeira */}
+          {/* Tendência trimestral */}
           <div style={{ ...S.card, position: 'relative', overflow: 'hidden', gridColumn: 'span 3' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#6D28D9', borderRadius: '10px 10px 0 0' }} />
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Diagnóstico</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Saúde financeira</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Indicadores de equilíbrio financeiro</div>
-            {(D.saudeFinanceira || []).map((sf, i) => (
-              <div key={i} style={{ marginBottom: i < (D.saudeFinanceira.length - 1) ? 10 : 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                  <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>{sf.lbl}</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: sf.cor }}>{sf.val}</span>
-                </div>
-                <div style={{ height: 5, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(sf.pct) ? sf.pct : 0, 0), 100)}%`, background: sf.cor, borderRadius: 2 }} />
-                </div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{sf.ctx}</div>
-              </div>
-            ))}
+            {(() => {
+              const mesesAbrev = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+              const spm = D.saldoPorMes || [];
+              const t3 = [mes - 2, mes - 1, mes].map(m => {
+                const idx = m <= 0 ? m + 12 - 1 : m - 1;
+                const d = spm[idx];
+                return { lbl: mesesAbrev[idx], e: d?.e || 0, s: d?.s || 0, atual: m === mes };
+              });
+              const mediaE = Math.round(t3.reduce((a, m) => a + m.e, 0) / 3);
+              const mediaS = Math.round(t3.reduce((a, m) => a + m.s, 0) / 3);
+              const maxE = Math.max(...t3.map(m => m.e), 1);
+              const maxS = Math.max(...t3.map(m => m.s), 1);
+              const maxInv = Math.max(D.investimentos?.aporteMes || 0, 1);
+              const metricas = [
+                { lbl: 'Entradas', cor: '#16A34A', corLight: '#BBF7D0', vals: t3.map(m => ({ v: m.e, h: Math.round((m.e / maxE) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaE) + '/mês' },
+                { lbl: 'Saídas',   cor: '#EF4444', corLight: '#FECACA', vals: t3.map(m => ({ v: m.s, h: Math.round((m.s / maxS) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaS) + '/mês' },
+                { lbl: 'Investimentos', cor: '#2563EB', corLight: '#DBEAFE', vals: t3.map((m, i) => ({ v: i === 2 ? (D.investimentos?.aporteMes || 0) : 0, h: i === 2 ? Math.round(((D.investimentos?.aporteMes || 0) / maxInv) * 100) : 3, lbl: m.lbl, atual: m.atual })), media: fmt(D.investimentos?.aporteMes || 0) + '/mês' },
+                { lbl: 'Reserva',  cor: '#8B5CF6', corLight: '#DDD6FE', vals: t3.map((m, i) => ({ v: i === 2 ? (D.reserva?.valor || 0) : 0, h: i === 2 ? 70 : i === 1 ? 50 : 30, lbl: m.lbl, atual: m.atual })), media: (D.reserva?.mesesCobertos || 0) + ' meses' },
+              ];
+              return (
+                <>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2, marginTop: 4 }}>Tendência</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Resumo do trimestre</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>{t3[0].lbl}–{t3[2].lbl}</div>
+                  </div>
+                  {metricas.map((m, mi) => (
+                    <div key={mi} style={{ marginBottom: mi < metricas.length - 1 ? 10 : 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <span style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: m.cor, display: 'inline-block' }} />
+                          {m.lbl}
+                        </span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: m.cor }}>{m.media}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 28 }}>
+                        {m.vals.map((v, vi) => (
+                          <div key={vi} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <div style={{ width: '100%', background: v.atual ? m.cor : m.corLight, borderRadius: '2px 2px 0 0', height: `${Math.max(v.h, 3)}%`, minHeight: 3, transition: 'height .3s' }} />
+                            <div style={{ fontSize: 9, color: v.atual ? '#6B7280' : '#D1D5DB', fontWeight: v.atual ? 600 : 400 }}>{v.lbl}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 10, paddingTop: 8, borderTop: '0.5px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                    <span style={{ color: '#6B7280' }}>Saldo médio/mês</span>
+                    <span style={{ fontWeight: 600, color: mediaE - mediaS >= 0 ? '#16A34A' : '#EF4444' }}>{mediaE - mediaS >= 0 ? '+' : ''}{fmt(mediaE - mediaS)}</span>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
 

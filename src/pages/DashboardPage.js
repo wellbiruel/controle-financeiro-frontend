@@ -791,7 +791,7 @@ export default function DashboardPage() {
                   <span style={{ fontSize: 14, fontWeight: 700, color: sf.cor }}>{sf.val}</span>
                 </div>
                 <div style={{ height: 5, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${sf.pct}%`, background: sf.cor, borderRadius: 2 }} />
+                  <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(sf.pct) ? sf.pct : 0, 0), 100)}%`, background: sf.cor, borderRadius: 2 }} />
                 </div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{sf.ctx}</div>
               </div>

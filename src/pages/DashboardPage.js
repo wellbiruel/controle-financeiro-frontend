@@ -788,30 +788,59 @@ export default function DashboardPage() {
           {/* Categorias */}
           <div style={{ ...S.card, position: 'relative', overflow: 'hidden', gridColumn: 'span 3' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '10px 10px 0 0' }} />
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Categorias</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Gastos por categoria no período</div>
-            <div style={{ background: '#FEF2F2', borderRadius: 7, padding: '8px 10px', marginBottom: 10, border: '0.5px solid #FECACA' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>Maior impacto</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 1 }}>{D.categorias?.maiorImpacto?.nome}</div>
-              <div style={{ fontSize: 12, color: '#DC2626', fontWeight: 600 }}>{fmt(D.categorias?.maiorImpacto?.valor)} · {D.categorias?.maiorImpacto?.pct}% das saídas</div>
-              <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>+{D.categorias?.maiorImpacto?.tendencia}% vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]} — atenção</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2, marginTop: 4 }}>Distribuição</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Categorias vs Saldo</div>
+              <div style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[mes - 1]}</div>
             </div>
-            {(D.categorias?.lista || []).map((c, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: i < (D.categorias.lista.length - 1) ? 8 : 0 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor, flexShrink: 0 }} />
-                <div style={{ fontSize: 12, color: '#6B7280', width: 68 }}>{c.nome}</div>
-                <div style={{ flex: 1, height: 5, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${c.pct}%`, background: c.cor, borderRadius: 2 }} />
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#111827', minWidth: 52, textAlign: 'right' }}>{fmt(c.valor)}</div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', minWidth: 28, textAlign: 'right' }}>{c.pct}%</div>
-              </div>
-            ))}
-            <div style={{ marginTop: 10, paddingTop: 8, borderTop: '0.5px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-              <span style={{ color: '#6B7280' }}>Total saídas</span>
-              <span style={{ fontWeight: 700, color: '#DC2626' }}>{fmt(D.categorias?.total)}</span>
-            </div>
+            {/* Barra empilhada */}
+            {(() => {
+              const lista = D.categorias?.lista || [];
+              const total = D.entradas?.valor || 0;
+              const saidas = D.categorias?.total || 0;
+              const saldoRestante = Math.max(0, total - saidas);
+              const saldoPct = total > 0 ? Math.round((saldoRestante / total) * 100) : 0;
+              return (
+                <>
+                  <div style={{ display: 'flex', height: 18, borderRadius: 5, overflow: 'hidden', gap: 1, marginBottom: 12 }}>
+                    {lista.map((c, i) => (
+                      <div key={i} title={`${c.nome}: ${c.pct}%`} style={{ width: `${(c.valor / total) * 100}%`, background: c.cor, minWidth: c.pct > 2 ? 2 : 0 }} />
+                    ))}
+                    {saldoRestante > 0 && (
+                      <div style={{ flex: 1, background: '#16A34A', minWidth: 3 }} title={`Saldo: ${saldoPct}%`} />
+                    )}
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <tbody>
+                      {lista.map((c, i) => (
+                        <tr key={i} style={{ borderBottom: '0.5px solid #F9FAFB' }}>
+                          <td style={{ padding: '4px 0', width: 14, verticalAlign: 'middle' }}>
+                            <div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor }} />
+                          </td>
+                          <td style={{ padding: '4px 6px', fontSize: 12, color: '#6B7280', verticalAlign: 'middle' }}>{c.nome}</td>
+                          <td style={{ padding: '4px 0', fontSize: 12, fontWeight: 600, color: '#111827', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmt(c.valor)}</td>
+                          <td style={{ padding: '4px 0 4px 8px', fontSize: 11, color: '#9CA3AF', textAlign: 'right', verticalAlign: 'middle', width: 34 }}>{c.pct}%</td>
+                        </tr>
+                      ))}
+                      {saldoRestante > 0 && (
+                        <tr>
+                          <td style={{ padding: '4px 0', verticalAlign: 'middle' }}>
+                            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#16A34A' }} />
+                          </td>
+                          <td style={{ padding: '4px 6px', fontSize: 12, color: '#16A34A', fontWeight: 500, verticalAlign: 'middle' }}>Saldo restante</td>
+                          <td style={{ padding: '4px 0', fontSize: 12, fontWeight: 600, color: '#16A34A', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmt(saldoRestante)}</td>
+                          <td style={{ padding: '4px 0 4px 8px', fontSize: 11, color: '#16A34A', textAlign: 'right', verticalAlign: 'middle', width: 34 }}>{saldoPct}%</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  <div style={{ marginTop: 10, paddingTop: 8, borderTop: '0.5px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                    <span style={{ color: '#6B7280' }}>Total saídas</span>
+                    <span style={{ fontWeight: 700, color: '#DC2626' }}>{fmt(saidas)}</span>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {/* Saúde financeira */}

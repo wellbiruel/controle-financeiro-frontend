@@ -49,7 +49,7 @@ const S = {
   page:    { padding: '0 20px 24px', background: '#F3F4F6', minHeight: '100vh' },
   card:    { background: 'white', borderRadius: 10, border: '0.5px solid #E5E7EB', padding: '14px 16px' },
   cardLink:{ fontSize: 12, color: '#3B82F6', cursor: 'pointer', marginTop: 8, display: 'block' },
-  bar:     (w, bg) => ({ height: '100%', width: `${Math.min(w, 100)}%`, background: bg, borderRadius: 2 }),
+  bar:     (w, bg) => ({ height: '100%', width: `${Math.min(Math.max(isFinite(w) ? w : 0, 0), 100)}%`, background: bg, borderRadius: 2 }),
   track:   (bg='#F1F5F9') => ({ height: 4, background: bg, borderRadius: 2, overflow: 'hidden', marginBottom: 4 }),
   pill:    (bg, txt) => ({ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500, background: bg, color: txt }),
   badge:   (bg, txt) => ({ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 5, background: bg, color: txt }),
@@ -643,7 +643,7 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 3 }}>Patrimônio investido {Ico.info}</div>
                 <div style={{ fontSize: 26, fontWeight: 700, color: '#2563EB', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                 <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Total acumulado</div>
-                <ProgressBar pct={60} color="#3B82F6" />
+                <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
                 <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
                   {Ico.up} {fmt(D.investimentos?.patrimonioVsMes)} em Abril
                 </div>
@@ -663,7 +663,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 24, fontWeight: 700, color: '#0F766E', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.reserva?.pctMeta}% da meta · {D.reserva?.mesesCobertos} meses</div>
             <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${Math.min(D.reserva?.pctMeta || 0, 100)}%`, background: '#0F766E', borderRadius: 2 }} />
+              <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: '#0F766E', borderRadius: 2 }} />
             </div>
             <span style={S.cardLink} onClick={() => navigate('/reserva')}>Ver detalhes da reserva →</span>
           </div>
@@ -693,7 +693,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 24, fontWeight: 700, color: '#B45309', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.limiteRestante?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.limiteRestante?.pctRestante}% do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
             <div style={{ height: 3, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${Math.min(100 - (D.limiteRestante?.pctRestante || 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
+              <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
             </div>
             <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>
@@ -719,7 +719,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706', marginBottom: 2 }}>{gaugePct}%</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>do orçamento utilizado</div>
             <div style={{ height: 4, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
-              <div style={{ height: '100%', width: `${Math.min(gaugePct, 100)}%`, background: gaugeCor, borderRadius: 2 }} />
+              <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(gaugePct) ? gaugePct : 0, 0), 100)}%`, background: gaugeCor, borderRadius: 2 }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>
               <span>Gasto: <strong style={{ color: '#DC2626' }}>{fmt(D.tetoGastos?.gasto)}</strong></span>

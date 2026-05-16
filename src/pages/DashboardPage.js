@@ -724,7 +724,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 2 – 5 KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,minmax(0,1fr))', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           <KpiCard accentColor="#3B82F6" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>} label="Entradas" value={fmt(D.entradas?.valor)} sub={D.entradas?.sub} trend={D.entradas?.tendencia} trendSuffix="% vs mês anterior" />
 

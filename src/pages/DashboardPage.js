@@ -78,7 +78,7 @@ function Trend({ val, suffix = '', reverse = false }) {
 
 function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, trendSuffix, trendReverse, children }) {
   return (
-    <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0 }}>
+    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accentColor, borderRadius: '10px 10px 0 0' }} />
       <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
         {icon}{label}

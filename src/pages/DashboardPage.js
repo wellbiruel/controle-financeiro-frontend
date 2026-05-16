@@ -76,9 +76,9 @@ function Trend({ val, suffix = '', reverse = false }) {
   );
 }
 
-function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, trendSuffix, trendReverse, children }) {
+function KpiCard({ accentColor, icon, label, value, valueColor, sub, trend, trendSuffix, trendReverse, children, style }) {
   return (
-    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0, ...style }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: accentColor, borderRadius: '10px 10px 0 0' }} />
       <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
         {icon}{label}
@@ -205,7 +205,7 @@ function PMA({ acaoAgora }) {
 }
 
 // ──
-function GraficoSaldo({ meses }) {
+function GraficoSaldo({ meses, style }) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState(null);
   const [filtro, setFiltro] = useState('todos');
@@ -233,11 +233,14 @@ function GraficoSaldo({ meses }) {
   ];
 
   return (
-    <div style={S.card}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>Saldo por mês · 2026</div>
+    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', ...style }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#16A34A', borderRadius: '10px 10px 0 0' }} />
+      <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Análise mensal</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+        <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Saldo por mês · 2026</div>
         <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver fluxo →</span>
       </div>
+      <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Evolução do saldo acumulado mês a mês</div>
       <div style={{ display: 'flex', gap: 7, marginBottom: 14, flexWrap: 'wrap' }}>
         {pills.map(p => {
           const ativo = filtro === p.tipo;
@@ -329,11 +332,14 @@ function RadarFinanceiro({ insights = [] }) {
   const i2 = insights[idx * 2 + 1];
 
   return (
-    <div style={S.card} onMouseEnter={() => { paused.current = true; }} onMouseLeave={() => { paused.current = false; }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>
+    <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }} onMouseEnter={() => { paused.current = true; }} onMouseLeave={() => { paused.current = false; }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#3B82F6', borderRadius: '10px 10px 0 0' }} />
+      <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Insights</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="#3B82F6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
         Radar financeiro <Tooltip text="Insights automáticos baseados nos seus dados financeiros do período.">{Ico.info}</Tooltip>
       </div>
+      <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Alertas e oportunidades identificados no período</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, opacity: fade ? 1 : 0, transform: fade ? 'translateY(0)' : 'translateY(4px)', transition: 'opacity .4s, transform .4s' }}>
         {[i1, i2].filter(Boolean).map((ins, i) => {
           const c = COR_RADAR[ins.tipo] || COR_RADAR.info;
@@ -371,8 +377,11 @@ function ScoreGauge({ score }) {
   const sc = STATUS_COR[st];
   const arc = Math.round((s / 100) * 126);
   return (
-    <div style={{ ...S.card, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 8 }}>Score financeiro <Tooltip text="Score calculado com base em saldo, poupança, teto, reserva e metas.">{Ico.info}</Tooltip></div>
+    <div style={{ ...S.card, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
+      <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2, width: '100%', textAlign: 'left' }}>Saúde geral</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Score financeiro <Tooltip text="Score calculado com base em saldo, poupança, teto, reserva e metas.">{Ico.info}</Tooltip></div>
+      <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, width: '100%', textAlign: 'left' }}>Pontuação baseada em 5 indicadores</div>
       <svg width="100" height="56" viewBox="0 0 100 56" style={{ marginBottom: 4 }}>
         <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke="#F1F5F9" strokeWidth="9" strokeLinecap="round"/>
         <path d="M10 50 A40 40 0 0 1 90 50" fill="none" stroke={cor} strokeWidth="9" strokeLinecap="round" strokeDasharray={`${arc} 126`} strokeDashoffset="0"/>
@@ -620,11 +629,11 @@ export default function DashboardPage() {
         {/* PMA */}
         <PMA acaoAgora={D.acaoAgora} />
 
-        {/* ROW 1 + ROW 2 – grid unificado 5 colunas; Investimentos ocupa span 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
+        {/* ROW 1 + ROW 2 – grid 10 colunas; cada card=span2, Investimentos=span4 (alinha com Entradas+Saídas) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
 
           {/* Investimentos (duplo) */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 4' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
               Investimentos <Tooltip text="Valor investido além da reserva de segurança no período selecionado.">{Ico.info}</Tooltip>
@@ -662,7 +671,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Reserva */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#0F766E', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F766E"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
               Reserva de Segurança <Tooltip text="Valor guardado para emergências — meta ideal: 6 meses de despesas.">{Ico.info}</Tooltip>
@@ -691,7 +700,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Metas */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6D28D9', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#6D28D9"><path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/></svg>
               Metas Ativas <Tooltip text="Progresso das suas metas financeiras ativas.">{Ico.info}</Tooltip>
@@ -708,7 +717,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Limite */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#B45309', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#B45309"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
               Limite Restante <Tooltip text="Quanto ainda pode gastar no mês sem ultrapassar seu teto.">{Ico.info}</Tooltip>
@@ -722,16 +731,16 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>
 
-          <KpiCard accentColor="#3B82F6" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>} label="Entradas" value={fmt(D.entradas?.valor)} sub={D.entradas?.sub} trend={D.entradas?.tendencia} trendSuffix="% vs mês anterior" />
+          <KpiCard accentColor="#3B82F6" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>} label="Entradas" value={fmt(D.entradas?.valor)} sub={D.entradas?.sub} trend={D.entradas?.tendencia} trendSuffix="% vs mês anterior" style={{ gridColumn: 'span 2' }} />
 
-          <KpiCard accentColor="#EF4444" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#EF4444"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>} label="Saídas" value={fmt(D.saidas?.valor)} valueColor="#DC2626" sub={D.saidas?.sub} trend={D.saidas?.tendencia} trendSuffix="% vs mês anterior" trendReverse />
+          <KpiCard accentColor="#EF4444" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#EF4444"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>} label="Saídas" value={fmt(D.saidas?.valor)} valueColor="#DC2626" sub={D.saidas?.sub} trend={D.saidas?.tendencia} trendSuffix="% vs mês anterior" trendReverse style={{ gridColumn: 'span 2' }} />
 
-          <KpiCard accentColor="#16A34A" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>} label="Saldo" value={fmt(D.saldo?.valor)} valueColor={D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444'} sub={`${fmtP(D.saldo?.pctRenda)} da renda guardada`}>
+          <KpiCard accentColor="#16A34A" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>} label="Saldo" value={fmt(D.saldo?.valor)} valueColor={D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444'} sub={`${fmtP(D.saldo?.pctRenda)} da renda guardada`} style={{ gridColumn: 'span 2' }}>
             {D.saldo?.melhorMes && <div style={{ fontSize: 12, color: '#3B82F6', fontWeight: 500, marginTop: 3 }}>Melhor mês do ano</div>}
           </KpiCard>
 
           {/* Teto de gastos */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0 }}>
+          <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0, gridColumn: 'span 2' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
               Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado." direction="down">{Ico.info}</Tooltip>
@@ -754,7 +763,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Maior Gasto */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0, gridColumn: 'span 2' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '10px 10px 0 0' }} />
             <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
               {Ico.warn} Maior Gasto
@@ -763,26 +772,30 @@ export default function DashboardPage() {
             <div style={{ fontSize: 24, fontWeight: 700, color: '#DC2626', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.maiorGasto?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3 }}>{fmtP(D.maiorGasto?.pctSaidas)} das saídas de {MESES_ABREV[mes-1]}</div>
             <div style={{ fontSize: 12, color: '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>
-              {Ico.up} {D.maiorGasto?.tendencia}% vs Março
+              {Ico.up} {D.maiorGasto?.tendencia}% vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
             </div>
             <div style={S.badge('#FEE2E2', '#B91C1C')}>{Ico.warn} Alto impacto</div>
             <span style={S.cardLink} onClick={() => navigate('/cartoes')}>Ver análise do cartão →</span>
           </div>
         </div>
 
-        {/* ROW 3 – Saldo + Categorias + Saude */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.4fr', gap: 10, marginBottom: 10 }}>
+        {/* ROW 3 – Saldo gráfico + Categorias + Saude – 10 colunas alinhadas com ROW 1+2 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 10, marginBottom: 10 }}>
 
-          <GraficoSaldo meses={D.saldoPorMes} />
+          {/* GraficoSaldo span4 = mesma largura de Entradas+Saídas acima */}
+          <GraficoSaldo meses={D.saldoPorMes} style={{ gridColumn: 'span 4' }} />
 
           {/* Categorias */}
-          <div style={S.card}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>Categorias</div>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', gridColumn: 'span 3' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '10px 10px 0 0' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Categorias</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Gastos por categoria no período</div>
             <div style={{ background: '#FEF2F2', borderRadius: 7, padding: '8px 10px', marginBottom: 10, border: '0.5px solid #FECACA' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>Maior impacto</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 1 }}>{D.categorias?.maiorImpacto?.nome}</div>
               <div style={{ fontSize: 12, color: '#DC2626', fontWeight: 600 }}>{fmt(D.categorias?.maiorImpacto?.valor)} · {D.categorias?.maiorImpacto?.pct}% das saídas</div>
-              <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>+{D.categorias?.maiorImpacto?.tendencia}% vs Março — atenção</div>
+              <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>+{D.categorias?.maiorImpacto?.tendencia}% vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]} — atenção</div>
             </div>
             {(D.categorias?.lista || []).map((c, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: i < (D.categorias.lista.length - 1) ? 8 : 0 }}>
@@ -802,8 +815,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Saúde financeira */}
-          <div style={S.card}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Saúde financeira</div>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', gridColumn: 'span 3' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#6D28D9', borderRadius: '10px 10px 0 0' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Diagnóstico</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Saúde financeira</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Indicadores de equilíbrio financeiro</div>
             {(D.saudeFinanceira || []).map((sf, i) => (
               <div key={i} style={{ marginBottom: i < (D.saudeFinanceira.length - 1) ? 10 : 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
@@ -823,8 +839,11 @@ export default function DashboardPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,1fr)', gap: 10, marginBottom: 10 }}>
 
           {/* Comparativos */}
-          <div style={S.card}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Comparativos {Ico.info}</div>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#6B7280', borderRadius: '10px 10px 0 0' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Análise</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 5 }}>Comparativos {Ico.info}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Variação vs mês anterior e média semestral</div>
             {D.comparativos?.vsMesAnterior && (
               <>
                 <div style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 7 }}>{D.comparativos.vsMesAnterior.label}</div>
@@ -862,8 +881,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Comparativo de perfil */}
-          <div style={S.card}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 10 }}>Comparativo de perfil <Tooltip text="Comparação baseada em médias de usuários com perfil semelhante. Dados agregados e anônimos.">{Ico.info}</Tooltip></div>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Benchmark</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 5 }}>Comparativo de perfil <Tooltip text="Comparação baseada em médias de usuários com perfil semelhante. Dados agregados e anônimos.">{Ico.info}</Tooltip></div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Sua taxa de poupança vs usuários semelhantes</div>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -895,11 +917,14 @@ export default function DashboardPage() {
           <RadarFinanceiro insights={D.radarFinanceiro || []} />
 
           {/* Metas em andamento */}
-          <div style={S.card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>Metas em andamento</div>
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#8B5CF6', borderRadius: '10px 10px 0 0' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Progresso</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Metas em andamento</div>
               <span style={{ fontSize: 12, color: '#3B82F6', cursor: 'pointer' }} onClick={() => navigate('/metas')}>Ver todas →</span>
             </div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Acompanhe o progresso das suas metas financeiras</div>
             {(D.metasAndamento || []).map((m, i) => (
               <div key={i} style={{ padding: '7px 0', borderBottom: i < (D.metasAndamento.length - 1) ? '0.5px solid #F3F4F6' : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>

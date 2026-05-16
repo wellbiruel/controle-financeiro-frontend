@@ -658,6 +658,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/investimentos')}>Ver investimentos →</span>
           </div>
 
           {/* Reserva */}

@@ -660,6 +660,7 @@ export default function DashboardPage() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F766E"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
               Reserva de Segurança <Tooltip text="Valor guardado para emergências — meta ideal: 6 meses de despesas.">{Ico.info}</Tooltip>
             </div>
+            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Saldo acumulado</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#0F766E', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.reserva?.pctMeta}% da meta · {D.reserva?.mesesCobertos} meses</div>
             <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
@@ -674,6 +675,7 @@ export default function DashboardPage() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#6D28D9"><path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/></svg>
               Metas Ativas <Tooltip text="Progresso das suas metas financeiras ativas.">{Ico.info}</Tooltip>
             </div>
+            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Em andamento</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#6D28D9', letterSpacing: '-.5px', marginBottom: 3 }}>{D.metasAtivas?.total} metas</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.metasAtivas?.resumo}</div>
             <div style={{ display: 'flex', gap: 2, marginBottom: 8 }}>
@@ -690,6 +692,7 @@ export default function DashboardPage() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="#B45309"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
               Limite Restante <Tooltip text="Quanto ainda pode gastar no mês sem ultrapassar seu teto.">{Ico.info}</Tooltip>
             </div>
+            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Disponível no mês</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#B45309', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.limiteRestante?.valor)}</div>
             <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.limiteRestante?.pctRestante}% do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
             <div style={{ height: 3, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>

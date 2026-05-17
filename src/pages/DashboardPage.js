@@ -627,7 +627,7 @@ export default function DashboardPage() {
         <PMA acaoAgora={D.acaoAgora} />
 
         {/* ROW 1 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
 
           {/* Card triplo: Entradas / Saídas / Saldo */}
           <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
@@ -691,6 +691,25 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Reserva */}
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Segurança</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Reserva de Emergência</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Saldo acumulado</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#16A34A', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
+            <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, marginTop: 4 }}>Faltam {fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta</div>
+            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 500, marginBottom: 8 }}>↑ +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
+            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 500, marginBottom: 8 }}>↓ -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
+            {(D.reserva?.mesesCobertos || 0) < 3
+              ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>● Crítico</div>
+              : (D.reserva?.mesesCobertos || 0) < 6
+              ? <div style={{ ...S.badge('#FEF3C7','#D97706'), marginBottom: 8, width: 'fit-content' }}>● Em progresso</div>
+              : <div style={{ ...S.badge('#F0FDF4','#16A34A'), marginBottom: 8, width: 'fit-content' }}>✓ Proteção ativa</div>}
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes →</span>
+          </div>
+
           {/* Maior Gasto */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Destaque</div>
@@ -705,7 +724,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Investimentos duplo */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
@@ -736,21 +755,6 @@ export default function DashboardPage() {
                 <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
               </div>
             </div>
-          </div>
-
-          {/* Reserva */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Segurança</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 5 }}>🛡 Reserva {Ico.info}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Saldo acumulado</div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: '#111827', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
-            <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, marginTop: 4 }}>Faltam {fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta</div>
-            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 500, marginBottom: 8 }}>↑ +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
-            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 500, marginBottom: 8 }}>↓ -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
-            {D.reserva?.estado === 'zerado' && <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 500, marginBottom: 8 }}>Sem reserva de emergência</div>}
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes →</span>
           </div>
 
           {/* Cobertura */}

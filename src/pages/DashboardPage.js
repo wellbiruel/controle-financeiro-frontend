@@ -627,7 +627,7 @@ export default function DashboardPage() {
         <PMA acaoAgora={D.acaoAgora} />
 
         {/* ROW 1 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Card triplo: Entradas / Saídas / Saldo */}
           <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
@@ -659,33 +659,36 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Limite Restante */}
+          {/* Teto de Gastos + Limite Restante — card unificado */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Orçamento</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Limite Restante</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Disponível no mês</div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: '#F59E0B', lineHeight: 1, marginBottom: 4 }}>{fmt(D.limiteRestante?.valor)}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{fmtP(D.limiteRestante?.pctRestante)} do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
-            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 12 }}>
-              <div style={{ height: '100%', width: `${D.limiteRestante?.teto > 0 ? Math.min(Math.max(isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100) : 0}%`, background: '#F59E0B', borderRadius: 3 }} />
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Teto de Gastos</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Disponível no mês</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 6 }}>
+              <div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 1 }}>Utilizado</div>
+                <div style={{ fontSize: 20, fontWeight: 500, color: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>{Math.round(gaugePct)}%</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 1 }}>Restante</div>
+                <div style={{ fontSize: 20, fontWeight: 500, color: '#16A34A', lineHeight: 1 }}>{fmt(D.limiteRestante?.valor)}</div>
+              </div>
             </div>
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
-          </div>
-
-          {/* Teto de Gastos */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Controle</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 5 }}>Teto de Gastos {Ico.info}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Do orçamento utilizado</div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1, marginBottom: 4 }}>{Math.round(gaugePct)}%</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Gasto: <span style={{ color: '#EF4444', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}</div>
-            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
               <div style={{ height: '100%', width: `${Math.min(gaugePct, 100)}%`, background: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', borderRadius: 3 }} />
             </div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>
+              Gasto: <span style={{ color: '#EF4444', fontWeight: 500 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
+            </div>
             {gaugePct >= 100
-              ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8 }}>⚠ Teto ultrapassado!</div>
-              : <div style={{ ...S.badge('#FEF3C7','#D97706'), marginBottom: 8 }}>⚠ Atenção — {Math.round(gaugePct)}% usado</div>}
-            <div style={{ fontSize: 11, color: '#6B7280', cursor: 'pointer', marginTop: 'auto' }} onClick={() => setModalTeto(true)}>⚙ Alterar teto mensal</div>
+              ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>⚠ Teto ultrapassado!</div>
+              : gaugePct >= 80
+              ? <div style={{ ...S.badge('#FEF3C7','#D97706'), marginBottom: 8, width: 'fit-content' }}>⚠ Atenção — {Math.round(gaugePct)}% usado</div>
+              : null}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
+              <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
+              <span style={{ fontSize: 11, color: '#6B7280', cursor: 'pointer' }} onClick={() => setModalTeto(true)}>⚙ Alterar teto</span>
+            </div>
           </div>
 
           {/* Maior Gasto */}

@@ -48,7 +48,7 @@ const Ico = {
 const S = {
   page:    { padding: '0 20px 24px', background: '#F3F4F6', minHeight: '100vh' },
   card:    { background: 'white', borderRadius: 10, border: '0.5px solid #E5E7EB', padding: '14px 16px' },
-  cardLink:{ fontSize: 12, color: '#3B82F6', cursor: 'pointer', marginTop: 8, display: 'block' },
+  cardLink:{ fontSize: 12, color: '#9CA3AF', cursor: 'pointer', marginTop: 'auto', display: 'block' },
   bar:     (w, bg) => ({ height: '100%', width: `${Math.min(Math.max(isFinite(w) ? w : 0, 0), 100)}%`, background: bg, borderRadius: 2 }),
   track:   (bg='#F1F5F9') => ({ height: 4, background: bg, borderRadius: 2, overflow: 'hidden', marginBottom: 4 }),
   pill:    (bg, txt) => ({ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, fontSize: 11, fontWeight: 500, background: bg, color: txt }),
@@ -652,7 +652,7 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.saldo?.pctRenda)} da renda guardada</div>
                 <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{D.saldo?.valor >= 0 ? '↑' : '↓'}</span> {D.saldo?.valor >= 0 ? 'Superávit no mês' : 'Déficit no mês'}</div>
                 {D.saldo?.melhorMes && <div style={{ fontSize: 11, color: '#6B7280' }}>Melhor mês do ano</div>}
-                <span style={{ ...S.cardLink, marginTop: 4 }} onClick={() => navigate('/fluxo-anual')}>Ver evolução do saldo →</span>
+                <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver evolução do saldo →</span>
               </div>
             </div>
           </div>

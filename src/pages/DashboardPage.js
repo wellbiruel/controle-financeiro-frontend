@@ -646,7 +646,7 @@ export default function DashboardPage() {
                   <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444' }}>{D.saidas?.tendencia <= 0 ? '↓' : '↑'}</span> {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior</div>
                 </div>
               </div>
-              <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ padding: '18px 20px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>$ Saldo do mês</div>
                 <div style={{ fontSize: 30, fontWeight: 500, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1 }}>{D.saldo?.valor >= 0 ? '+' : ''}{fmt(D.saldo?.valor)}</div>
                 <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.saldo?.pctRenda)} da renda guardada</div>

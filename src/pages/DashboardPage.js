@@ -538,6 +538,7 @@ export default function DashboardPage() {
   const [apiError, setApiError] = useState(null);
   const [modalTeto, setModalTeto] = useState(false);
   const [valorTeto, setValorTeto] = useState(7000);
+  const [saldoTip, setSaldoTip] = useState(null);
 
   const carregarDados = useCallback(async (m, a) => {
     setLoading(true);
@@ -755,23 +756,60 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Cobertura */}
+          {/* Saldo por mês — gráfico de linha SVG */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Cobertura</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 10 }}>Reserva em dia</div>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} style={{ width: 28, height: 28, borderRadius: 6, background: i < Math.floor(D.reserva?.mesesCobertos || 0) ? '#16A34A' : '#F1F5F9' }} />
-              ))}
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 500, color: '#111827', marginBottom: 4 }}>{D.reserva?.mesesCobertos || 0} <span style={{ fontSize: 13, color: '#9CA3AF' }}>de 6 meses</span></div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>cobertura de emergência</div>
-            {(D.reserva?.mesesCobertos || 0) < 3
-              ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 10 }}>● Crítico</div>
-              : (D.reserva?.mesesCobertos || 0) < 6
-              ? <div style={{ ...S.badge('#FEF3C7','#D97706'), marginBottom: 10 }}>● Em progresso</div>
-              : <div style={{ ...S.badge('#F0FDF4','#16A34A'), marginBottom: 10 }}>✓ Proteção ativa</div>}
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver reserva →</span>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Evolução</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Saldo por Mês</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Resultado mensal no ano</div>
+            {(() => {
+              const meses = D.saldoPorMes || [];
+              if (meses.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
+              const W = 200, H = 56, pad = 10;
+              const vals = meses.map(m => m.saldo);
+              const min = Math.min(...vals), max = Math.max(...vals);
+              const range = max - min || 1;
+              const toX = i => pad + (i / (meses.length - 1)) * (W - pad * 2);
+              const toY = v => pad + (1 - (v - min) / range) * (H - pad * 2);
+              const pts = meses.map((m, i) => ({ x: toX(i), y: toY(m.saldo), saldo: m.saldo, mes: m.mes }));
+              const polyline = pts.map(p => `${p.x},${p.y}`).join(' ');
+              const zeroY = toY(0);
+              return (
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 64, overflow: 'visible', display: 'block' }}>
+                    {min < 0 && max > 0 && (
+                      <line x1={pad} y1={zeroY} x2={W - pad} y2={zeroY} stroke="#E5E7EB" strokeWidth="1" strokeDasharray="3 3" />
+                    )}
+                    <polyline points={polyline} fill="none" stroke="#D1D5DB" strokeWidth="1.5" strokeLinejoin="round" />
+                    {pts.map((p, i) => (
+                      <g key={i} style={{ cursor: 'pointer' }}
+                        onMouseEnter={() => setSaldoTip({ i, x: p.x, y: p.y, saldo: p.saldo, mes: p.mes })}
+                        onMouseLeave={() => setSaldoTip(null)}>
+                        <circle cx={p.x} cy={p.y} r={6} fill="transparent" />
+                        <circle cx={p.x} cy={p.y} r={3} fill="white" stroke={p.saldo >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="1.5" />
+                      </g>
+                    ))}
+                  </svg>
+                  {saldoTip && (
+                    <div style={{
+                      position: 'absolute',
+                      top: (saldoTip.y / H) * 64 - 30,
+                      left: `${(saldoTip.x / W) * 100}%`,
+                      transform: 'translateX(-50%)',
+                      background: '#111827', color: 'white',
+                      fontSize: 11, fontWeight: 500,
+                      padding: '3px 8px', borderRadius: 5,
+                      whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10,
+                    }}>
+                      {MESES_ABREV[(saldoTip.mes || 1) - 1]}: {fmtS(saldoTip.saldo)}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#D1D5DB', marginTop: 2, paddingLeft: pad - 4, paddingRight: pad - 4 }}>
+                    {meses.map((m, i) => <span key={i}>{MESES_ABREV[(m.mes || i + 1) - 1]}</span>)}
+                  </div>
+                </div>
+              );
+            })()}
+            <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver evolução →</span>
           </div>
 
         </div>

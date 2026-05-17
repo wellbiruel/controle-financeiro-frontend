@@ -66,6 +66,11 @@ function ProgressBar({ pct, color, trackColor }) {
 
 function Trend({ val, suffix = '', reverse = false }) {
   if (val == null) return null;
+  if (val === 0) return (
+    <div style={{ fontSize: 12, color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+      — {suffix ? `0${suffix}` : ''}
+    </div>
+  );
   const pos = reverse ? val < 0 : val >= 0;
   const cor = pos ? '#16A34A' : '#EF4444';
   return (
@@ -723,7 +728,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Investimentos duplo */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
@@ -732,24 +737,30 @@ export default function DashboardPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte do mês</div>
-                <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                <div style={{ fontSize: 22, fontWeight: 500, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
-                <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
+                <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#16A34A" />
                 <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4, marginBottom: 8 }}>
-                  <span style={{ color: D.investimentos?.aporteVsAnterior >= 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos?.aporteVsAnterior >= 0 ? '↑' : '↓'}</span> {D.investimentos?.aporteVsAnterior >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                  {D.investimentos?.aporteVsAnterior == null || D.investimentos.aporteVsAnterior === 0
+                    ? <span style={{ color: '#9CA3AF' }}>— sem variação</span>
+                    : <><span style={{ color: D.investimentos.aporteVsAnterior > 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos.aporteVsAnterior > 0 ? '↑' : '↓'}</span> {D.investimentos.aporteVsAnterior > 0 ? '+' : ''}{fmt(D.investimentos.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}</>}
                 </div>
                 <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio total</div>
-                <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                <div style={{ fontSize: 22, fontWeight: 500, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>Total acumulado</div>
-                <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
+                <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#16A34A" />
                 <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4, marginBottom: 3 }}>
-                  <span style={{ color: D.investimentos?.patrimonioVsMes >= 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos?.patrimonioVsMes >= 0 ? '↑' : '↓'}</span> {D.investimentos?.patrimonioVsMes >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)} ({D.investimentos?.patrimonioVsMesPct >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsMesPct}%) em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                  {D.investimentos?.patrimonioVsMes == null || D.investimentos.patrimonioVsMes === 0
+                    ? <span style={{ color: '#9CA3AF' }}>— sem variação no mês</span>
+                    : <><span style={{ color: D.investimentos.patrimonioVsMes > 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos.patrimonioVsMes > 0 ? '↑' : '↓'}</span> {D.investimentos.patrimonioVsMes > 0 ? '+' : ''}{fmt(D.investimentos.patrimonioVsMes)} ({D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}{D.investimentos?.patrimonioVsMesPct}%) em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}</>}
                 </div>
                 <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}>
-                  <span style={{ color: D.investimentos?.patrimonioVsAno >= 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos?.patrimonioVsAno >= 0 ? '↑' : '↓'}</span> {D.investimentos?.patrimonioVsAno >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
+                  {D.investimentos?.patrimonioVsAno == null || D.investimentos.patrimonioVsAno === 0
+                    ? <span style={{ color: '#9CA3AF' }}>— sem variação no ano</span>
+                    : <><span style={{ color: D.investimentos.patrimonioVsAno > 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos.patrimonioVsAno > 0 ? '↑' : '↓'}</span> {D.investimentos.patrimonioVsAno > 0 ? '+' : ''}{D.investimentos.patrimonioVsAno}% em {ano}</>}
                 </div>
                 <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
               </div>
@@ -824,22 +835,13 @@ export default function DashboardPage() {
             })()}
           </div>
 
-        </div>
-
-        {/* ROW 3 – Saldo gráfico + Categorias + Saude – 10 colunas alinhadas com ROW 1+2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 10, marginBottom: 10 }}>
-
-          {/* GraficoSaldo span4 = mesma largura de Entradas+Saídas acima */}
-          <GraficoSaldo meses={D.saldoPorMes} style={{ gridColumn: 'span 4' }} />
-
           {/* Categorias */}
-          <div style={{ ...S.card, gridColumn: 'span 3' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
               <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Categorias vs Saldo</div>
               <div style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[mes - 1]}</div>
             </div>
-            {/* Barra empilhada */}
             {(() => {
               const lista = D.categorias?.lista || [];
               const total = D.entradas?.valor || 0;
@@ -852,17 +854,13 @@ export default function DashboardPage() {
                     {lista.map((c, i) => (
                       <div key={i} title={`${c.nome}: ${c.pct}%`} style={{ width: `${(c.valor / total) * 100}%`, background: c.cor, minWidth: c.pct > 2 ? 2 : 0 }} />
                     ))}
-                    {saldoRestante > 0 && (
-                      <div style={{ flex: 1, background: '#16A34A', minWidth: 3 }} title={`Saldo: ${saldoPct}%`} />
-                    )}
+                    {saldoRestante > 0 && <div style={{ flex: 1, background: '#16A34A', minWidth: 3 }} title={`Saldo: ${saldoPct}%`} />}
                   </div>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <tbody>
                       {lista.map((c, i) => (
                         <tr key={i} style={{ borderBottom: '0.5px solid #F9FAFB' }}>
-                          <td style={{ padding: '4px 0', width: 14, verticalAlign: 'middle' }}>
-                            <div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor }} />
-                          </td>
+                          <td style={{ padding: '4px 0', width: 14, verticalAlign: 'middle' }}><div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor }} /></td>
                           <td style={{ padding: '4px 6px', fontSize: 12, color: '#6B7280', verticalAlign: 'middle' }}>{c.nome}</td>
                           <td style={{ padding: '4px 0', fontSize: 12, fontWeight: 600, color: '#111827', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmt(c.valor)}</td>
                           <td style={{ padding: '4px 0 4px 8px', fontSize: 11, color: '#9CA3AF', textAlign: 'right', verticalAlign: 'middle', width: 34 }}>{c.pct}%</td>
@@ -870,9 +868,7 @@ export default function DashboardPage() {
                       ))}
                       {saldoRestante > 0 && (
                         <tr>
-                          <td style={{ padding: '4px 0', verticalAlign: 'middle' }}>
-                            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#16A34A' }} />
-                          </td>
+                          <td style={{ padding: '4px 0', verticalAlign: 'middle' }}><div style={{ width: 8, height: 8, borderRadius: 2, background: '#16A34A' }} /></td>
                           <td style={{ padding: '4px 6px', fontSize: 12, color: '#16A34A', fontWeight: 500, verticalAlign: 'middle' }}>Saldo restante</td>
                           <td style={{ padding: '4px 0', fontSize: 12, fontWeight: 600, color: '#16A34A', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmt(saldoRestante)}</td>
                           <td style={{ padding: '4px 0 4px 8px', fontSize: 11, color: '#16A34A', textAlign: 'right', verticalAlign: 'middle', width: 34 }}>{saldoPct}%</td>
@@ -887,10 +883,19 @@ export default function DashboardPage() {
                 </>
               );
             })()}
+            <span style={S.cardLink} onClick={() => navigate('/saidas')}>Ver saídas →</span>
           </div>
 
+        </div>
+
+        {/* ROW 3 – Saldo gráfico + Tendência trimestral – 10 colunas */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 10, marginBottom: 10 }}>
+
+          {/* GraficoSaldo span4 = mesma largura de Entradas+Saídas acima */}
+          <GraficoSaldo meses={D.saldoPorMes} style={{ gridColumn: 'span 4' }} />
+
           {/* Tendência trimestral */}
-          <div style={{ ...S.card, gridColumn: 'span 3' }}>
+          <div style={{ ...S.card, gridColumn: 'span 6' }}>
             {(() => {
               const mesesAbrev = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
               const t3 = (D.trimestre || []).map((d, i) => ({

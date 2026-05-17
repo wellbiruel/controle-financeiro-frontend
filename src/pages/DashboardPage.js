@@ -728,7 +728,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Investimentos */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>

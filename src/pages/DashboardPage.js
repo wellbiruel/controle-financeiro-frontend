@@ -776,7 +776,7 @@ export default function DashboardPage() {
               const vals = hist.map(p => p.valor);
               const min = Math.min(...vals) * 0.98;
               const max = Math.max(...vals) * 1.02;
-              const W = 240, H = 50;
+              const W = 240, H = 45;
               const px = i => (i / (hist.length - 1 || 1)) * W;
               const py = v => H - ((v - min) / (max - min || 1)) * H;
               const pts = hist.map((p, i) => `${px(i).toFixed(1)},${py(p.valor).toFixed(1)}`).join(' ');
@@ -787,29 +787,26 @@ export default function DashboardPage() {
               const varPct = inicio > 0 ? ((variacao / inicio) * 100).toFixed(1) : 0;
               return (
                 <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                     <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>Evolução {ano}</div>
                     <div style={{ fontSize: 10, color: '#9CA3AF' }}>{MESES_ABREV[(hist[0]?.mes || 1) - 1]}–{MESES_ABREV[(hist[hist.length - 1]?.mes || 1) - 1]}</div>
                   </div>
                   <div style={{ position: 'relative' }}>
-                    <svg width="100%" viewBox={`0 0 ${W} ${H + 14}`} style={{ display: 'block', overflow: 'visible' }}>
-                      <path d={area} fill="rgba(22,163,74,0.06)" />
+                    <svg width="100%" viewBox={`0 0 ${W} ${H + 11}`} style={{ display: 'block', overflow: 'visible' }}>
+                      <path d={area} fill="rgba(22,163,74,0.04)" />
                       <polyline points={pts} fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-                      {hist[hist.length - 1] && (
-                        <path d={`M${px(hist.length - 1).toFixed(1)},${py(hist[hist.length - 1].valor).toFixed(1)} L${W},${py(hist[hist.length - 1].valor).toFixed(1)}`} fill="none" stroke="#E5E7EB" strokeWidth="1.5" strokeDasharray="3 2" />
-                      )}
                       {hist.map((p, i) => (
                         <g key={i} onMouseEnter={() => setSaldoTip({ i, valor: p.valor, mes: MESES_ABREV[(p.mes || 1) - 1] })} onMouseLeave={() => setSaldoTip(null)} style={{ cursor: 'pointer' }}>
-                          <circle cx={px(i)} cy={py(p.valor)} r="8" fill="transparent" />
-                          <circle cx={px(i)} cy={py(p.valor)} r={i === hist.length - 1 ? 4 : 3} fill={i === hist.length - 1 ? '#16A34A' : '#fff'} stroke="#16A34A" strokeWidth="1.5" />
+                          <circle cx={px(i)} cy={py(p.valor)} r="7" fill="transparent" />
+                          <circle cx={px(i)} cy={py(p.valor)} r={i === hist.length - 1 ? 3 : 2} fill={i === hist.length - 1 ? '#16A34A' : '#fff'} stroke="#16A34A" strokeWidth="1.5" />
                         </g>
                       ))}
-                      {hist.map((p, i) => (
-                        <text key={i} x={px(i)} y={H + 13} textAnchor="middle" fontSize="7" fill={i === hist.length - 1 ? '#6B7280' : '#D1D5DB'} fontWeight={i === hist.length - 1 ? '500' : '400'}>{MESES_ABREV[(p.mes || 1) - 1]}</text>
+                      {hist.map((p, i) => (i === 0 || i === hist.length - 1) && (
+                        <text key={i} x={px(i)} y={H + 10} textAnchor={i === 0 ? 'start' : 'end'} fontSize="7" fill="#9CA3AF">{MESES_ABREV[(p.mes || 1) - 1]}</text>
                       ))}
                     </svg>
                     {saldoTip && (
-                      <div style={{ position: 'absolute', top: -28, left: `${(saldoTip.i / (hist.length - 1 || 1)) * 100}%`, transform: 'translateX(-50%)', background: '#111827', color: '#fff', fontSize: 10, padding: '3px 7px', borderRadius: 5, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10 }}>
+                      <div style={{ position: 'absolute', top: -26, left: `${(saldoTip.i / (hist.length - 1 || 1)) * 100}%`, transform: 'translateX(-50%)', background: '#111827', color: '#fff', fontSize: 10, padding: '3px 7px', borderRadius: 5, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10 }}>
                         {saldoTip.mes}: {fmt(saldoTip.valor)}
                       </div>
                     )}

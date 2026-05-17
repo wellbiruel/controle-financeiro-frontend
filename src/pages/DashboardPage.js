@@ -772,13 +772,33 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver reserva →</span>
           </div>
 
-          {/* Metas */}
+          {/* Metas — card unificado */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Progresso</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 5 }}>🎯 Metas Ativas {Ico.info}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Em andamento</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Metas Ativas</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Acompanhe o progresso das suas metas</div>
             <div style={{ fontSize: 22, fontWeight: 500, color: '#8B5CF6', lineHeight: 1, marginBottom: 4 }}>{D.metasAtivas?.total ?? 0} metas</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>{D.metasAtivas?.total ? `${D.metasAtivas.total} meta${D.metasAtivas.total !== 1 ? 's' : ''} cadastrada${D.metasAtivas.total !== 1 ? 's' : ''}` : 'Nenhuma meta cadastrada'}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Em andamento</div>
+            {(D.metasAndamento || []).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                {(D.metasAndamento || []).slice(0, 3).map((m, i) => (
+                  <div key={i}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+                      <span style={{ color: '#374151', fontWeight: 500 }}>{m.nome}</span>
+                      <span style={{ color: '#8B5CF6', fontWeight: 600 }}>{m.pct}%</span>
+                    </div>
+                    <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${m.pct}%`, background: m.cor || '#8B5CF6', borderRadius: 3 }} />
+                    </div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{m.ctx}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '12px', textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF' }}>Nenhuma meta cadastrada</div>
+              </div>
+            )}
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
           </div>
         </div>
@@ -907,7 +927,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 4 – linha inferior */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,1fr)', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.1fr)', gap: 10, marginBottom: 10 }}>
 
           {/* Comparativos */}
           <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
@@ -987,28 +1007,6 @@ export default function DashboardPage() {
           {/* Radar */}
           <RadarFinanceiro insights={D.radarFinanceiro || []} />
 
-          {/* Metas em andamento */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#8B5CF6', borderRadius: '10px 10px 0 0' }} />
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Progresso</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Metas em andamento</div>
-              <span style={{ fontSize: 12, color: '#3B82F6', cursor: 'pointer' }} onClick={() => navigate('/metas')}>Ver todas →</span>
-            </div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Acompanhe o progresso das suas metas financeiras</div>
-            {(D.metasAndamento || []).map((m, i) => (
-              <div key={i} style={{ padding: '7px 0', borderBottom: i < (D.metasAndamento.length - 1) ? '0.5px solid #F3F4F6' : 'none' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{m.nome}</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: m.cor }}>{m.pct}%</span>
-                </div>
-                <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${m.pct}%`, background: m.cor, borderRadius: 2 }} />
-                </div>
-                <div style={{ fontSize: 11, color: m.ctxCor, marginTop: 2 }}>{m.ctx}</div>
-              </div>
-            ))}
-          </div>
 
           {/* Score */}
           <ScoreGauge score={D.scoreFinanceiro} />

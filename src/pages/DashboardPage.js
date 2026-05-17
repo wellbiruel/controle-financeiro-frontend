@@ -629,153 +629,195 @@ export default function DashboardPage() {
         {/* PMA */}
         <PMA acaoAgora={D.acaoAgora} />
 
-        {/* ROW 1 + ROW 2 – grid 10 colunas; cada card=span2, Investimentos=span4 (alinha com Entradas+Saídas) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
+        {/* ROW 1 — grid 4 colunas */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
-          {/* Investimentos (duplo) */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 4' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#3B82F6', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="#3B82F6"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-              Investimentos <Tooltip text="Valor investido além da reserva de segurança no período selecionado.">{Ico.info}</Tooltip>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
-              <div style={{ paddingRight: 14, borderRight: '1px solid #F3F4F6' }}>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 3 }}>Aporte do mês {Ico.info}</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: '#2563EB', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.investimentos?.aporteMes)}</div>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda do mês</div>
-                <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
-                <div style={{ fontSize: 12, color: (D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? Ico.up : Ico.down}
-                  {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+          {/* Card triplo: Entradas / Saídas / Saldo */}
+          <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: '100%' }}>
+              {/* Esquerda: Entradas em cima, Saídas embaixo */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 3, background: '#16A34A' }} />
+                <div style={{ padding: '16px 18px', flex: 1, borderBottom: '0.5px solid #E5E7EB', borderRight: '0.5px solid #E5E7EB' }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {Ico.up} Entradas
+                  </div>
+                  <div style={{ fontSize: 24, fontWeight: 500, color: '#111827', lineHeight: 1, marginBottom: 4 }}>{fmt(D.entradas?.valor)}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
+                  <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 500 }}>
+                    {(D.entradas?.tendencia ?? 0) >= 0 ? '↑' : '↓'} {(D.entradas?.tendencia ?? 0) >= 0 ? '+' : ''}{D.entradas?.tendencia ?? 0}% vs mês anterior
+                  </div>
                 </div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>
-                  vs média semestral: {(D.investimentos?.vsMediaSemestral ?? 15) >= 0 ? '↑' : '↓'} {Math.abs(D.investimentos?.vsMediaSemestral ?? 15)}% acima da média
+                <div style={{ padding: '16px 18px', flex: 1, borderRight: '0.5px solid #E5E7EB' }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {Ico.down} Saídas
+                  </div>
+                  <div style={{ fontSize: 24, fontWeight: 500, color: '#EF4444', lineHeight: 1, marginBottom: 4 }}>{fmt(D.saidas?.valor)}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total de gastos</div>
+                  <div style={{ fontSize: 11, color: (D.saidas?.tendencia ?? 0) <= 0 ? '#16A34A' : '#EF4444', fontWeight: 500 }}>
+                    {(D.saidas?.tendencia ?? 0) <= 0 ? '↓' : '↑'} {(D.saidas?.tendencia ?? 0) >= 0 ? '+' : ''}{D.saidas?.tendencia ?? 0}% vs mês anterior
+                  </div>
                 </div>
+                <div style={{ height: 3, background: '#EF4444' }} />
               </div>
-              <div style={{ paddingLeft: 14 }}>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 3 }}>Patrimônio investido {Ico.info}</div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: '#2563EB', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Total acumulado</div>
-                <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
-                <div style={{ fontSize: 12, color: (D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? Ico.up : Ico.down}
-                  {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)}{D.investimentos?.patrimonioVsMesPct != null ? ` (${D.investimentos.patrimonioVsMesPct >= 0 ? '+' : ''}${D.investimentos.patrimonioVsMesPct}%)` : ''} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+              {/* Direita: Saldo em destaque */}
+              <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, background: '#F9FAFB' }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>$ Saldo do mês</div>
+                <div style={{ fontSize: 30, fontWeight: 500, color: (D.saldo?.valor ?? 0) >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1 }}>{(D.saldo?.valor ?? 0) >= 0 ? '+' : ''}{fmt(D.saldo?.valor)}</div>
+                <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.saldo?.pctRenda)} da renda guardada</div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: (D.saldo?.valor ?? 0) >= 0 ? '#F0FDF4' : '#FEF2F2', border: `0.5px solid ${(D.saldo?.valor ?? 0) >= 0 ? '#BBF7D0' : '#FECACA'}`, fontSize: 11, color: (D.saldo?.valor ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, width: 'fit-content' }}>
+                  {(D.saldo?.valor ?? 0) >= 0 ? '↑ Superávit no mês' : '↓ Déficit no mês'}
                 </div>
-                <div style={{ fontSize: 12, color: (D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                  {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? Ico.up : Ico.down}
-                  {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
-                </div>
+                {D.saldo?.melhorMes && <div style={{ fontSize: 11, color: '#3B82F6', fontWeight: 500 }}>Melhor mês do ano</div>}
+                <span style={{ ...S.cardLink, marginTop: 4 }} onClick={() => navigate('/fluxo-anual')}>Ver evolução do saldo →</span>
               </div>
             </div>
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/investimentos')}>Ver investimentos →</span>
           </div>
 
-          {/* Reserva */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#0F766E', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F766E"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-              Reserva de Segurança <Tooltip text="Valor guardado para emergências — meta ideal: 6 meses de despesas.">{Ico.info}</Tooltip>
-            </div>
-            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Saldo acumulado</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#0F766E', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.reserva?.pctMeta}% da meta · {D.reserva?.mesesCobertos} meses</div>
-            <div style={{ height: 3, background: '#E0F2F1', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
-              <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: '#0F766E', borderRadius: 2 }} />
-            </div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>
-              {(D.reserva?.pctMeta ?? 0) >= 100
-                ? 'Meta atingida ✓'
-                : `Faltam ${fmt((D.reserva?.metaValor ?? 0) - (D.reserva?.valor ?? 0))} para a meta de ${fmt(D.reserva?.metaValor)}`}
-            </div>
-            {D.reserva?.estado && D.reserva.estado !== 'estavel' && (
-              <div style={{ fontSize: 12, color: D.reserva.estado === 'crescendo' ? '#16A34A' : D.reserva.estado === 'reduzindo' ? '#EF4444' : '#6B7280', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>
-                {D.reserva.estado === 'crescendo' ? Ico.up : D.reserva.estado === 'reduzindo' ? Ico.down : '–'}
-                {D.reserva.variacao > 0 ? '+' : ''}{fmt(D.reserva.variacao)} ({D.reserva.variacaoPct > 0 ? '+' : ''}{D.reserva.variacaoPct}%) vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
-              </div>
-            )}
-            {D.reserva?.estado === 'zerado' && (
-              <div style={{ fontSize: 12, color: '#EF4444', marginBottom: 6 }}>Sem reserva de emergência</div>
-            )}
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes da reserva →</span>
+          {/* Limite Restante */}
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: 4, marginBottom: 3 }}>Orçamento</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 5 }}>Limite Restante {Ico.info}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Disponível no mês</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#F59E0B', lineHeight: 1, marginBottom: 8 }}>{fmt(D.limiteRestante?.valor)}</div>
+            <ProgressBar pct={D.limiteRestante?.teto > 0 ? Math.min(Math.max(isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100) : 0} color="#F59E0B" />
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>{fmtP(D.limiteRestante?.pctRestante)} do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
+            <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
           </div>
 
-          {/* Metas */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#6D28D9', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="#6D28D9"><path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/></svg>
-              Metas Ativas <Tooltip text="Progresso das suas metas financeiras ativas.">{Ico.info}</Tooltip>
+          {/* Teto de Gastos */}
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: 4, marginBottom: 3 }}>Controle</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>Teto de Gastos {Ico.info}</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1, marginBottom: 3 }}>{Math.round(gaugePct)}%</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>do orçamento utilizado</div>
+            <div style={{ height: 5, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
+              <div style={{ height: '100%', width: `${Math.min(gaugePct, 100)}%`, background: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', borderRadius: 2 }} />
             </div>
-            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Em andamento</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#6D28D9', letterSpacing: '-.5px', marginBottom: 3 }}>{D.metasAtivas?.total} metas</div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.metasAtivas?.resumo}</div>
-            <div style={{ display: 'flex', gap: 2, marginBottom: 8 }}>
-              {(D.metasAtivas?.barras || []).map((b, i) => (
-                <div key={i} style={{ height: 3, flex: b.pct, background: b.cor, borderRadius: 1 }} />
-              ))}
-            </div>
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
-          </div>
-
-          {/* Limite */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 2' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#B45309', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="#B45309"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
-              Limite Restante <Tooltip text="Quanto ainda pode gastar no mês sem ultrapassar seu teto.">{Ico.info}</Tooltip>
-            </div>
-            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Disponível no mês</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#B45309', letterSpacing: '-.5px', marginBottom: 3 }}>{fmt(D.limiteRestante?.valor)}</div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{D.limiteRestante?.pctRestante}% do teto · {fmt(D.limiteRestante?.teto)}/mês</div>
-            <div style={{ height: 3, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${Math.min(Math.max(D.limiteRestante?.teto > 0 && isFinite(D.limiteRestante?.pctRestante) ? 100 - D.limiteRestante.pctRestante : 0, 0), 100)}%`, background: '#F59E0B', borderRadius: 2 }} />
-            </div>
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
-          </div>
-
-          <KpiCard accentColor="#3B82F6" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>} label="Entradas" value={fmt(D.entradas?.valor)} sub={D.entradas?.sub} trend={D.entradas?.tendencia} trendSuffix="% vs mês anterior" style={{ gridColumn: 'span 2' }} />
-
-          <KpiCard accentColor="#EF4444" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#EF4444"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>} label="Saídas" value={fmt(D.saidas?.valor)} valueColor="#DC2626" sub={D.saidas?.sub} trend={D.saidas?.tendencia} trendSuffix="% vs mês anterior" trendReverse style={{ gridColumn: 'span 2' }} />
-
-          <KpiCard accentColor="#16A34A" icon={<svg width="13" height="13" viewBox="0 0 24 24" fill="#16A34A"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>} label="Saldo" value={fmt(D.saldo?.valor)} valueColor={D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444'} sub={`${fmtP(D.saldo?.pctRenda)} da renda guardada`} style={{ gridColumn: 'span 2' }}>
-            {D.saldo?.melhorMes && <div style={{ fontSize: 12, color: '#3B82F6', fontWeight: 500, marginTop: 3 }}>Melhor mês do ano</div>}
-          </KpiCard>
-
-          {/* Teto de gastos */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'visible', minHeight: 0, gridColumn: 'span 2' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#F59E0B', borderRadius: '10px 10px 0 0' }} />
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-              Teto de Gastos <Tooltip text="Percentual do limite mensal já utilizado." direction="down">{Ico.info}</Tooltip>
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#D97706', marginBottom: 2 }}>{gaugePct}%</div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>do orçamento utilizado</div>
-            <div style={{ height: 4, background: '#FEF3C7', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
-              <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(gaugePct) ? gaugePct : 0, 0), 100)}%`, background: gaugeCor, borderRadius: 2 }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>
-              <span>Gasto: <strong style={{ color: '#DC2626' }}>{fmt(D.tetoGastos?.gasto)}</strong></span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>
+              <span>Gasto: <span style={{ color: '#EF4444', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span></span>
               <span>Teto: {fmt(D.tetoGastos?.teto)}</span>
             </div>
-            <div style={S.badge(gaugeBg, gaugeTxtC)}>
-              {Ico.warn} {gaugeTxt}
-            </div>
-            <div onClick={() => setModalTeto(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6, cursor: 'pointer' }}>
-              {Ico.gear} <span style={{ fontSize: 11, color: '#9CA3AF' }}>Alterar teto mensal</span>
+            {gaugePct >= 100
+              ? <div style={S.badge('#FEE2E2', '#DC2626')}>{Ico.warn} Teto ultrapassado!</div>
+              : <div style={S.badge('#FEF3C7', '#D97706')}>{Ico.warn} Atenção — {Math.round(gaugePct)}% usado</div>}
+            <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, cursor: 'pointer' }} onClick={() => setModalTeto(true)}>
+              {Ico.gear} Alterar teto mensal
             </div>
           </div>
 
           {/* Maior Gasto */}
-          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', minHeight: 0, gridColumn: 'span 2' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444', borderRadius: '10px 10px 0 0' }} />
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-              {Ico.warn} Maior Gasto
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#EF4444' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: 4, marginBottom: 3 }}>Destaque</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 8 }}>{Ico.warn} Maior Gasto</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', marginBottom: 3 }}>{D.maiorGasto?.nome || '—'}</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#EF4444', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>{fmtP(D.maiorGasto?.pctSaidas)} das saídas de {MESES_ABREV[mes-1]}</div>
+            <Trend val={D.maiorGasto?.tendencia} suffix={`% vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`} />
+            <div style={{ ...S.badge('#FEE2E2', '#DC2626'), marginTop: 6 }}>{Ico.warn} Alto impacto</div>
+            <span style={S.cardLink} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>
+          </div>
+        </div>
+
+        {/* ROW 2 — grid 4 colunas */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+
+          {/* Investimentos duplo */}
+          <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
+            <div style={{ height: 3, background: '#2563EB' }} />
+            <div style={{ padding: '14px 16px' }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#2563EB"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                Investimentos {Ico.info}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, borderTop: '0.5px solid #E5E7EB', paddingTop: 10 }}>
+                <div style={{ paddingRight: 14, borderRight: '0.5px solid #E5E7EB' }}>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte do mês</div>
+                  <div style={{ fontSize: 17, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
+                  <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
+                  <div style={{ fontSize: 11, color: (D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
+                    {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                  </div>
+                  <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
+                </div>
+                <div style={{ paddingLeft: 14 }}>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio total</div>
+                  <div style={{ fontSize: 17, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total acumulado</div>
+                  <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
+                  <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 3 }}>
+                    {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)}{D.investimentos?.patrimonioVsMesPct != null ? ` (${D.investimentos.patrimonioVsMesPct >= 0 ? '+' : ''}${D.investimentos.patrimonioVsMesPct}%)` : ''} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                  </div>
+                  <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
+                    {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
+                  </div>
+                  <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
+                </div>
+              </div>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 3 }}>{D.maiorGasto?.nome}</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#DC2626', letterSpacing: '-.5px', marginBottom: 2 }}>{fmt(D.maiorGasto?.valor)}</div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 3 }}>{fmtP(D.maiorGasto?.pctSaidas)} das saídas de {MESES_ABREV[mes-1]}</div>
-            <div style={{ fontSize: 12, color: '#EF4444', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 6 }}>
-              {Ico.up} {D.maiorGasto?.tendencia}% vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+          </div>
+
+          {/* Reserva de Segurança */}
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#16A34A' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: 4, marginBottom: 3 }}>Segurança</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#0F766E"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+              Reserva {Ico.info}
             </div>
-            <div style={S.badge('#FEE2E2', '#B91C1C')}>{Ico.warn} Alto impacto</div>
-            <span style={S.cardLink} onClick={() => navigate('/cartoes')}>Ver análise do cartão →</span>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>Saldo acumulado</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#111827', lineHeight: 1, marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
+            <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>
+              {(D.reserva?.pctMeta ?? 0) >= 100
+                ? 'Meta atingida ✓'
+                : `Faltam ${fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta`}
+            </div>
+            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 500 }}>↑ +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
+            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 500 }}>↓ {fmt(D.reserva?.variacao)} vs mês anterior</div>}
+            {D.reserva?.estado === 'zerado' && <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 500 }}>Sem reserva de emergência</div>}
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes →</span>
+          </div>
+
+          {/* Reserva em dia — visual */}
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#16A34A' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', alignSelf: 'flex-start', marginTop: 4 }}>Cobertura</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', alignSelf: 'flex-start', marginBottom: 6 }}>Reserva em dia</div>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 4 }}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} style={{ width: 28, height: 28, borderRadius: 6, background: i < Math.floor(D.reserva?.mesesCobertos || 0) ? '#16A34A' : '#F1F5F9' }} />
+              ))}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 500, color: '#111827' }}>{D.reserva?.mesesCobertos || 0} <span style={{ fontSize: 13, color: '#9CA3AF' }}>de 6 meses</span></div>
+            <div style={{ fontSize: 11, color: '#9CA3AF' }}>cobertura de emergência</div>
+            {(D.reserva?.mesesCobertos || 0) < 3
+              ? <div style={S.badge('#FEE2E2', '#DC2626')}>● Crítico</div>
+              : (D.reserva?.mesesCobertos || 0) < 6
+              ? <div style={S.badge('#FEF3C7', '#D97706')}>● Em progresso</div>
+              : <div style={S.badge('#F0FDF4', '#16A34A')}>✓ Proteção ativa</div>}
+            <span style={S.cardLink} onClick={() => navigate('/reserva')}>Ver reserva →</span>
+          </div>
+
+          {/* Metas Ativas */}
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#8B5CF6' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: 4, marginBottom: 3 }}>Progresso</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#8B5CF6"><path d="M19.07 4.93l-1.41 1.41A8.014 8.014 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.48 8.64 6 10.17 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6a5.99 5.99 0 0 0-1.76-4.24l-1.41 1.41A3.977 3.977 0 0 1 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4V2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z"/></svg>
+              Metas Ativas {Ico.info}
+            </div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>Em andamento</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#8B5CF6', lineHeight: 1, marginBottom: 5 }}>{D.metasAtivas?.total ?? 0} metas</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>
+              {D.metasAtivas?.total ? `${D.metasAtivas.total} meta${D.metasAtivas.total !== 1 ? 's' : ''} cadastrada${D.metasAtivas.total !== 1 ? 's' : ''}` : 'Nenhuma meta cadastrada'}
+            </div>
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
           </div>
         </div>
 
@@ -848,22 +890,25 @@ export default function DashboardPage() {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#6D28D9', borderRadius: '10px 10px 0 0' }} />
             {(() => {
               const mesesAbrev = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-              const spm = D.saldoPorMes || [];
-              const t3 = [mes - 2, mes - 1, mes].map(m => {
-                const idx = m <= 0 ? m + 12 - 1 : m - 1;
-                const d = spm[idx];
-                return { lbl: mesesAbrev[idx], e: d?.e || 0, s: d?.s || 0, atual: m === mes };
-              });
-              const mediaE = Math.round(t3.reduce((a, m) => a + m.e, 0) / 3);
-              const mediaS = Math.round(t3.reduce((a, m) => a + m.s, 0) / 3);
-              const maxE = Math.max(...t3.map(m => m.e), 1);
-              const maxS = Math.max(...t3.map(m => m.s), 1);
-              const maxInv = Math.max(D.investimentos?.aporteMes || 0, 1);
+              const t3 = (D.trimestre || []).map((d, i) => ({
+                lbl: mesesAbrev[d.mes - 1],
+                e: d.entradas, s: d.saidas, inv: d.aportes, res: d.reserva,
+                atual: i === 2,
+              }));
+              if (t3.length < 3) return null;
+              const mediaE   = Math.round(t3.reduce((a, m) => a + m.e,   0) / 3);
+              const mediaS   = Math.round(t3.reduce((a, m) => a + m.s,   0) / 3);
+              const mediaInv = Math.round(t3.reduce((a, m) => a + m.inv, 0) / 3);
+              const mediaRes = Math.round(t3.reduce((a, m) => a + m.res, 0) / 3);
+              const maxE   = Math.max(...t3.map(m => m.e),   1);
+              const maxS   = Math.max(...t3.map(m => m.s),   1);
+              const maxInv = Math.max(...t3.map(m => m.inv), 1);
+              const maxRes = Math.max(...t3.map(m => m.res), 1);
               const metricas = [
-                { lbl: 'Entradas', cor: '#16A34A', corLight: '#BBF7D0', vals: t3.map(m => ({ v: m.e, h: Math.round((m.e / maxE) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaE) + '/mês' },
-                { lbl: 'Saídas',   cor: '#EF4444', corLight: '#FECACA', vals: t3.map(m => ({ v: m.s, h: Math.round((m.s / maxS) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaS) + '/mês' },
-                { lbl: 'Investimentos', cor: '#2563EB', corLight: '#DBEAFE', vals: t3.map((m, i) => ({ v: i === 2 ? (D.investimentos?.aporteMes || 0) : 0, h: i === 2 ? Math.round(((D.investimentos?.aporteMes || 0) / maxInv) * 100) : 3, lbl: m.lbl, atual: m.atual })), media: fmt(D.investimentos?.aporteMes || 0) + '/mês' },
-                { lbl: 'Reserva',  cor: '#8B5CF6', corLight: '#DDD6FE', vals: t3.map((m, i) => ({ v: i === 2 ? (D.reserva?.valor || 0) : 0, h: i === 2 ? 70 : i === 1 ? 50 : 30, lbl: m.lbl, atual: m.atual })), media: (D.reserva?.mesesCobertos || 0) + ' meses' },
+                { lbl: 'Entradas',      cor: '#16A34A', corLight: '#BBF7D0', vals: t3.map(m => ({ v: m.e,   h: Math.round((m.e   / maxE)   * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaE)   + '/mês' },
+                { lbl: 'Saídas',        cor: '#EF4444', corLight: '#FECACA', vals: t3.map(m => ({ v: m.s,   h: Math.round((m.s   / maxS)   * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaS)   + '/mês' },
+                { lbl: 'Investimentos', cor: '#2563EB', corLight: '#DBEAFE', vals: t3.map(m => ({ v: m.inv, h: Math.round((m.inv / maxInv) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaInv) + '/mês' },
+                { lbl: 'Reserva',       cor: '#8B5CF6', corLight: '#DDD6FE', vals: t3.map(m => ({ v: m.res, h: Math.round((m.res / maxRes) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaRes) + '/mês' },
               ];
               return (
                 <>

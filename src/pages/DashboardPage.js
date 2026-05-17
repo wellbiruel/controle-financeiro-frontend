@@ -856,19 +856,19 @@ export default function DashboardPage() {
                 atual: i === 2,
               }));
               if (t3.length < 3) return null;
-              const mediaE   = Math.round(t3.reduce((a, m) => a + m.e,   0) / 3);
-              const mediaS   = Math.round(t3.reduce((a, m) => a + m.s,   0) / 3);
-              const mediaInv = Math.round(t3.reduce((a, m) => a + m.inv, 0) / 3);
-              const mediaRes = Math.round(t3.reduce((a, m) => a + m.res, 0) / 3);
+              const totalE   = Math.round(t3.reduce((a, m) => a + m.e,   0));
+              const totalS   = Math.round(t3.reduce((a, m) => a + m.s,   0));
+              const totalInv = Math.round(t3.reduce((a, m) => a + m.inv, 0));
+              const totalRes = Math.round(t3.reduce((a, m) => a + m.res, 0));
               const maxE   = Math.max(...t3.map(m => m.e),   1);
               const maxS   = Math.max(...t3.map(m => m.s),   1);
               const maxInv = Math.max(...t3.map(m => m.inv), 1);
               const maxRes = Math.max(...t3.map(m => m.res), 1);
               const metricas = [
-                { lbl: 'Entradas',      cor: '#16A34A', corLight: '#BBF7D0', vals: t3.map(m => ({ v: m.e,   h: Math.round((m.e   / maxE)   * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaE)   + '/mês' },
-                { lbl: 'Saídas',        cor: '#EF4444', corLight: '#FECACA', vals: t3.map(m => ({ v: m.s,   h: Math.round((m.s   / maxS)   * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaS)   + '/mês' },
-                { lbl: 'Investimentos', cor: '#2563EB', corLight: '#DBEAFE', vals: t3.map(m => ({ v: m.inv, h: Math.round((m.inv / maxInv) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaInv) + '/mês' },
-                { lbl: 'Reserva',       cor: '#8B5CF6', corLight: '#DDD6FE', vals: t3.map(m => ({ v: m.res, h: Math.round((m.res / maxRes) * 100), lbl: m.lbl, atual: m.atual })), media: fmt(mediaRes) + '/mês' },
+                { lbl: 'Entradas',      cor: '#16A34A', corLight: '#BBF7D0', vals: t3.map(m => ({ v: m.e,   h: Math.round((m.e   / maxE)   * 100), lbl: m.lbl, atual: m.atual })), total: fmt(totalE)   },
+                { lbl: 'Saídas',        cor: '#EF4444', corLight: '#FECACA', vals: t3.map(m => ({ v: m.s,   h: Math.round((m.s   / maxS)   * 100), lbl: m.lbl, atual: m.atual })), total: fmt(totalS)   },
+                { lbl: 'Investimentos', cor: '#2563EB', corLight: '#DBEAFE', vals: t3.map(m => ({ v: m.inv, h: Math.round((m.inv / maxInv) * 100), lbl: m.lbl, atual: m.atual })), total: fmt(totalInv) },
+                { lbl: 'Reserva',       cor: '#8B5CF6', corLight: '#DDD6FE', vals: t3.map(m => ({ v: m.res, h: Math.round((m.res / maxRes) * 100), lbl: m.lbl, atual: m.atual })), total: fmt(totalRes) },
               ];
               return (
                 <>
@@ -884,7 +884,7 @@ export default function DashboardPage() {
                           <span style={{ width: 7, height: 7, borderRadius: '50%', background: m.cor, display: 'inline-block' }} />
                           {m.lbl}
                         </span>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: m.cor }}>{m.media}</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: m.cor }}>{m.total}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 28 }}>
                         {m.vals.map((v, vi) => (
@@ -897,8 +897,8 @@ export default function DashboardPage() {
                     </div>
                   ))}
                   <div style={{ marginTop: 10, paddingTop: 8, borderTop: '0.5px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-                    <span style={{ color: '#6B7280' }}>Saldo médio/mês</span>
-                    <span style={{ fontWeight: 600, color: mediaE - mediaS >= 0 ? '#16A34A' : '#EF4444' }}>{mediaE - mediaS >= 0 ? '+' : ''}{fmt(mediaE - mediaS)}</span>
+                    <span style={{ color: '#6B7280' }}>Saldo do trimestre</span>
+                    <span style={{ fontWeight: 600, color: totalE - totalS >= 0 ? '#16A34A' : '#EF4444' }}>{totalE - totalS >= 0 ? '+' : ''}{fmt(totalE - totalS)}</span>
                   </div>
                 </>
               );

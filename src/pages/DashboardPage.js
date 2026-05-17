@@ -705,7 +705,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Investimentos duplo */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
@@ -772,35 +772,6 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver reserva →</span>
           </div>
 
-          {/* Metas — card unificado */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Progresso</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Metas Ativas</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Acompanhe o progresso das suas metas</div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: '#8B5CF6', lineHeight: 1, marginBottom: 4 }}>{D.metasAtivas?.total ?? 0} metas</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Em andamento</div>
-            {(D.metasAndamento || []).length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
-                {(D.metasAndamento || []).slice(0, 3).map((m, i) => (
-                  <div key={i}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
-                      <span style={{ color: '#374151', fontWeight: 500 }}>{m.nome}</span>
-                      <span style={{ color: '#8B5CF6', fontWeight: 600 }}>{m.pct}%</span>
-                    </div>
-                    <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${m.pct}%`, background: m.cor || '#8B5CF6', borderRadius: 3 }} />
-                    </div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{m.ctx}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '12px', textAlign: 'center', marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF' }}>Nenhuma meta cadastrada</div>
-              </div>
-            )}
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
-          </div>
         </div>
 
         {/* ROW 3 – Saldo gráfico + Categorias + Saude – 10 colunas alinhadas com ROW 1+2 */}
@@ -927,7 +898,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 4 – linha inferior */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.1fr)', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,1fr)', gap: 10, marginBottom: 10 }}>
 
           {/* Comparativos */}
           <div style={{ ...S.card, position: 'relative', overflow: 'hidden' }}>
@@ -1010,6 +981,36 @@ export default function DashboardPage() {
 
           {/* Score */}
           <ScoreGauge score={D.scoreFinanceiro} />
+
+          {/* Metas — card unificado */}
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Progresso</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Metas Ativas</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Acompanhe o progresso das suas metas</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#8B5CF6', lineHeight: 1, marginBottom: 4 }}>{D.metasAtivas?.total ?? 0} metas</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Em andamento</div>
+            {(D.metasAndamento || []).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                {(D.metasAndamento || []).slice(0, 3).map((m, i) => (
+                  <div key={i}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+                      <span style={{ color: '#374151', fontWeight: 500 }}>{m.nome}</span>
+                      <span style={{ color: '#8B5CF6', fontWeight: 600 }}>{m.pct}%</span>
+                    </div>
+                    <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${m.pct}%`, background: m.cor || '#8B5CF6', borderRadius: 3 }} />
+                    </div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{m.ctx}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '12px', textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF' }}>Nenhuma meta cadastrada</div>
+              </div>
+            )}
+            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/metas')}>Ver todas as metas →</span>
+          </div>
         </div>
 
         {/* RESUMO DO PERÍODO */}

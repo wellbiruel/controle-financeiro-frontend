@@ -69,7 +69,7 @@ function Trend({ val, suffix = '', reverse = false }) {
   const pos = reverse ? val < 0 : val >= 0;
   const cor = pos ? '#16A34A' : '#EF4444';
   return (
-    <div style={{ fontSize: 12, fontWeight: 500, color: cor, display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+    <div style={{ fontSize: 12, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
       <span style={{ color: cor }}>{pos ? Ico.up : Ico.down}</span>
       {val > 0 ? '+' : ''}{val}{suffix}
     </div>
@@ -637,23 +637,21 @@ export default function DashboardPage() {
                   <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}>{Ico.up} Entradas</div>
                   <div style={{ fontSize: 24, fontWeight: 500, color: '#111827', lineHeight: 1, marginBottom: 4 }}>{fmt(D.entradas?.valor)}</div>
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
-                  <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 500 }}>{D.entradas?.tendencia >= 0 ? '↑' : '↓'} {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior</div>
+                  <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444' }}>{D.entradas?.tendencia >= 0 ? '↑' : '↓'}</span> {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior</div>
                 </div>
                 <div style={{ padding: '16px 18px', flex: 1, borderRight: '0.5px solid #E5E7EB' }}>
                   <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}>{Ico.down} Saídas</div>
                   <div style={{ fontSize: 24, fontWeight: 500, color: '#EF4444', lineHeight: 1, marginBottom: 4 }}>{fmt(D.saidas?.valor)}</div>
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total de gastos</div>
-                  <div style={{ fontSize: 11, color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444', fontWeight: 500 }}>{D.saidas?.tendencia <= 0 ? '↓' : '↑'} {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior</div>
+                  <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444' }}>{D.saidas?.tendencia <= 0 ? '↓' : '↑'}</span> {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior</div>
                 </div>
               </div>
               <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>$ Saldo do mês</div>
                 <div style={{ fontSize: 30, fontWeight: 500, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1 }}>{D.saldo?.valor >= 0 ? '+' : ''}{fmt(D.saldo?.valor)}</div>
                 <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.saldo?.pctRenda)} da renda guardada</div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: D.saldo?.valor >= 0 ? '#F0FDF4' : '#FEF2F2', border: `0.5px solid ${D.saldo?.valor >= 0 ? '#BBF7D0' : '#FECACA'}`, fontSize: 11, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, width: 'fit-content' }}>
-                  {D.saldo?.valor >= 0 ? '↑ Superávit no mês' : '↓ Déficit no mês'}
-                </div>
-                {D.saldo?.melhorMes && <div style={{ fontSize: 11, color: '#3B82F6', fontWeight: 500 }}>Melhor mês do ano</div>}
+                <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{D.saldo?.valor >= 0 ? '↑' : '↓'}</span> {D.saldo?.valor >= 0 ? 'Superávit no mês' : 'Déficit no mês'}</div>
+                {D.saldo?.melhorMes && <div style={{ fontSize: 11, color: '#6B7280' }}>Melhor mês do ano</div>}
                 <span style={{ ...S.cardLink, marginTop: 4 }} onClick={() => navigate('/fluxo-anual')}>Ver evolução do saldo →</span>
               </div>
             </div>
@@ -700,8 +698,8 @@ export default function DashboardPage() {
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
             <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, marginTop: 4 }}>Faltam {fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta</div>
-            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 500, marginBottom: 8 }}>↑ +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
-            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 500, marginBottom: 8 }}>↓ -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
+            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#16A34A' }}>↑</span> +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
+            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#EF4444' }}>↓</span> -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
             {(D.reserva?.mesesCobertos || 0) < 3
               ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>● Crítico</div>
               : (D.reserva?.mesesCobertos || 0) < 6
@@ -736,8 +734,8 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
                 <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
-                <div style={{ fontSize: 11, color: D.investimentos?.aporteVsAnterior >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginTop: 4, marginBottom: 8 }}>
-                  {D.investimentos?.aporteVsAnterior >= 0 ? '↑' : '↓'} {D.investimentos?.aporteVsAnterior >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4, marginBottom: 8 }}>
+                  <span style={{ color: D.investimentos?.aporteVsAnterior >= 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos?.aporteVsAnterior >= 0 ? '↑' : '↓'}</span> {D.investimentos?.aporteVsAnterior >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
                 <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
               </div>
@@ -746,11 +744,11 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>Total acumulado</div>
                 <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
-                <div style={{ fontSize: 11, color: D.investimentos?.patrimonioVsMes >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginTop: 4, marginBottom: 3 }}>
-                  {D.investimentos?.patrimonioVsMes >= 0 ? '↑' : '↓'} {D.investimentos?.patrimonioVsMes >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)} ({D.investimentos?.patrimonioVsMesPct >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsMesPct}%) em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4, marginBottom: 3 }}>
+                  <span style={{ color: D.investimentos?.patrimonioVsMes >= 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos?.patrimonioVsMes >= 0 ? '↑' : '↓'}</span> {D.investimentos?.patrimonioVsMes >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)} ({D.investimentos?.patrimonioVsMesPct >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsMesPct}%) em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
-                <div style={{ fontSize: 11, color: D.investimentos?.patrimonioVsAno >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 8 }}>
-                  {D.investimentos?.patrimonioVsAno >= 0 ? '↑' : '↓'} {D.investimentos?.patrimonioVsAno >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
+                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}>
+                  <span style={{ color: D.investimentos?.patrimonioVsAno >= 0 ? '#16A34A' : '#EF4444' }}>{D.investimentos?.patrimonioVsAno >= 0 ? '↑' : '↓'}</span> {D.investimentos?.patrimonioVsAno >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
                 </div>
                 <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
               </div>
@@ -921,7 +919,7 @@ export default function DashboardPage() {
                   <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, width: 18, color: r.cor }}>{r.arrow}</span>
                     <span style={{ fontSize: 13, color: '#6B7280', flex: 1 }}>{r.lbl}</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: r.cor }}>{r.val}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#6B7280' }}>{r.val}</span>
                   </div>
                 ))}
               </>
@@ -938,7 +936,7 @@ export default function DashboardPage() {
                   <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, width: 18, color: r.cor }}>{r.arrow}</span>
                     <span style={{ fontSize: 13, color: '#6B7280', flex: 1 }}>{r.lbl}</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: r.cor }}>{r.val}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#6B7280' }}>{r.val}</span>
                   </div>
                 ))}
               </>

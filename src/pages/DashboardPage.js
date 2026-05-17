@@ -756,36 +756,32 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Saldo por mês — gráfico de linha SVG */}
+          {/* Patrimônio acumulado — gráfico de linha SVG */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Evolução</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Saldo por Mês</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Resultado mensal no ano</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Patrimônio</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Total acumulado no ano</div>
             {(() => {
-              const meses = (D.saldoPorMes || []).filter(m => m != null && m.saldo != null);
+              const meses = (D.investimentos?.patrimonioHistorico || []).filter(m => m != null && m.valor != null);
               if (meses.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
               const W = 200, H = 56, pad = 10;
-              const vals = meses.map(m => m.saldo);
+              const vals = meses.map(m => m.valor);
               const min = Math.min(...vals), max = Math.max(...vals);
               const range = max - min || 1;
               const toX = i => pad + (i / (meses.length - 1)) * (W - pad * 2);
               const toY = v => pad + (1 - (v - min) / range) * (H - pad * 2);
-              const pts = meses.map((m, i) => ({ x: toX(i), y: toY(m.saldo), saldo: m.saldo, mes: m.mes }));
+              const pts = meses.map((m, i) => ({ x: toX(i), y: toY(m.valor), valor: m.valor, mes: m.mes }));
               const polyline = pts.map(p => `${p.x},${p.y}`).join(' ');
-              const zeroY = toY(0);
               return (
                 <div style={{ position: 'relative', flex: 1 }}>
                   <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 64, overflow: 'visible', display: 'block' }}>
-                    {min < 0 && max > 0 && (
-                      <line x1={pad} y1={zeroY} x2={W - pad} y2={zeroY} stroke="#E5E7EB" strokeWidth="1" strokeDasharray="3 3" />
-                    )}
-                    <polyline points={polyline} fill="none" stroke="#D1D5DB" strokeWidth="1.5" strokeLinejoin="round" />
+                    <polyline points={polyline} fill="none" stroke="#BFDBFE" strokeWidth="1.5" strokeLinejoin="round" />
                     {pts.map((p, i) => (
                       <g key={i} style={{ cursor: 'pointer' }}
-                        onMouseEnter={() => setSaldoTip({ i, x: p.x, y: p.y, saldo: p.saldo, mes: p.mes })}
+                        onMouseEnter={() => setSaldoTip({ i, x: p.x, y: p.y, valor: p.valor, mes: p.mes })}
                         onMouseLeave={() => setSaldoTip(null)}>
                         <circle cx={p.x} cy={p.y} r={6} fill="transparent" />
-                        <circle cx={p.x} cy={p.y} r={3} fill="white" stroke={p.saldo >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="1.5" />
+                        <circle cx={p.x} cy={p.y} r={3} fill="white" stroke="#2563EB" strokeWidth="1.5" />
                       </g>
                     ))}
                   </svg>
@@ -800,7 +796,7 @@ export default function DashboardPage() {
                       padding: '3px 8px', borderRadius: 5,
                       whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10,
                     }}>
-                      {MESES_ABREV[(saldoTip.mes || 1) - 1]}: {fmtS(saldoTip.saldo)}
+                      {MESES_ABREV[(saldoTip.mes || 1) - 1]}: {fmt(saldoTip.valor)}
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#D1D5DB', marginTop: 2, paddingLeft: pad - 4, paddingRight: pad - 4 }}>
@@ -809,7 +805,7 @@ export default function DashboardPage() {
                 </div>
               );
             })()}
-            <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver evolução →</span>
+            <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
           </div>
 
         </div>

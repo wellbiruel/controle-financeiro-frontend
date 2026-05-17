@@ -762,7 +762,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Saldo por Mês</div>
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Resultado mensal no ano</div>
             {(() => {
-              const meses = D.saldoPorMes || [];
+              const meses = (D.saldoPorMes || []).filter(m => m != null && m.saldo != null);
               if (meses.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
               const W = 200, H = 56, pad = 10;
               const vals = meses.map(m => m.saldo);

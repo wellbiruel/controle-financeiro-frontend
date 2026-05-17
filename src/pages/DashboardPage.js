@@ -756,56 +756,72 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Patrimônio acumulado — gráfico de linha SVG */}
+          {/* Evolução do Patrimônio */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Evolução</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Patrimônio</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Total acumulado no ano</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Patrimônio</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Evolução {ano}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Patrimônio líquido por mês</div>
             {(() => {
-              const meses = (D.investimentos?.patrimonioHistorico || []).filter(m => m != null && m.valor != null);
-              if (meses.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
-              const W = 200, H = 56, pad = 10;
-              const vals = meses.map(m => m.valor);
-              const min = Math.min(...vals), max = Math.max(...vals);
-              const range = max - min || 1;
-              const toX = i => pad + (i / (meses.length - 1)) * (W - pad * 2);
-              const toY = v => pad + (1 - (v - min) / range) * (H - pad * 2);
-              const pts = meses.map((m, i) => ({ x: toX(i), y: toY(m.valor), valor: m.valor, mes: m.mes }));
-              const polyline = pts.map(p => `${p.x},${p.y}`).join(' ');
+              const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
+              if (hist.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
+              const vals = hist.map(p => p.valor);
+              const min = Math.min(...vals) * 0.98;
+              const max = Math.max(...vals) * 1.02;
+              const W = 240, H = 70;
+              const x = i => (i / (hist.length - 1 || 1)) * W;
+              const y = v => H - ((v - min) / (max - min || 1)) * H;
+              const points = hist.map((p, i) => `${x(i).toFixed(1)},${y(p.valor).toFixed(1)}`).join(' ');
+              const area = `M${x(0).toFixed(1)},${H} ` + hist.map((p, i) => `L${x(i).toFixed(1)},${y(p.valor).toFixed(1)}`).join(' ') + ` L${x(hist.length - 1).toFixed(1)},${H} Z`;
+              const inicio = hist[0]?.valor || 0;
+              const atual = hist[hist.length - 1]?.valor || 0;
+              const variacao = atual - inicio;
+              const variacaoPct = inicio > 0 ? ((variacao / inicio) * 100).toFixed(1) : 0;
               return (
-                <div style={{ position: 'relative', flex: 1 }}>
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 64, overflow: 'visible', display: 'block' }}>
-                    <polyline points={polyline} fill="none" stroke="#BFDBFE" strokeWidth="1.5" strokeLinejoin="round" />
-                    {pts.map((p, i) => (
-                      <g key={i} style={{ cursor: 'pointer' }}
-                        onMouseEnter={() => setSaldoTip({ i, x: p.x, y: p.y, valor: p.valor, mes: p.mes })}
-                        onMouseLeave={() => setSaldoTip(null)}>
-                        <circle cx={p.x} cy={p.y} r={6} fill="transparent" />
-                        <circle cx={p.x} cy={p.y} r={3} fill="white" stroke="#2563EB" strokeWidth="1.5" />
-                      </g>
-                    ))}
-                  </svg>
-                  {saldoTip && (
-                    <div style={{
-                      position: 'absolute',
-                      top: (saldoTip.y / H) * 64 - 30,
-                      left: `${(saldoTip.x / W) * 100}%`,
-                      transform: 'translateX(-50%)',
-                      background: '#111827', color: 'white',
-                      fontSize: 11, fontWeight: 500,
-                      padding: '3px 8px', borderRadius: 5,
-                      whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10,
-                    }}>
-                      {MESES_ABREV[(saldoTip.mes || 1) - 1]}: {fmt(saldoTip.valor)}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#D1D5DB', marginTop: 2, paddingLeft: pad - 4, paddingRight: pad - 4 }}>
-                    {meses.map((m, i) => <span key={i}>{MESES_ABREV[(m.mes || i + 1) - 1]}</span>)}
+                <>
+                  <div style={{ position: 'relative', marginBottom: 8 }}>
+                    <svg width="100%" viewBox={`0 0 ${W} ${H + 16}`} style={{ display: 'block', overflow: 'visible' }}>
+                      <path d={area} fill="rgba(37,99,235,0.06)" />
+                      <polyline points={points} fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+                      {hist.map((p, i) => (
+                        <g key={i}
+                          onMouseEnter={() => setSaldoTip({ i, valor: p.valor, mes: MESES_ABREV[p.mes - 1] })}
+                          onMouseLeave={() => setSaldoTip(null)}
+                          style={{ cursor: 'pointer' }}>
+                          <circle cx={x(i)} cy={y(p.valor)} r="8" fill="transparent" />
+                          <circle cx={x(i)} cy={y(p.valor)} r={i === hist.length - 1 ? 4 : 3}
+                            fill={i === hist.length - 1 ? '#2563EB' : '#fff'}
+                            stroke="#2563EB" strokeWidth="1.5" />
+                        </g>
+                      ))}
+                      {hist.map((p, i) => (
+                        <text key={i} x={x(i)} y={H + 13} textAnchor="middle" fontSize="8" fill={i === hist.length - 1 ? '#6B7280' : '#D1D5DB'} fontWeight={i === hist.length - 1 ? '500' : '400'}>
+                          {MESES_ABREV[p.mes - 1]}
+                        </text>
+                      ))}
+                    </svg>
+                    {saldoTip && (
+                      <div style={{ position: 'absolute', top: -28, left: `${(saldoTip.i / (hist.length - 1 || 1)) * 100}%`, transform: 'translateX(-50%)', background: '#111827', color: '#fff', fontSize: 10, padding: '3px 7px', borderRadius: 5, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10 }}>
+                        {saldoTip.mes}: {fmt(saldoTip.valor)}
+                      </div>
+                    )}
                   </div>
-                </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 6 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 1 }}>Início do ano</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280' }}>{fmt(inicio)}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 1 }}>Atual</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: '#2563EB' }}>{fmt(atual)}</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 10 }}>
+                    <span style={{ color: variacao >= 0 ? '#16A34A' : '#EF4444' }}>{variacao >= 0 ? '↑' : '↓'}</span> {variacao >= 0 ? '+' : ''}{fmt(variacao)} ({variacao >= 0 ? '+' : ''}{variacaoPct}%) em {ano}
+                  </div>
+                  <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/investimentos')}>Ver investimentos →</span>
+                </>
               );
             })()}
-            <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
           </div>
 
         </div>

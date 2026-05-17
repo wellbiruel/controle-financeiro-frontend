@@ -736,7 +736,7 @@ export default function DashboardPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, borderTop: '0.5px solid #E5E7EB', paddingTop: 10 }}>
                 <div style={{ paddingRight: 14, borderRight: '0.5px solid #E5E7EB' }}>
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte do mês</div>
-                  <div style={{ fontSize: 17, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                  <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
                   <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
                   <div style={{ fontSize: 11, color: (D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
@@ -746,7 +746,7 @@ export default function DashboardPage() {
                 </div>
                 <div style={{ paddingLeft: 14 }}>
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio total</div>
-                  <div style={{ fontSize: 17, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                  <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                   <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total acumulado</div>
                   <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
                   <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 3 }}>
@@ -770,7 +770,7 @@ export default function DashboardPage() {
               Reserva {Ico.info}
             </div>
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>Saldo acumulado</div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: '#111827', lineHeight: 1, marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#0F766E', lineHeight: 1, marginBottom: 3 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
             <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>
@@ -794,7 +794,7 @@ export default function DashboardPage() {
                 <div key={i} style={{ width: 28, height: 28, borderRadius: 6, background: i < Math.floor(D.reserva?.mesesCobertos || 0) ? '#16A34A' : '#F1F5F9' }} />
               ))}
             </div>
-            <div style={{ fontSize: 20, fontWeight: 500, color: '#111827' }}>{D.reserva?.mesesCobertos || 0} <span style={{ fontSize: 13, color: '#9CA3AF' }}>de 6 meses</span></div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: '#111827' }}>{D.reserva?.mesesCobertos || 0} <span style={{ fontSize: 13, color: '#9CA3AF' }}>de 6 meses</span></div>
             <div style={{ fontSize: 11, color: '#9CA3AF' }}>cobertura de emergência</div>
             {(D.reserva?.mesesCobertos || 0) < 3
               ? <div style={S.badge('#FEE2E2', '#DC2626')}>● Crítico</div>

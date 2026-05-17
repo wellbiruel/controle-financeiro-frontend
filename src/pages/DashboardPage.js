@@ -726,37 +726,35 @@ export default function DashboardPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Investimentos duplo */}
-          <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
-            <div style={{ height: 3, background: '#2563EB' }} />
-            <div style={{ padding: '14px 16px' }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#2563EB"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-                Investimentos {Ico.info}
+          <div style={{ ...S.card, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#2563EB' }} />
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginTop: 4, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#2563EB"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+              Investimentos {Ico.info}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, flex: 1 }}>
+              <div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte do mês</div>
+                <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
+                <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
+                <div style={{ fontSize: 11, color: (D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
+                  {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                </div>
+                <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, borderTop: '0.5px solid #E5E7EB', paddingTop: 10 }}>
-                <div style={{ paddingRight: 14, borderRight: '0.5px solid #E5E7EB' }}>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte do mês</div>
-                  <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
-                  <ProgressBar pct={D.investimentos?.aportePctRenda || 0} color="#3B82F6" />
-                  <div style={{ fontSize: 11, color: (D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
-                    {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.aporteVsAnterior ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
-                  </div>
-                  <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
+              <div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio total</div>
+                <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total acumulado</div>
+                <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
+                <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 3 }}>
+                  {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)}{D.investimentos?.patrimonioVsMesPct != null ? ` (${D.investimentos.patrimonioVsMesPct >= 0 ? '+' : ''}${D.investimentos.patrimonioVsMesPct}%)` : ''} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
                 </div>
-                <div style={{ paddingLeft: 14 }}>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio total</div>
-                  <div style={{ fontSize: 22, fontWeight: 500, color: '#2563EB', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total acumulado</div>
-                  <ProgressBar pct={Math.min(Math.max(isFinite(D.investimentos?.patrimonioVsAno) ? D.investimentos.patrimonioVsAno : 0, 0), 100)} color="#3B82F6" />
-                  <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 3 }}>
-                    {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.patrimonioVsMes ?? 0) >= 0 ? '+' : ''}{fmt(D.investimentos?.patrimonioVsMes)}{D.investimentos?.patrimonioVsMesPct != null ? ` (${D.investimentos.patrimonioVsMesPct >= 0 ? '+' : ''}${D.investimentos.patrimonioVsMesPct}%)` : ''} em {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
-                  </div>
-                  <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
-                    {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
-                  </div>
-                  <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
+                <div style={{ fontSize: 11, color: (D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '#16A34A' : '#EF4444', fontWeight: 500, marginBottom: 6 }}>
+                  {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '↑' : '↓'} {(D.investimentos?.patrimonioVsAno ?? 0) >= 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}% em {ano}
                 </div>
+                <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
               </div>
             </div>
           </div>

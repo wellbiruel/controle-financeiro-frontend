@@ -769,55 +769,45 @@ export default function DashboardPage() {
             </div>
             {/* Separador horizontal */}
             <div style={{ height: '0.5px', background: '#E5E7EB', marginBottom: 10 }} />
-            {/* Gráfico evolução */}
+            {/* Sparkline patrimônio */}
             {(() => {
               const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
-              if (!hist.length) return null;
+              if (hist.length < 2) return null;
               const vals = hist.map(p => p.valor);
-              const min = Math.min(...vals) * 0.98;
-              const max = Math.max(...vals) * 1.02;
-              const W = 240, H = 45;
-              const px = i => (i / (hist.length - 1 || 1)) * W;
+              const min = Math.min(...vals) * 0.97;
+              const max = Math.max(...vals) * 1.03;
+              const W = 240, H = 32;
+              const px = i => (i / (hist.length - 1)) * W;
               const py = v => H - ((v - min) / (max - min || 1)) * H;
               const pts = hist.map((p, i) => `${px(i).toFixed(1)},${py(p.valor).toFixed(1)}`).join(' ');
-              const area = `M${px(0).toFixed(1)},${H} ` + hist.map((p, i) => `L${px(i).toFixed(1)},${py(p.valor).toFixed(1)}`).join(' ') + ` L${px(hist.length - 1).toFixed(1)},${H} Z`;
-              const inicio = hist[0]?.valor || 0;
-              const atual = hist[hist.length - 1]?.valor || 0;
-              const variacao = atual - inicio;
-              const varPct = inicio > 0 ? ((variacao / inicio) * 100).toFixed(1) : 0;
+              const inicio = hist[0].valor;
+              const atual = hist[hist.length - 1].valor;
+              const varTotal = atual - inicio;
+              const varPct = inicio > 0 ? ((varTotal / inicio) * 100).toFixed(1) : 0;
               return (
                 <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>Evolução {ano}</div>
-                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>{MESES_ABREV[(hist[0]?.mes || 1) - 1]}–{MESES_ABREV[(hist[hist.length - 1]?.mes || 1) - 1]}</div>
-                  </div>
-                  <div style={{ position: 'relative' }}>
-                    <svg width="100%" viewBox={`0 0 ${W} ${H + 11}`} style={{ display: 'block', overflow: 'visible' }}>
-                      <path d={area} fill="rgba(22,163,74,0.04)" />
-                      <polyline points={pts} fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-                      {hist.map((p, i) => (
-                        <g key={i} onMouseEnter={() => setSaldoTip({ i, valor: p.valor, mes: MESES_ABREV[(p.mes || 1) - 1] })} onMouseLeave={() => setSaldoTip(null)} style={{ cursor: 'pointer' }}>
-                          <circle cx={px(i)} cy={py(p.valor)} r="7" fill="transparent" />
-                          <circle cx={px(i)} cy={py(p.valor)} r={i === hist.length - 1 ? 3 : 2} fill={i === hist.length - 1 ? '#16A34A' : '#fff'} stroke="#16A34A" strokeWidth="1.5" />
-                        </g>
-                      ))}
-                      {hist.map((p, i) => (i === 0 || i === hist.length - 1) && (
-                        <text key={i} x={px(i)} y={H + 10} textAnchor={i === 0 ? 'start' : 'end'} fontSize="7" fill="#9CA3AF">{MESES_ABREV[(p.mes || 1) - 1]}</text>
-                      ))}
+                  <div style={{ position: 'relative', marginBottom: 4 }}>
+                    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', overflow: 'visible' }}>
+                      <polyline points={pts} fill="none" stroke="#D1D5DB" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+                      <circle cx={px(hist.length - 1)} cy={py(atual)} r="2" fill="#6B7280" />
+                      {hist.map((p, i) => {
+                        const varVsAnterior = i > 0 ? p.valor - hist[i - 1].valor : 0;
+                        return (
+                          <g key={i} onMouseEnter={() => setSaldoTip({ i, varVsAnterior, mes: MESES_ABREV[(p.mes || 1) - 1] })} onMouseLeave={() => setSaldoTip(null)} style={{ cursor: 'crosshair' }}>
+                            <circle cx={px(i)} cy={py(p.valor)} r="6" fill="transparent" />
+                          </g>
+                        );
+                      })}
                     </svg>
                     {saldoTip && (
-                      <div style={{ position: 'absolute', top: -26, left: `${(saldoTip.i / (hist.length - 1 || 1)) * 100}%`, transform: 'translateX(-50%)', background: '#111827', color: '#fff', fontSize: 10, padding: '3px 7px', borderRadius: 5, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10 }}>
-                        {saldoTip.mes}: {fmt(saldoTip.valor)}
+                      <div style={{ position: 'absolute', top: -24, left: `${(saldoTip.i / (hist.length - 1)) * 100}%`, transform: 'translateX(-50%)', background: '#111827', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10 }}>
+                        {saldoTip.mes}{saldoTip.i > 0 ? `: ${saldoTip.varVsAnterior >= 0 ? '+' : ''}${fmt(saldoTip.varVsAnterior)}` : ': início'}
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#9CA3AF', marginBottom: 5, marginTop: 2 }}>
-                    <span>Início: {fmt(inicio)}</span>
-                    <span>Atual: {fmt(atual)}</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 10 }}>
-                    {variacao > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : variacao < 0 ? <span style={{ color: '#EF4444' }}>↓</span> : <span>—</span>}
-                    {' '}{variacao !== 0 ? `${variacao > 0 ? '+' : ''}${fmt(variacao)} (${varPct > 0 ? '+' : ''}${varPct}%) em ${ano}` : `sem variação em ${ano}`}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#9CA3AF', marginBottom: 8 }}>
+                    <span>{MESES_ABREV[(hist[0]?.mes || 1) - 1]}: {fmt(inicio)}</span>
+                    <span style={{ color: varTotal > 0 ? '#16A34A' : varTotal < 0 ? '#EF4444' : '#9CA3AF' }}>{varTotal > 0 ? '+' : ''}{fmt(varTotal)} ({varPct > 0 ? '+' : ''}{varPct}%)</span>
                   </div>
                 </>
               );

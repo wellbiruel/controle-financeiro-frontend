@@ -1017,40 +1017,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* RESUMO DO PERÍODO */}
-        <div style={{ background: '#111827', borderRadius: 10, padding: '14px 18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', flexWrap: 'wrap', gap: 0, marginBottom: 4 }}>
-          <div style={{ minWidth: 90, paddingRight: 18, borderRight: '1px solid rgba(255,255,255,.08)', paddingBottom: 4 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{R.titulo || 'Resumo'}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 1, marginBottom: 8 }}>{R.intervalo}</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 2 }}>Diagnóstico</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#FCD34D' }}>{R.diagnostico}</div>
-          </div>
-          {[
-            { lbl: 'Entradas',               val: fmt(R.entradasTotal),                          sub: `Média/mês: ${fmt(R.entradasMediaMes)}` },
-            { lbl: 'Saídas',                 val: fmt(R.saidasTotal),                            sub: `Média/mês: ${fmt(R.saidasMediaMes)}` },
-            { lbl: 'Saldo',                  val: fmtS(R.saldoPeriodo || 0),                     sub: `Taxa de poupança: ${fmtP(R.taxaPoupancaPeriodo)}`, valCor: '#86EFAC' },
-            { lbl: 'Do mês total',           val: fmtS(R.saldoMesSelecionado || 0),              sub: `Melhor mês: ${R.melhorMes}`, valCor: '#86EFAC' },
-            { lbl: 'Saída que mais impactou', val: R.maiorImpactoNome,                           sub: `${fmt(R.maiorImpactoValor)} (${fmtP(R.maiorImpactoPercentual)})`, isCartao: true },
-            { lbl: 'Investimentos',          val: fmt(R.investimentosPeriodo),                   sub: `${fmtP(R.investimentosPercentualRenda)} da renda` },
-            { lbl: 'Patrimônio',             val: `+${R.patrimonioCrescimentoPercentual || 0}%`, sub: 'Crescimento no período', valCor: '#86EFAC' },
-            { lbl: 'Score médio',            val: `${R.scoreMedio || 0}/100`,                    sub: null, valCor: '#FCD34D' },
-            { lbl: 'Pior mês',               val: R.piorMes,                                     sub: null, valCor: '#FCA5A5' },
-          ].map((item, i, arr) => (
-            <div key={i} style={{ padding: '0 14px', borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,.08)' : 'none', minWidth: 90 }}>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 3 }}>{item.lbl}</div>
-              {item.isCartao && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 1 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="rgba(255,255,255,.5)"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2zm-7 7h5v-2h-5v2z"/></svg>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'white', whiteSpace: 'nowrap' }}>{item.val}</div>
-                </div>
-              )}
-              {!item.isCartao && <div style={{ fontSize: 14, fontWeight: 700, color: item.valCor || 'white', whiteSpace: 'nowrap' }}>{item.val}</div>}
-              {item.sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1, whiteSpace: 'nowrap' }}>{item.sub}</div>}
-              {item.isCartao && item.sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1 }}>{item.sub}</div>}
-            </div>
-          ))}
-        </div>
-
         {/* Modal Teto */}
         {modalTeto && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.2)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalTeto(false)}>

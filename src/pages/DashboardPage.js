@@ -728,7 +728,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ROW 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Investimentos */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
@@ -767,12 +767,16 @@ export default function DashboardPage() {
                 <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
               </div>
             </div>
-            {/* Separador horizontal */}
-            <div style={{ height: '0.5px', background: '#E5E7EB', marginBottom: 10 }} />
-            {/* Sparkline patrimônio */}
+          </div>
+
+          {/* Evolução Patrimônio */}
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Patrimônio</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Evolução {ano}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Histórico acumulado</div>
             {(() => {
               const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
-              if (hist.length < 2) return null;
+              if (hist.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
               const vals = hist.map(p => p.valor);
               const min = Math.min(...vals) * 0.97;
               const max = Math.max(...vals) * 1.03;

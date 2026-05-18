@@ -726,11 +726,6 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>
           </div>
 
-        </div>
-
-        {/* ROW 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.4fr', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
-
           {/* Investimentos — card unificado com Evolução */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Investimentos</div>
@@ -827,6 +822,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 10, alignItems: 'stretch' }}>
           {/* Categorias */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
@@ -879,6 +875,7 @@ export default function DashboardPage() {
           </div>
 
           <GraficoSaldo meses={D.saldoPorMes} />
+          </div>
 
         </div>
 

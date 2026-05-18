@@ -766,20 +766,23 @@ export default function DashboardPage() {
 
             {/* Evolução anual */}
             {(() => {
-              const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
-              if (!hist.length) return <div style={{ fontSize: 11, color: '#9CA3AF' }}>Sem dados de evolução</div>;
-              const maxVar = Math.max(...hist.map((p, i) => i > 0 ? Math.abs(p.valor - hist[i - 1].valor) : 0).filter(v => v > 0), 1);
-              const totalRendeu = hist.reduce((acc, p, i) => i === 0 ? acc : acc + (p.valor - hist[i - 1].valor), 0);
-              const totalPct = hist.length > 1 ? ((hist[hist.length - 1].valor / hist[0].valor - 1) * 100).toFixed(1) : '0.0';
-              const mesFim = MESES_ABREV[(hist[hist.length - 1].mes || 1) - 1];
+              const histRaw = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
+              if (!histRaw.length) return <div style={{ fontSize: 11, color: '#9CA3AF' }}>Sem dados de evolução</div>;
+              // só meses com variação real (exclui meses futuros sem dado)
+              const hist = histRaw.filter((p, i) => i === 0 || p.valor !== histRaw[i - 1].valor);
+              if (hist.length < 2) return null;
+              const maxVar = Math.max(...hist.map((p, i) => i > 0 ? Math.abs(p.valor - hist[i - 1].valor) : 0), 1);
+              const totalVar = hist[hist.length - 1].valor - hist[0].valor;
+              const totalPct = ((hist[hist.length - 1].valor / hist[0].valor - 1) * 100).toFixed(1);
               const mesIni = MESES_ABREV[(hist[0].mes || 1) - 1];
+              const mesFim = MESES_ABREV[(hist[hist.length - 1].mes || 1) - 1];
               return (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
                     <span style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em' }}>Evolução {ano}</span>
                     <span style={{ fontSize: 11, color: '#9CA3AF' }}>{mesIni} – {mesFim}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '26px 1fr 58px 34px', gap: 4, alignItems: 'center', marginBottom: 4 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '26px 1fr 62px 34px', gap: 4, alignItems: 'center', marginBottom: 3 }}>
                     <span /><span />
                     <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right' }}>Variação</span>
                     <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right' }}>%</span>
@@ -788,13 +791,14 @@ export default function DashboardPage() {
                     const varVsAnterior = i > 0 ? p.valor - hist[i - 1].valor : null;
                     const barW = varVsAnterior !== null ? Math.round((Math.abs(varVsAnterior) / maxVar) * 100) : 0;
                     const pctMes = i > 0 && hist[i - 1].valor > 0 ? ((p.valor / hist[i - 1].valor - 1) * 100).toFixed(1) : null;
+                    const cor = varVsAnterior === null ? '#9CA3AF' : varVsAnterior >= 0 ? '#16A34A' : '#EF4444';
                     return (
-                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '26px 1fr 58px 34px', gap: 4, alignItems: 'center', marginBottom: 5 }}>
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '26px 1fr 62px 34px', gap: 4, alignItems: 'center', marginBottom: 4 }}>
                         <span style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
                         <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
                           <div style={{ width: `${barW}%`, height: '100%', background: varVsAnterior !== null && varVsAnterior < 0 ? '#EF4444' : '#16A34A', borderRadius: 2 }} />
                         </div>
-                        <span style={{ fontSize: 11, color: varVsAnterior === null ? '#9CA3AF' : varVsAnterior >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 11, color: cor, textAlign: 'right', whiteSpace: 'nowrap' }}>
                           {varVsAnterior === null ? '—' : `${varVsAnterior >= 0 ? '+' : ''}${fmt(varVsAnterior)}`}
                         </span>
                         <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>
@@ -803,9 +807,9 @@ export default function DashboardPage() {
                       </div>
                     );
                   })}
-                  <div style={{ display: 'grid', gridTemplateColumns: '26px 1fr 58px 34px', gap: 4, alignItems: 'center', paddingTop: 8, borderTop: '0.5px solid #E5E7EB', marginTop: 3 }}>
-                    <span style={{ fontSize: 11, fontWeight: 500, color: '#6B7280', whiteSpace: 'nowrap', gridColumn: 'span 2' }}>Total {ano}</span>
-                    <span style={{ fontSize: 11, color: totalRendeu >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>{totalRendeu >= 0 ? '+' : ''}{fmt(totalRendeu)}</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: '26px 1fr 62px 34px', gap: 4, alignItems: 'center', paddingTop: 7, borderTop: '0.5px solid #E5E7EB', marginTop: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: '#6B7280', gridColumn: 'span 2' }}>Total {ano}</span>
+                    <span style={{ fontSize: 11, color: totalVar >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>{totalVar >= 0 ? '+' : ''}{fmt(totalVar)}</span>
                     <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>{parseFloat(totalPct) >= 0 ? '+' : ''}{totalPct}%</span>
                   </div>
                 </>

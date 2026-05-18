@@ -822,7 +822,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 10, alignItems: 'stretch' }}>
           {/* Categorias */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
@@ -874,8 +873,7 @@ export default function DashboardPage() {
             <span style={S.cardLink} onClick={() => navigate('/saidas')}>Ver saídas →</span>
           </div>
 
-          <GraficoSaldo meses={D.saldoPorMes} />
-          </div>
+          <GraficoSaldo meses={D.saldoPorMes} style={{ gridColumn: 'span 2' }} />
 
         </div>
 

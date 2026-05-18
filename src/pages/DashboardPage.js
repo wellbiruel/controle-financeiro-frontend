@@ -773,44 +773,29 @@ export default function DashboardPage() {
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Histórico acumulado</div>
             {(() => {
               const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
-              if (hist.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
-              const vals = hist.map(p => p.valor);
-              const min = Math.min(...vals) * 0.97;
-              const max = Math.max(...vals) * 1.03;
-              const W = 240, H = 32;
-              const px = i => (i / (hist.length - 1)) * W;
-              const py = v => H - ((v - min) / (max - min || 1)) * H;
-              const pts = hist.map((p, i) => `${px(i).toFixed(1)},${py(p.valor).toFixed(1)}`).join(' ');
-              const inicio = hist[0].valor;
-              const atual = hist[hist.length - 1].valor;
-              const varTotal = atual - inicio;
-              const varPct = inicio > 0 ? ((varTotal / inicio) * 100).toFixed(1) : 0;
+              if (!hist.length) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
+              const maxVal = Math.max(...hist.map(p => p.valor));
               return (
-                <>
-                  <div style={{ position: 'relative', marginBottom: 4 }}>
-                    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', overflow: 'visible' }}>
-                      <polyline points={pts} fill="none" stroke="#D1D5DB" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
-                      <circle cx={px(hist.length - 1)} cy={py(atual)} r="2" fill="#6B7280" />
-                      {hist.map((p, i) => {
-                        const varVsAnterior = i > 0 ? p.valor - hist[i - 1].valor : 0;
-                        return (
-                          <g key={i} onMouseEnter={() => setSaldoTip({ i, varVsAnterior, mes: MESES_ABREV[(p.mes || 1) - 1] })} onMouseLeave={() => setSaldoTip(null)} style={{ cursor: 'crosshair' }}>
-                            <circle cx={px(i)} cy={py(p.valor)} r="6" fill="transparent" />
-                          </g>
-                        );
-                      })}
-                    </svg>
-                    {saldoTip && (
-                      <div style={{ position: 'absolute', top: -24, left: `${(saldoTip.i / (hist.length - 1)) * 100}%`, transform: 'translateX(-50%)', background: '#111827', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10 }}>
-                        {saldoTip.mes}{saldoTip.i > 0 ? `: ${saldoTip.varVsAnterior >= 0 ? '+' : ''}${fmt(saldoTip.varVsAnterior)}` : ': início'}
+                <div style={{ flex: 1 }}>
+                  {hist.map((p, i) => {
+                    const varVsAnterior = i > 0 ? p.valor - hist[i - 1].valor : null;
+                    const barW = Math.round((p.valor / maxVal) * 100);
+                    return (
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '26px 1fr 56px 58px', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+                        <div style={{ fontSize: 10, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</div>
+                        <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ width: `${barW}%`, height: '100%', background: '#D1D5DB', borderRadius: 2 }} />
+                        </div>
+                        <div style={{ fontSize: 10, color: varVsAnterior === null ? '#9CA3AF' : varVsAnterior >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          {varVsAnterior === null ? '—' : `${varVsAnterior >= 0 ? '+' : ''}${fmt(varVsAnterior)}`}
+                        </div>
+                        <div style={{ fontSize: 10, color: '#374151', fontWeight: 500, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          {fmt(p.valor)}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#9CA3AF', marginBottom: 8 }}>
-                    <span>{MESES_ABREV[(hist[0]?.mes || 1) - 1]}: {fmt(inicio)}</span>
-                    <span style={{ color: varTotal > 0 ? '#16A34A' : varTotal < 0 ? '#EF4444' : '#9CA3AF' }}>{varTotal > 0 ? '+' : ''}{fmt(varTotal)} ({varPct > 0 ? '+' : ''}{varPct}%)</span>
-                  </div>
-                </>
+                    );
+                  })}
+                </div>
               );
             })()}
             <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver investimentos →</span>

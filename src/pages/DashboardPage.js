@@ -726,83 +726,100 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>
           </div>
 
-          {/* Investimentos */}
+          {/* Investimentos — card unificado com Evolução */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Investimentos</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Aporte e patrimônio do mês</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', gap: 0, marginBottom: 12 }}>
-              {/* Patrimônio — destaque maior */}
-              <div style={{ paddingRight: 14 }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio total</div>
-                <div style={{ fontSize: 22, fontWeight: 500, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>Total acumulado</div>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 3 }}>
-                  {D.investimentos?.patrimonioVsMes > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : D.investimentos?.patrimonioVsMes < 0 ? <span style={{ color: '#EF4444' }}>↓</span> : <span>—</span>}
-                  {' '}{D.investimentos?.patrimonioVsMes !== 0 ? `${D.investimentos?.patrimonioVsMes > 0 ? '+' : ''}${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Aporte e patrimônio do mês</div>
+
+            {/* KPIs: Patrimônio | separador | Aporte */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', marginBottom: 10 }}>
+              <div style={{ paddingRight: 12 }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Patrimônio total</div>
+                <div style={{ fontSize: 22, fontWeight: 500, color: '#16A34A', lineHeight: 1, marginBottom: 2 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total acumulado</div>
+                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
+                  {D.investimentos?.patrimonioVsMes > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : D.investimentos?.patrimonioVsMes < 0 ? <span style={{ color: '#EF4444' }}>↓</span> : <span style={{ color: '#9CA3AF' }}>—</span>}
+                  <span>{D.investimentos?.patrimonioVsMes !== 0 ? `${D.investimentos?.patrimonioVsMes > 0 ? '+' : ''}${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}</span>
                 </div>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 10 }}>
-                  {D.investimentos?.patrimonioVsAno > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : D.investimentos?.patrimonioVsAno < 0 ? <span style={{ color: '#EF4444' }}>↓</span> : <span>—</span>}
-                  {' '}{D.investimentos?.patrimonioVsAno !== 0 ? `${D.investimentos?.patrimonioVsAno > 0 ? '+' : ''}${D.investimentos?.patrimonioVsAno}% em ${ano}` : `sem variação em ${ano}`}
+                <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  {D.investimentos?.patrimonioVsAno > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : D.investimentos?.patrimonioVsAno < 0 ? <span style={{ color: '#EF4444' }}>↓</span> : <span style={{ color: '#9CA3AF' }}>—</span>}
+                  <span>{D.investimentos?.patrimonioVsAno !== 0 ? `${D.investimentos?.patrimonioVsAno > 0 ? '+' : ''}${D.investimentos?.patrimonioVsAno}% em ${ano}` : `sem variação em ${ano}`}</span>
                 </div>
-                <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
               </div>
-              {/* Separador vertical */}
               <div style={{ background: '#E5E7EB' }} />
-              {/* Aporte — secundário */}
-              <div style={{ paddingLeft: 14 }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte do mês</div>
-                <div style={{ fontSize: 18, fontWeight: 500, color: D.investimentos?.aporteMes > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 3 }}>{fmt(D.investimentos?.aporteMes)}</div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 10 }}>
+              <div style={{ paddingLeft: 12 }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Aporte do mês</div>
+                <div style={{ fontSize: 18, fontWeight: 500, color: D.investimentos?.aporteMes > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 2 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
+                <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
                   {Math.abs(D.investimentos?.aporteVsAnterior || 0) < 1
-                    ? <span style={{ color: '#9CA3AF' }}>— sem variação</span>
+                    ? <><span style={{ color: '#9CA3AF' }}>—</span><span style={{ color: '#9CA3AF' }}>sem variação</span></>
                     : D.investimentos?.aporteVsAnterior > 0
-                    ? <><span style={{ color: '#16A34A' }}>↑</span>{' '}+{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}</>
-                    : <><span style={{ color: '#EF4444' }}>↓</span>{' '}{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}</>}
+                    ? <><span style={{ color: '#16A34A' }}>↑</span><span>+{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}</span></>
+                    : <><span style={{ color: '#EF4444' }}>↓</span><span>{fmt(D.investimentos?.aporteVsAnterior)} vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}</span></>}
                 </div>
-                <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
               </div>
             </div>
-          </div>
 
-          <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignItems: 'stretch' }}>
-          {/* Evolução Patrimônio */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Patrimônio</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Evolução {ano}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>Histórico acumulado</div>
+            {/* Separador horizontal */}
+            <div style={{ height: '0.5px', background: '#E5E7EB', margin: '0 0 10px' }} />
+
+            {/* Evolução anual */}
             {(() => {
               const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
-              if (!hist.length) return <div style={{ fontSize: 11, color: '#9CA3AF', flex: 1 }}>Dados insuficientes</div>;
-              const maxVal = Math.max(...hist.map(p => p.valor));
+              if (!hist.length) return <div style={{ fontSize: 11, color: '#9CA3AF' }}>Sem dados de evolução</div>;
+              const maxVar = Math.max(...hist.map((p, i) => i > 0 ? Math.abs(p.valor - hist[i - 1].valor) : 0).filter(v => v > 0), 1);
+              const totalRendeu = hist.reduce((acc, p, i) => i === 0 ? acc : acc + (p.valor - hist[i - 1].valor), 0);
+              const totalPct = hist.length > 1 ? ((hist[hist.length - 1].valor / hist[0].valor - 1) * 100).toFixed(1) : '0.0';
+              const mesFim = MESES_ABREV[(hist[hist.length - 1].mes || 1) - 1];
+              const mesIni = MESES_ABREV[(hist[0].mes || 1) - 1];
               return (
-                <div style={{ flex: 1 }}>
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em' }}>Evolução {ano}</span>
+                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>{mesIni} – {mesFim}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '26px 1fr 58px 34px', gap: 4, alignItems: 'center', marginBottom: 4 }}>
+                    <span /><span />
+                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right' }}>Variação</span>
+                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right' }}>%</span>
+                  </div>
                   {hist.map((p, i) => {
                     const varVsAnterior = i > 0 ? p.valor - hist[i - 1].valor : null;
-                    const barW = Math.round((p.valor / maxVal) * 100);
+                    const barW = varVsAnterior !== null ? Math.round((Math.abs(varVsAnterior) / maxVar) * 100) : 0;
+                    const pctMes = i > 0 && hist[i - 1].valor > 0 ? ((p.valor / hist[i - 1].valor - 1) * 100).toFixed(1) : null;
                     return (
-                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '26px 1fr 56px 58px', alignItems: 'center', gap: 5, marginBottom: 5 }}>
-                        <div style={{ fontSize: 10, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</div>
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '26px 1fr 58px 34px', gap: 4, alignItems: 'center', marginBottom: 5 }}>
+                        <span style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
                         <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ width: `${barW}%`, height: '100%', background: '#D1D5DB', borderRadius: 2 }} />
+                          <div style={{ width: `${barW}%`, height: '100%', background: varVsAnterior !== null && varVsAnterior < 0 ? '#EF4444' : '#16A34A', borderRadius: 2 }} />
                         </div>
-                        <div style={{ fontSize: 10, color: varVsAnterior === null ? '#9CA3AF' : varVsAnterior >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 11, color: varVsAnterior === null ? '#9CA3AF' : varVsAnterior >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>
                           {varVsAnterior === null ? '—' : `${varVsAnterior >= 0 ? '+' : ''}${fmt(varVsAnterior)}`}
-                        </div>
-                        <div style={{ fontSize: 10, color: '#374151', fontWeight: 500, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          {fmt(p.valor)}
-                        </div>
+                        </span>
+                        <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          {pctMes === null ? '—' : `${parseFloat(pctMes) >= 0 ? '+' : ''}${pctMes}%`}
+                        </span>
                       </div>
                     );
                   })}
-                </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '26px 1fr 58px 34px', gap: 4, alignItems: 'center', paddingTop: 8, borderTop: '0.5px solid #E5E7EB', marginTop: 3 }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: '#6B7280', whiteSpace: 'nowrap', gridColumn: 'span 2' }}>Total {ano}</span>
+                    <span style={{ fontSize: 11, color: totalRendeu >= 0 ? '#16A34A' : '#EF4444', textAlign: 'right', whiteSpace: 'nowrap' }}>{totalRendeu >= 0 ? '+' : ''}{fmt(totalRendeu)}</span>
+                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>{parseFloat(totalPct) >= 0 ? '+' : ''}{totalPct}%</span>
+                  </div>
+                </>
               );
             })()}
-            <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver investimentos →</span>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+              <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver carteira →</span>
+              <span style={S.cardLink} onClick={() => navigate('/investimentos')}>Ver histórico →</span>
+            </div>
           </div>
 
           {/* Categorias */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 3' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
               <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Categorias vs Saldo</div>
@@ -850,7 +867,6 @@ export default function DashboardPage() {
               );
             })()}
             <span style={S.cardLink} onClick={() => navigate('/saidas')}>Ver saídas →</span>
-          </div>
           </div>
 
         </div>

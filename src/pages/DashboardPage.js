@@ -726,6 +726,11 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>
           </div>
 
+        </div>
+
+        {/* ROW 2 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.4fr', gap: 10, marginBottom: 10, alignItems: 'stretch' }}>
+
           {/* Investimentos — card unificado com Evolução */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Investimentos</div>
@@ -823,7 +828,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Categorias */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gridColumn: 'span 3' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
               <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Categorias vs Saldo</div>
@@ -873,16 +878,15 @@ export default function DashboardPage() {
             <span style={S.cardLink} onClick={() => navigate('/saidas')}>Ver saídas →</span>
           </div>
 
+          <GraficoSaldo meses={D.saldoPorMes} />
+
         </div>
 
-        {/* ROW 3 – Saldo gráfico + Tendência trimestral – 10 colunas */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 10, marginBottom: 10 }}>
-
-          {/* GraficoSaldo span4 = mesma largura de Entradas+Saídas acima */}
-          <GraficoSaldo meses={D.saldoPorMes} style={{ gridColumn: 'span 4' }} />
+        {/* ROW 3 – Tendência trimestral */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10, marginBottom: 10 }}>
 
           {/* Tendência trimestral */}
-          <div style={{ ...S.card, gridColumn: 'span 6' }}>
+          <div style={{ ...S.card }}>
             {(() => {
               const mesesAbrev = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
               const t3 = (D.trimestre || []).map((d, i) => ({

@@ -755,7 +755,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, paddingTop: 2 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
                 <div style={{ fontSize: 10, color: '#9CA3AF' }}>Aporte em {MESES_ABREV[mes - 1]}</div>
                 <div style={{ fontSize: 15, fontWeight: 500, color: '#9CA3AF' }}>{fmt(D.investimentos?.aporteMes)}</div>
                 <div style={{ fontSize: 10, color: '#9CA3AF' }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
@@ -811,11 +811,11 @@ export default function DashboardPage() {
                     return (
                       <div key={i} style={{ ...grid, marginBottom: 6 }}>
                         <span style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
-                        <div style={{ height: 3, background: varTotal !== null ? '#F3F4F6' : 'transparent', borderRadius: 2, overflow: 'hidden', minWidth: 0 }}>
-                          <div style={{ width: `${barW}%`, height: '100%', background: '#16A34A', borderRadius: 2 }} />
+                        <div style={{ height: 3, background: i === 0 ? 'transparent' : '#F3F4F6', borderRadius: 2, overflow: 'hidden', minWidth: 0 }}>
+                          <div style={{ width: i === 0 ? '0%' : `${barW}%`, height: '100%', background: '#16A34A', borderRadius: 2 }} />
                         </div>
                         <span style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          {aporteMes > 0 ? fmt(aporteMes) : '—'}
+                          {'—'}
                         </span>
                         <span style={{ fontSize: 11, color: rendeuMes === null ? '#9CA3AF' : '#16A34A', textAlign: 'right', whiteSpace: 'nowrap' }}>
                           {rendeuMes === null ? '—' : `${rendeuMes >= 0 ? '+' : ''}${fmt(rendeuMes)}`}

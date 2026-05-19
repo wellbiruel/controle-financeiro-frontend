@@ -784,7 +784,11 @@ export default function DashboardPage() {
               const totalPct = ((hist[hist.length - 1].valor / hist[0].valor - 1) * 100).toFixed(1);
               const mesIni = MESES_ABREV[(hist[0].mes || 1) - 1];
               const mesFim = MESES_ABREV[(hist[hist.length - 1].mes || 1) - 1];
-              const grid = { display: 'grid', gridTemplateColumns: '28px 36px 52px 60px 30px 68px', gap: '0 8px', alignItems: 'center' };
+              // CRÍTICO: barra usa 1fr para ocupar TODO o espaço disponível do card.
+              // NÃO usar largura fixa na barra (ex: 36px) — causa espaço em branco à direita.
+              // Colunas de dados têm largura fixa ajustada ao conteúdo máximo esperado.
+              // gap: '0 6px' — sem gap vertical, 6px horizontal entre colunas.
+              const grid = { display: 'grid', gridTemplateColumns: '28px 1fr 46px 56px 28px 64px', gap: '0 6px', alignItems: 'center' };
               return (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>

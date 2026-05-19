@@ -637,29 +637,107 @@ export default function DashboardPage() {
 
           {/* Card triplo: Entradas / Saídas / Saldo */}
           <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: '100%' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', height: '100%' }}>
+
+              {/* ESQUERDA: Entradas + Saídas */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '16px 18px', flex: 1, borderBottom: '0.5px solid #E5E7EB', borderRight: '0.5px solid #E5E7EB' }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="#16A34A"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg> Entradas</div>
-                  <div style={{ fontSize: 24, fontWeight: 500, color: '#111827', lineHeight: 1, marginBottom: 4 }}>{fmt(D.entradas?.valor)}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
-                  <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444' }}>{D.entradas?.tendencia >= 0 ? '↑' : '↓'}</span> {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior</div>
+
+                {/* Entradas */}
+                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E8F8EE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+                      </svg>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em' }}>Entradas</span>
+                  </div>
+                  <div style={{ fontSize: 26, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.entradas?.valor)}</div>
+                  <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      {D.entradas?.tendencia >= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
+                    </svg>
+                    {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior
+                  </div>
                 </div>
-                <div style={{ padding: '16px 18px', flex: 1, borderRight: '0.5px solid #E5E7EB' }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="#EF4444"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg> Saídas</div>
-                  <div style={{ fontSize: 24, fontWeight: 500, color: '#EF4444', lineHeight: 1, marginBottom: 4 }}>{fmt(D.saidas?.valor)}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Total de gastos</div>
-                  <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444' }}>{D.saidas?.tendencia <= 0 ? '↓' : '↑'}</span> {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior</div>
+
+                {/* Separador com dot central */}
+                <div style={{ position: 'relative', margin: '0 16px' }}>
+                  <div style={{ height: '0.5px', background: '#E5E7EB' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 18, height: 18, borderRadius: '50%', background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#9CA3AF' }}>↕</div>
+                </div>
+
+                {/* Saídas */}
+                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FEECEC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                      </svg>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em' }}>Saídas</span>
+                  </div>
+                  <div style={{ fontSize: 26, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 3 }}>{fmt(D.saidas?.valor)}</div>
+                  <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>Total de gastos</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      {D.saidas?.tendencia <= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
+                    </svg>
+                    {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior
+                  </div>
                 </div>
               </div>
-              <div style={{ padding: '18px 20px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>$ Saldo do mês</div>
-                <div style={{ fontSize: 30, fontWeight: 500, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1 }}>{D.saldo?.valor >= 0 ? '+' : ''}{fmt(D.saldo?.valor)}</div>
-                <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.saldo?.pctRenda)} da renda guardada</div>
-                <div style={{ fontSize: 11, color: '#6B7280' }}><span style={{ color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{D.saldo?.valor >= 0 ? '↑' : '↓'}</span> {D.saldo?.valor >= 0 ? 'Superávit no mês' : 'Déficit no mês'}</div>
-                {D.saldo?.melhorMes && <div style={{ fontSize: 11, color: '#6B7280' }}>Melhor mês do ano</div>}
-                <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver evolução do saldo →</span>
+
+              {/* SEPARADOR VERTICAL */}
+              <div style={{ background: '#E5E7EB' }} />
+
+              {/* DIREITA: Saldo */}
+              <div style={{ padding: '16px 18px 14px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>$ Saldo do mês</div>
+                <div style={{ fontSize: 34, fontWeight: 700, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1, marginBottom: 4 }}>
+                  {D.saldo?.valor >= 0 ? '+' : ''}{fmt(D.saldo?.valor)}
+                </div>
+                <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 10 }}>
+                  {fmtP(D.saldo?.pctRenda)} da renda preservada
+                </div>
+
+                {/* Pill superávit/déficit */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: D.saldo?.valor >= 0 ? '#DCFCE7' : '#FEE2E2', color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, marginBottom: 8, width: 'fit-content' }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {D.saldo?.valor >= 0
+                      ? <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>
+                      : <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>}
+                  </svg>
+                  {D.saldo?.valor >= 0 ? 'Mês positivo' : 'Déficit no mês'}
+                </div>
+
+                {/* Melhor mês */}
+                {D.saldo?.melhorMes && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 'auto' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 9a6 6 0 0 0 12 0"/><line x1="12" y1="15" x2="12" y2="19"/><line x1="8" y1="19" x2="16" y2="19"/>
+                    </svg>
+                    Melhor mês do ano
+                  </div>
+                )}
+
+                {/* Link */}
+                <span style={{ fontSize: 12, color: '#2563EB', fontWeight: 500, cursor: 'pointer', marginTop: 'auto', paddingTop: 8 }} onClick={() => navigate('/fluxo-anual')}>
+                  Ver evolução do saldo →
+                </span>
+
+                {/* Carteira decorativa */}
+                <div style={{ position: 'absolute', right: -8, bottom: -8, opacity: 0.08, pointerEvents: 'none' }}>
+                  <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="3"/>
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    <rect x="14" y="11" width="6" height="5" rx="1.5"/>
+                    <circle cx="17" cy="13.5" r="1"/>
+                  </svg>
+                </div>
               </div>
+
             </div>
           </div>
 

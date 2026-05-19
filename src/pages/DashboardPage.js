@@ -795,10 +795,10 @@ export default function DashboardPage() {
                   {/* Header colunas */}
                   <div style={{ ...grid, marginBottom: 6 }}>
                     <span /><span />
-                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Aporte</span>
-                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Rendeu</span>
-                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>%</span>
-                    <span style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Saldo</span>
+                    <div style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Aporte</div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Rendeu</div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>%</div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Saldo</div>
                   </div>
 
                   {/* Linhas dos meses */}
@@ -811,7 +811,7 @@ export default function DashboardPage() {
                     return (
                       <div key={i} style={{ ...grid, marginBottom: 6 }}>
                         <span style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
-                        <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden', minWidth: 0 }}>
+                        <div style={{ height: 3, background: varTotal !== null ? '#F3F4F6' : 'transparent', borderRadius: 2, overflow: 'hidden', minWidth: 0 }}>
                           <div style={{ width: `${barW}%`, height: '100%', background: '#16A34A', borderRadius: 2 }} />
                         </div>
                         <span style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>

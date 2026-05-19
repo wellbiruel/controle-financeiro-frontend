@@ -643,22 +643,22 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', flexDirection: 'column' }}>
 
                 {/* Entradas */}
-                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E8F8EE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
-                      </svg>
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em' }}>Entradas</span>
-                  </div>
-                  <div style={{ fontSize: 26, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.entradas?.valor)}</div>
-                  <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      {D.entradas?.tendencia >= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
+                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E8F8EE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
                     </svg>
-                    {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Entradas</span>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.entradas?.valor)}</div>
+                    <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        {D.entradas?.tendencia >= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
+                      </svg>
+                      {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior
+                    </div>
                   </div>
                 </div>
 
@@ -669,22 +669,22 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Saídas */}
-                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FEECEC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
-                      </svg>
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em' }}>Saídas</span>
-                  </div>
-                  <div style={{ fontSize: 26, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 3 }}>{fmt(D.saidas?.valor)}</div>
-                  <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>Total de gastos</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      {D.saidas?.tendencia <= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
+                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FEECEC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
                     </svg>
-                    {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Saídas</span>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 3 }}>{fmt(D.saidas?.valor)}</div>
+                    <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>Total de gastos</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        {D.saidas?.tendencia <= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
+                      </svg>
+                      {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior
+                    </div>
                   </div>
                 </div>
               </div>

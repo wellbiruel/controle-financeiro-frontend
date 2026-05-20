@@ -940,35 +940,48 @@ export default function DashboardPage() {
               const saldoPct = total > 0 ? Math.round((saldoRestante / total) * 100) : 0;
               return (
                 <>
-                  <div style={{ display: 'flex', height: 18, borderRadius: 5, overflow: 'hidden', gap: 1, marginBottom: 12 }}>
-                    {lista.map((c, i) => (
-                      <div key={i} title={`${c.nome}: ${c.pct}%`} style={{ width: `${(c.valor / total) * 100}%`, background: c.cor, minWidth: c.pct > 2 ? 2 : 0 }} />
-                    ))}
-                    {saldoRestante > 0 && <div style={{ flex: 1, background: '#16A34A', minWidth: 3 }} title={`Saldo: ${saldoPct}%`} />}
-                  </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <tbody>
-                      {lista.map((c, i) => (
-                        <tr key={i} style={{ borderBottom: '0.5px solid #F9FAFB' }}>
-                          <td style={{ padding: '4px 0', width: 14, verticalAlign: 'middle' }}><div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor }} /></td>
-                          <td style={{ padding: '4px 6px', fontSize: 12, color: '#6B7280', verticalAlign: 'middle' }}>{c.nome}</td>
-                          <td style={{ padding: '4px 0', fontSize: 12, fontWeight: 600, color: '#111827', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmt(c.valor)}</td>
-                          <td style={{ padding: '4px 0 4px 8px', fontSize: 11, color: '#9CA3AF', textAlign: 'right', verticalAlign: 'middle', width: 34 }}>{c.pct}%</td>
-                        </tr>
-                      ))}
-                      {saldoRestante > 0 && (
-                        <tr>
-                          <td style={{ padding: '4px 0', verticalAlign: 'middle' }}><div style={{ width: 8, height: 8, borderRadius: 2, background: '#16A34A' }} /></td>
-                          <td style={{ padding: '4px 6px', fontSize: 12, color: '#16A34A', fontWeight: 500, verticalAlign: 'middle' }}>Saldo restante</td>
-                          <td style={{ padding: '4px 0', fontSize: 12, fontWeight: 600, color: '#16A34A', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{fmt(saldoRestante)}</td>
-                          <td style={{ padding: '4px 0 4px 8px', fontSize: 11, color: '#16A34A', textAlign: 'right', verticalAlign: 'middle', width: 34 }}>{saldoPct}%</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                  <div style={{ marginTop: 10, paddingTop: 8, borderTop: '0.5px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                    <span style={{ color: '#6B7280' }}>Total saídas</span>
-                    <span style={{ fontWeight: 700, color: '#DC2626' }}>{fmt(saidas)}</span>
+                  {/* Linhas de categoria com ícone badge + mini barra + valor + % */}
+                  {lista.map((c, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: `${c.cor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, color: '#374151', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>{c.nome}</div>
+                        <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ width: `${c.pct}%`, height: '100%', background: c.cor, borderRadius: 2 }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: '#111827', whiteSpace: 'nowrap' }}>{fmt(c.valor)}</span>
+                        <span style={{ fontSize: 10, color: '#9CA3AF' }}>{c.pct}%</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Saldo restante */}
+                  {saldoRestante > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: 2, background: '#16A34A' }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, color: '#16A34A', fontWeight: 500, marginBottom: 3 }}>Saldo restante</div>
+                        <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ width: `${saldoPct}%`, height: '100%', background: '#16A34A', borderRadius: 2 }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: '#16A34A', whiteSpace: 'nowrap' }}>{fmt(saldoRestante)}</span>
+                        <span style={{ fontSize: 10, color: '#16A34A' }}>{saldoPct}%</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Total saídas */}
+                  <div style={{ marginTop: 4, paddingTop: 8, borderTop: '0.5px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: '#6B7280', fontWeight: 400 }}>Total saídas</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#EF4444' }}>{fmt(saidas)}</span>
                   </div>
                 </>
               );

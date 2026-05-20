@@ -944,7 +944,7 @@ export default function DashboardPage() {
                   {lista.map((c, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
                       <div style={{ width: 28, height: 28, borderRadius: 8, background: `${c.cor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: 2, background: c.cor }} />
+                        <div style={{ width: 10, height: 10, borderRadius: 3, background: c.cor }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, color: '#374151', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>{c.nome}</div>
@@ -960,10 +960,10 @@ export default function DashboardPage() {
                   ))}
 
                   {/* Saldo restante */}
-                  {saldoRestante > 0 && (
+                  {total > 0 && saldoRestante >= 0 && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
                       <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: 2, background: '#16A34A' }} />
+                        <div style={{ width: 10, height: 10, borderRadius: 3, background: '#16A34A' }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, color: '#16A34A', fontWeight: 500, marginBottom: 3 }}>Saldo restante</div>
@@ -986,7 +986,7 @@ export default function DashboardPage() {
                 </>
               );
             })()}
-            <span style={S.cardLink} onClick={() => navigate('/saidas')}>Ver saídas →</span>
+            <span style={{ ...S.cardLink, marginTop: 8 }} onClick={() => navigate('/saidas')}>Ver saídas →</span>
           </div>
 
           <GraficoSaldo meses={D.saldoPorMes} style={{ gridColumn: 'span 2' }} />

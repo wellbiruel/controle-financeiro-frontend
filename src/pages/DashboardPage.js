@@ -940,42 +940,94 @@ export default function DashboardPage() {
               const saldoPct = total > 0 ? Math.round((saldoRestante / total) * 100) : 0;
               return (
                 <>
-                  {/* Linhas de categoria com ícone badge + mini barra + valor + % */}
-                  {lista.map((c, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 8, background: `${c.cor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: 3, background: c.cor }} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, color: '#374151', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>{c.nome}</div>
-                        <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ width: `${c.pct}%`, height: '100%', background: c.cor, borderRadius: 2 }} />
+                  {/* Categorias com hierarquia visual — maior gasto em destaque */}
+                  {lista.map((c, i) => {
+                    const isMaior = i === 0;
+                    const maxValor = lista[0]?.valor || 1;
+                    const barW = Math.round((c.valor / maxValor) * 100);
+
+                    const getIcone = (nome) => {
+                      const n = (nome || '').toLowerCase();
+                      if (n.includes('cart') || n.includes('card')) return (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isMaior ? '#EF4444' : '#64748B'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                      );
+                      if (n.includes('aliment') || n.includes('comida') || n.includes('restaur')) return (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+                        </svg>
+                      );
+                      if (n.includes('casa') || n.includes('aluguel') || n.includes('moradia')) return (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                      );
+                      if (n.includes('saúde') || n.includes('saude') || n.includes('médic') || n.includes('medic')) return (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                      );
+                      if (n.includes('transporte') || n.includes('carro') || n.includes('uber') || n.includes('gasolina')) return (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+                      );
+                      return (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>
+                        </svg>
+                      );
+                    };
+
+                    return (
+                      <div key={i} style={{ padding: '6px 0', borderRadius: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: 8, background: isMaior ? '#FEF2F2' : '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {getIcone(c.nome)}
+                          </div>
+                          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nome}</span>
+                            {isMaior && (
+                              <span style={{ fontSize: 10, fontWeight: 500, color: '#EF4444', background: '#FEF2F2', padding: '2px 6px', borderRadius: 99, whiteSpace: 'nowrap', flexShrink: 0 }}>Maior gasto</span>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: isMaior ? '#EF4444' : '#111827', whiteSpace: 'nowrap' }}>{fmt(c.valor)}</span>
+                            <span style={{ fontSize: 11, color: '#94A3B8' }}>{c.pct}%</span>
+                          </div>
+                        </div>
+                        <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginLeft: 40 }}>
+                          <div style={{ width: `${barW}%`, height: '100%', background: isMaior ? '#EF4444' : '#94A3B8', borderRadius: 2 }} />
                         </div>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: '#111827', whiteSpace: 'nowrap' }}>{fmt(c.valor)}</span>
-                        <span style={{ fontSize: 10, color: '#9CA3AF' }}>{c.pct}%</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
-                  {/* Saldo restante */}
+                  {/* Saldo restante — separado como RESULTADO, não categoria */}
                   {total > 0 && saldoRestante >= 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: 3, background: '#16A34A' }} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, color: '#16A34A', fontWeight: 500, marginBottom: 3 }}>Saldo restante</div>
-                        <div style={{ height: 3, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
+                    <>
+                      <div style={{ height: '0.5px', background: '#E5E7EB', margin: '6px 0' }} />
+                      <div style={{ padding: '6px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: '#16A34A' }}>Saldo restante</span>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#16A34A', whiteSpace: 'nowrap' }}>{fmt(saldoRestante)}</span>
+                            <span style={{ fontSize: 11, color: '#16A34A' }}>{saldoPct}%</span>
+                          </div>
+                        </div>
+                        <div style={{ height: 4, background: '#F1F5F9', borderRadius: 2, overflow: 'hidden', marginLeft: 40 }}>
                           <div style={{ width: `${saldoPct}%`, height: '100%', background: '#16A34A', borderRadius: 2 }} />
                         </div>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: '#16A34A', whiteSpace: 'nowrap' }}>{fmt(saldoRestante)}</span>
-                        <span style={{ fontSize: 10, color: '#16A34A' }}>{saldoPct}%</span>
-                      </div>
-                    </div>
+                    </>
                   )}
 
                   {/* Total saídas */}

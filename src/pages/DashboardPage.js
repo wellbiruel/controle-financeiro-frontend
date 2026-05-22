@@ -805,7 +805,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Investimentos — card unificado com Evolução */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+            {/* Faixa azul topo */}
+            <div style={{ height: 6, background: '#2563EB', width: '100%', flexShrink: 0 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: 14 }}>
 
             {/* Label com ícone de tendência */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
@@ -923,6 +926,7 @@ export default function DashboardPage() {
                 </>
               );
             })()}
+            </div>
           </div>
 
           {/* Categorias */}

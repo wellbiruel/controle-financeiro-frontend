@@ -743,24 +743,24 @@ export default function DashboardPage() {
 
           {/* Teto de Gastos + Limite Restante — card unificado */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Orçamento</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Teto de Gastos</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>Disponível no mês</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Orçamento</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>Teto de Gastos</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginBottom: 10 }}>Disponível no mês</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
               <div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 1 }}>Utilizado</div>
-                <div style={{ fontSize: 20, fontWeight: 500, color: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>{Math.round(gaugePct)}%</div>
+                <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Utilizado</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>{Math.round(gaugePct)}%</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 1 }}>Restante</div>
-                <div style={{ fontSize: 20, fontWeight: 500, color: '#16A34A', lineHeight: 1 }}>{fmt(D.limiteRestante?.valor)}</div>
+                <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Restante</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', lineHeight: 1 }}>{fmt(D.limiteRestante?.valor)}</div>
               </div>
             </div>
-            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
+            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
               <div style={{ height: '100%', width: `${Math.min(gaugePct, 100)}%`, background: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', borderRadius: 3 }} />
             </div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>
-              Gasto: <span style={{ color: '#EF4444', fontWeight: 500 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
+            <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
+              Gasto: <span style={{ color: '#EF4444', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
             </div>
             {gaugePct >= 100
               ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>⚠ Teto ultrapassado!</div>
@@ -775,15 +775,15 @@ export default function DashboardPage() {
 
           {/* Reserva */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Segurança</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Reserva de Emergência</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Saldo acumulado</div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: '#16A34A', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Segurança</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>Reserva de Emergência</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginBottom: 10 }}>Saldo acumulado</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
+            <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
             <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, marginTop: 4 }}>Faltam {fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta</div>
-            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#16A34A' }}>↑</span> +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
-            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#EF4444' }}>↓</span> -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
+            <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 6, marginTop: 6 }}>Faltam {fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta</div>
+            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#16A34A' }}>↑</span> +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
+            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#EF4444' }}>↓</span> -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
             {(D.reserva?.mesesCobertos || 0) < 3
               ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>● Crítico</div>
               : (D.reserva?.mesesCobertos || 0) < 6
@@ -794,11 +794,11 @@ export default function DashboardPage() {
 
           {/* Maior Gasto */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Destaque</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Maior Gasto</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>{fmtP(D.maiorGasto?.pctSaidas)} das saídas de {MESES_ABREV[mes-1]}</div>
-            {D.maiorGasto?.nome && <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>{D.maiorGasto.nome}</div>}
-            <div style={{ fontSize: 22, fontWeight: 500, color: '#EF4444', lineHeight: 1, marginBottom: 4 }}>{fmt(D.maiorGasto?.valor)}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Destaque</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>Maior Gasto</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginBottom: 10 }}>{fmtP(D.maiorGasto?.pctSaidas)} das saídas de {MESES_ABREV[mes-1]}</div>
+            {D.maiorGasto?.nome && <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', marginBottom: 6 }}>{D.maiorGasto.nome}</div>}
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
             <Trend val={D.maiorGasto?.tendencia} suffix={`% vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`} />
             {D.maiorGasto?.altoImpacto && <div style={{ ...S.badge('#FEF2F2','#DC2626'), marginTop: 8, marginBottom: 8 }}>▲ Alto impacto</div>}
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>

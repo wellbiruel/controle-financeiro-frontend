@@ -919,10 +919,77 @@ export default function DashboardPage() {
           {/* Maior Gasto */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Maior Gasto</div>
-            {D.maiorGasto?.nome && <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', marginBottom: 6 }}>{D.maiorGasto.nome}</div>}
-            <div style={{ fontSize: 24, fontWeight: 700, color: (D.maiorGasto?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
-            <Trend val={D.maiorGasto?.tendencia} suffix={`% vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`} />
-            {D.maiorGasto?.altoImpacto && <div style={{ ...S.badge('#FEF2F2','#DC2626'), marginTop: 8, marginBottom: 8 }}>▲ Alto impacto</div>}
+
+            {/* Ícone + categoria + descrição + badge variação */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{D.maiorGasto?.nome || '—'}</div>
+                  {D.maiorGasto?.descricao && (
+                    <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>{D.maiorGasto.descricao}</div>
+                  )}
+                </div>
+              </div>
+              {/* Badge variação */}
+              {D.maiorGasto?.tendencia != null && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: D.maiorGasto.tendencia <= 0 ? '#F0FDF4' : '#FEF2F2', color: D.maiorGasto.tendencia <= 0 ? '#16A34A' : '#EF4444', padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  <span>{D.maiorGasto.tendencia <= 0 ? '↓' : '↑'}</span>
+                  {D.maiorGasto.tendencia > 0 ? '+' : ''}{D.maiorGasto.tendencia}% vs {MESES_ABREV[mes <= 1 ? 11 : mes - 2]}
+                </div>
+              )}
+            </div>
+
+            {/* Valor principal */}
+            <div style={{ fontSize: 22, fontWeight: 700, color: (D.maiorGasto?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', lineHeight: 1, marginBottom: 3 }}>{fmt(D.maiorGasto?.valor)}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>
+              Representa <span style={{ color: '#EF4444', fontWeight: 600 }}>{fmtP(D.maiorGasto?.pctSaidas)}</span> das saídas de {MESES_ABREV[mes - 1]}
+            </div>
+
+            {/* Barra proporcional */}
+            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden', marginBottom: 10 }}>
+              <div style={{ width: `${Math.min(D.maiorGasto?.pctSaidas || 0, 100)}%`, height: '100%', background: '#EF4444', borderRadius: 2 }} />
+            </div>
+
+            {/* Insight de recorrência */}
+            {(() => {
+              const vezes = D.maiorGasto?.vezesComoMaior || 0;
+              const nome = D.maiorGasto?.nome || 'Esta categoria';
+              const totalMeses = mes;
+              if (vezes === 0) return null;
+              const isPrimeira = vezes === 1;
+              const isDominante = vezes >= 4;
+              const bg = isPrimeira ? '#F0FDF4' : isDominante ? '#FEF2F2' : '#FEF3C7';
+              const icoBg = isPrimeira ? '#DCFCE7' : isDominante ? '#FECACA' : '#FDE68A';
+              const cor = isPrimeira ? '#16A34A' : isDominante ? '#EF4444' : '#D97706';
+              const icoPath = isPrimeira
+                ? <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>
+                : isDominante
+                ? <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+                : <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>;
+              const titulo = isPrimeira ? '1ª vez como maior gasto' : isDominante ? `${vezes}ª vez — gasto dominante` : `${vezes}ª vez como maior gasto`;
+              const subtexto = isPrimeira
+                ? `${nome} nunca havia liderado os gastos em ${ano}.`
+                : `${nome} lidera os gastos em ${vezes} dos ${totalMeses} meses de ${ano}.`;
+              return (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: bg, borderRadius: 8, padding: '8px', marginBottom: 10 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {icoPath}
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
+                    <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
+                  </div>
+                </div>
+              );
+            })()}
+
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>
           </div>
 

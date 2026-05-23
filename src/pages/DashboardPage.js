@@ -6,7 +6,7 @@ import api from '../services/api';
 // ── 
 const fmt  = v => 'R$ ' + Math.round(Math.abs(v ?? 0)).toLocaleString('pt-BR');
 const fmtS = v => (v >= 0 ? '+' : '-') + 'R$ ' + Math.abs(Math.round(v ?? 0)).toLocaleString('pt-BR');
-const fmtP = v => (v ?? 0).toFixed(1) + '%';
+const fmtP = v => { const n = v ?? 0; return (Number.isInteger(n) || n % 1 === 0 ? Math.round(n) : n.toFixed(1)) + '%'; };
 
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MESES_F     = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -758,15 +758,6 @@ export default function DashboardPage() {
                   Ver evolução do saldo →
                 </span>
 
-                {/* Carteira decorativa */}
-                <div style={{ position: 'absolute', right: -8, bottom: -8, opacity: 0.08, pointerEvents: 'none' }}>
-                  <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="3"/>
-                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                    <rect x="14" y="11" width="6" height="5" rx="1.5"/>
-                    <circle cx="17" cy="13.5" r="1"/>
-                  </svg>
-                </div>
               </div>
 
             </div>

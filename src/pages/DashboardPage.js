@@ -745,11 +745,23 @@ export default function DashboardPage() {
                     <div style={{ fontSize: 13, fontWeight: 500, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{fmtP(D.saldo?.pctRenda)} da renda</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                      <polyline points="17 6 23 6 23 12"/>
-                    </svg>
-                    <span style={{ fontSize: 10, color: '#9CA3AF' }}>em alta</span>
+                    {(D.saldo?.valor || 0) >= 0 ? (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                          <polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                        <span style={{ fontSize: 10, color: '#9CA3AF' }}>em alta</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                          <polyline points="17 18 23 18 23 12"/>
+                        </svg>
+                        <span style={{ fontSize: 10, color: '#9CA3AF' }}>em baixa</span>
+                      </>
+                    )}
                   </div>
                 </div>
 

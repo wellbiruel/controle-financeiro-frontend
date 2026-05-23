@@ -781,7 +781,7 @@ export default function DashboardPage() {
               <div style={{ height: '100%', width: `${Math.min(gaugePct, 100)}%`, background: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', borderRadius: 3 }} />
             </div>
             <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
-              Gasto: <span style={{ color: '#EF4444', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
+              Gasto: <span style={{ color: (D.saidas?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
             </div>
             {gaugePct >= 100
               ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>⚠ Teto ultrapassado!</div>

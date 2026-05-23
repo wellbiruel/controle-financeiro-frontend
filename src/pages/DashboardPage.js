@@ -918,8 +918,7 @@ export default function DashboardPage() {
 
           {/* Maior Gasto */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Destaque</div>
-            <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF', marginBottom: 10 }}>Maior Gasto</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Maior Gasto</div>
             {D.maiorGasto?.nome && <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', marginBottom: 6 }}>{D.maiorGasto.nome}</div>}
             <div style={{ fontSize: 24, fontWeight: 700, color: (D.maiorGasto?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
             <Trend val={D.maiorGasto?.tendencia} suffix={`% vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`} />

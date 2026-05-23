@@ -296,11 +296,11 @@ function GraficoSaldo({ meses, style }) {
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: acum >= 0 ? '#16A34A' : '#EF4444' }}>Acumulado: {fmtS(acum)}</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF' }}>{new Date().getFullYear()}</div>
       </div>
 
       {/* Mini cards: Desempenho do ano + Meta anual */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
         {/* Desempenho do ano */}
         <div style={{ background: acum >= 0 ? '#F0FDF4' : '#FEF2F2', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>

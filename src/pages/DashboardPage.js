@@ -710,7 +710,7 @@ export default function DashboardPage() {
 
               {/* DIREITA: Saldo */}
               <div style={{ padding: '16px 18px 14px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>$ Saldo do mês</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>$ Saldo do mês</div>
                 <div style={{ fontSize: 34, fontWeight: 700, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1, marginBottom: 4 }}>
                   {D.saldo?.valor >= 0 ? '+' : ''}{fmt(D.saldo?.valor)}
                 </div>

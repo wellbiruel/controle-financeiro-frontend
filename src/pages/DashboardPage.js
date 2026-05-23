@@ -660,11 +660,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Separador com dot central */}
-                <div style={{ position: 'relative', margin: '0 16px' }}>
-                  <div style={{ height: '0.5px', background: '#E5E7EB' }} />
-                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 18, height: 18, borderRadius: '50%', background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#9CA3AF' }}>↕</div>
-                </div>
+                {/* Separador simples — linha fina sem dot */}
+                <div style={{ height: '0.5px', background: '#E5E7EB', margin: '0 16px' }} />
 
                 {/* Saídas */}
                 <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>

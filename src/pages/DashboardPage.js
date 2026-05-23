@@ -653,10 +653,8 @@ export default function DashboardPage() {
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Entradas</span>
                     <div style={{ fontSize: 26, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 3 }}>{fmt(D.entradas?.valor)}</div>
                     <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>{D.entradas?.sub || 'Salário + extras'}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        {D.entradas?.tendencia >= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
-                      </svg>
+                    <div style={{ fontSize: 11, fontWeight: 400, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <span style={{ color: D.entradas?.tendencia >= 0 ? '#16A34A' : '#EF4444' }}>{D.entradas?.tendencia >= 0 ? '↑' : '↓'}</span>
                       {D.entradas?.tendencia >= 0 ? '+' : ''}{D.entradas?.tendencia}% vs mês anterior
                     </div>
                   </div>
@@ -679,10 +677,8 @@ export default function DashboardPage() {
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Saídas</span>
                     <div style={{ fontSize: 26, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 3 }}>{fmt(D.saidas?.valor)}</div>
                     <div style={{ fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 3 }}>Total de gastos</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444', display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        {D.saidas?.tendencia <= 0 ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></> : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>}
-                      </svg>
+                    <div style={{ fontSize: 11, fontWeight: 400, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <span style={{ color: D.saidas?.tendencia <= 0 ? '#16A34A' : '#EF4444' }}>{D.saidas?.tendencia <= 0 ? '↑' : '↓'}</span>
                       {D.saidas?.tendencia >= 0 ? '+' : ''}{D.saidas?.tendencia}% vs mês anterior
                     </div>
                   </div>

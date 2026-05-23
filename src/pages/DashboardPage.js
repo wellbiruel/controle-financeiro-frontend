@@ -770,11 +770,11 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
               <div>
                 <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Utilizado</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>{Math.round(gaugePct)}%</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: gaugePct === 0 ? '#9CA3AF' : gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>{Math.round(gaugePct)}%</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Restante</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', lineHeight: 1 }}>{fmt(D.limiteRestante?.valor)}</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: (D.limiteRestante?.valor || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1 }}>{fmt(D.limiteRestante?.valor)}</div>
               </div>
             </div>
             <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
@@ -798,7 +798,7 @@ export default function DashboardPage() {
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Segurança</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>Reserva de Segurança</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: (D.reserva?.valor || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{(D.reserva?.mesesCobertos || 0).toFixed(1)} meses de proteção</div>
 
             {/* Barra de progresso global */}
@@ -903,7 +903,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Destaque</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>Maior Gasto</div>
             {D.maiorGasto?.nome && <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', marginBottom: 6 }}>{D.maiorGasto.nome}</div>}
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: (D.maiorGasto?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
             <Trend val={D.maiorGasto?.tendencia} suffix={`% vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`} />
             {D.maiorGasto?.altoImpacto && <div style={{ ...S.badge('#FEF2F2','#DC2626'), marginTop: 8, marginBottom: 8 }}>▲ Alto impacto</div>}
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>

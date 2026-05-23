@@ -766,7 +766,7 @@ export default function DashboardPage() {
           {/* Teto de Gastos + Limite Restante — card unificado */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Orçamento</div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>Teto de Gastos</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Teto de Gastos</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginBottom: 10 }}>Disponível no mês</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
               <div>
@@ -798,7 +798,7 @@ export default function DashboardPage() {
           {/* Reserva */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Segurança</div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>Reserva de Emergência</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Reserva de Emergência</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginBottom: 10 }}>Saldo acumulado</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
@@ -817,7 +817,7 @@ export default function DashboardPage() {
           {/* Maior Gasto */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Destaque</div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>Maior Gasto</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>Maior Gasto</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginBottom: 10 }}>{fmtP(D.maiorGasto?.pctSaidas)} das saídas de {MESES_ABREV[mes-1]}</div>
             {D.maiorGasto?.nome && <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', marginBottom: 6 }}>{D.maiorGasto.nome}</div>}
             <div style={{ fontSize: 24, fontWeight: 700, color: '#EF4444', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>

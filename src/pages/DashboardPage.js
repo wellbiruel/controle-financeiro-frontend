@@ -799,16 +799,102 @@ export default function DashboardPage() {
             <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Segurança</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>Reserva de Segurança</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
-            <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>{fmtP(D.reserva?.pctMeta)} da meta · {D.reserva?.mesesCobertos} meses</div>
-            <ProgressBar pct={Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)} color="#16A34A" />
-            <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 6, marginTop: 6 }}>Faltam {fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))} para a meta</div>
-            {D.reserva?.estado === 'crescendo' && <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#16A34A' }}>↑</span> +{fmt(D.reserva?.variacao)} vs mês anterior</div>}
-            {D.reserva?.estado === 'reduzindo' && <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}><span style={{ color: '#EF4444' }}>↓</span> -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior</div>}
-            {(D.reserva?.mesesCobertos || 0) < 3
-              ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>● Crítico</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{(D.reserva?.mesesCobertos || 0).toFixed(1)} meses de proteção</div>
+
+            {/* Barra de progresso global */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+              <div style={{ flex: 1, height: 4, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: '#16A34A', borderRadius: 2 }} />
+              </div>
+              <span style={{ fontSize: 11, color: '#16A34A', fontWeight: 500, whiteSpace: 'nowrap' }}>{Math.round(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0)}%</span>
+            </div>
+
+            {/* Quadrados de progresso — 6 meses meta */}
+            {(() => {
+              const META_MESES = 6;
+              const mesesCobertos = D.reserva?.mesesCobertos || 0;
+              const mesesInteiros = Math.floor(mesesCobertos);
+              const fracao = mesesCobertos - mesesInteiros;
+              return (
+                <>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>Meta ideal: {META_MESES} meses</div>
+                  <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
+                    {Array.from({ length: META_MESES }).map((_, i) => {
+                      if (i < mesesInteiros) {
+                        return <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: '#94A3B8', border: '1px solid #94A3B8' }} />;
+                      }
+                      if (i === mesesInteiros && fracao > 0) {
+                        const pct = Math.round(fracao * 100);
+                        return <div key={i} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #E5E7EB', background: `linear-gradient(to right, #94A3B8 ${pct}%, #F3F4F6 ${pct}%)` }} />;
+                      }
+                      return <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: '#F3F4F6', border: '1px solid #E5E7EB' }} />;
+                    })}
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Faltam R$ X para a meta */}
+            {(D.reserva?.metaValor || 0) > (D.reserva?.valor || 0) && (
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>
+                Faltam <span style={{ color: '#6B7280', fontWeight: 500 }}>{fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))}</span> para a meta
+              </div>
+            )}
+
+            {/* Variação vs mês anterior */}
+            {D.reserva?.estado === 'crescendo' && (
+              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>
+                <span style={{ color: '#16A34A' }}>↑</span> +{fmt(D.reserva?.variacao)} vs mês anterior
+              </div>
+            )}
+            {D.reserva?.estado === 'reduzindo' && (
+              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>
+                <span style={{ color: '#EF4444' }}>↓</span> -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior
+              </div>
+            )}
+
+            {/* Insight preditivo */}
+            {(() => {
+              const faltam = (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0);
+              const ritmo = D.reserva?.variacao || 0;
+              if (faltam <= 0 || ritmo <= 0) return null;
+              const mesesParaMeta = Math.ceil(faltam / ritmo);
+              if (mesesParaMeta > 120) return null;
+              const dataProjetada = new Date(ano, mes - 1 + mesesParaMeta, 1);
+              const mesProjetado = MESES_ABREV[dataProjetada.getMonth()];
+              const anoProjetado = dataProjetada.getFullYear();
+              return (
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  Na média atual, meta em <span style={{ color: '#6B7280', fontWeight: 500, marginLeft: 3 }}>{mesProjetado}/{anoProjetado}</span>
+                </div>
+              );
+            })()}
+
+            {/* Badge dinâmico */}
+            {(D.reserva?.mesesCobertos || 0) < 1
+              ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', marginBottom: 8, width: 'fit-content' }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Cobertura muito baixa
+                </div>
+              : (D.reserva?.mesesCobertos || 0) < 3
+              ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEE2E2', color: '#DC2626', border: '1px solid #FECACA', marginBottom: 8, width: 'fit-content' }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Crítico
+                </div>
               : (D.reserva?.mesesCobertos || 0) < 6
-              ? <div style={{ ...S.badge('#FEF3C7','#D97706'), marginBottom: 8, width: 'fit-content' }}>● Em progresso</div>
-              : <div style={{ ...S.badge('#F0FDF4','#16A34A'), marginBottom: 8, width: 'fit-content' }}>✓ Proteção ativa</div>}
+              ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEF3C7', color: '#D97706', border: '1px solid #FDE68A', marginBottom: 8, width: 'fit-content' }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Em progresso
+                </div>
+              : <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', border: '1px solid #86EFAC', marginBottom: 8, width: 'fit-content' }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Proteção completa
+                </div>
+            }
+
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes →</span>
           </div>
 

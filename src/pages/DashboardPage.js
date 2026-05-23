@@ -730,7 +730,7 @@ export default function DashboardPage() {
 
                 {/* Melhor mês */}
                 {D.saldo?.melhorMes && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 'auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748B', fontWeight: 400, marginBottom: 8 }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 9a6 6 0 0 0 12 0"/><line x1="12" y1="15" x2="12" y2="19"/><line x1="8" y1="19" x2="16" y2="19"/>
                     </svg>
@@ -738,8 +738,23 @@ export default function DashboardPage() {
                   </div>
                 )}
 
+                {/* Mini bloco: Renda preservada + seta discreta */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', marginBottom: 8, marginTop: 'auto' }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 2 }}>Renda preservada</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{fmtP(D.saldo?.pctRenda)} da renda</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                      <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                    <span style={{ fontSize: 10, color: '#9CA3AF' }}>em alta</span>
+                  </div>
+                </div>
+
                 {/* Link */}
-                <span style={{ fontSize: 12, color: '#2563EB', fontWeight: 500, cursor: 'pointer', marginTop: 'auto', paddingTop: 8 }} onClick={() => navigate('/fluxo-anual')}>
+                <span style={{ fontSize: 12, color: '#2563EB', fontWeight: 500, cursor: 'pointer', paddingTop: 4 }} onClick={() => navigate('/fluxo-anual')}>
                   Ver evolução do saldo →
                 </span>
 

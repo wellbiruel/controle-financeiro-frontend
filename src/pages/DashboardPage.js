@@ -719,7 +719,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Pill superávit/déficit */}
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: D.saldo?.valor >= 0 ? '#DCFCE7' : '#FEE2E2', color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, marginBottom: 8, width: 'fit-content' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: D.saldo?.valor >= 0 ? '#F0FDF4' : '#FFF7F7', color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 500, marginBottom: 8, width: 'fit-content', border: `1px solid ${D.saldo?.valor >= 0 ? '#DCFCE7' : '#FECACA'}` }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     {D.saldo?.valor >= 0
                       ? <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>
@@ -784,9 +784,15 @@ export default function DashboardPage() {
               Gasto: <span style={{ color: (D.saidas?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
             </div>
             {gaugePct >= 100
-              ? <div style={{ ...S.badge('#FEE2E2','#DC2626'), marginBottom: 8, width: 'fit-content' }}>⚠ Teto ultrapassado!</div>
+              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Teto ultrapassado
+                </div>
               : gaugePct >= 80
-              ? <div style={{ ...S.badge('#FEF3C7','#D97706'), marginBottom: 8, width: 'fit-content' }}>⚠ Atenção — {Math.round(gaugePct)}% usado</div>
+              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#F59E0B', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Atenção — {Math.round(gaugePct)}% usado
+                </div>
               : null}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
               <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
@@ -875,21 +881,21 @@ export default function DashboardPage() {
 
             {/* Badge dinâmico */}
             {(D.reserva?.mesesCobertos || 0) < 1
-              ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', marginBottom: 8, width: 'fit-content' }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   Cobertura muito baixa
                 </div>
               : (D.reserva?.mesesCobertos || 0) < 3
-              ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEE2E2', color: '#DC2626', border: '1px solid #FECACA', marginBottom: 8, width: 'fit-content' }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   Crítico
                 </div>
               : (D.reserva?.mesesCobertos || 0) < 6
-              ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEF3C7', color: '#D97706', border: '1px solid #FDE68A', marginBottom: 8, width: 'fit-content' }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#F59E0B', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   Em progresso
                 </div>
-              : <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', border: '1px solid #86EFAC', marginBottom: 8, width: 'fit-content' }}>
+              : <div style={{ fontSize: 11, fontWeight: 500, color: '#16A34A', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                   Proteção completa
                 </div>

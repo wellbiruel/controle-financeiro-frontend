@@ -259,7 +259,7 @@ function GraficoSaldo({ meses, style }) {
         })}
       </div>
 
-      <div style={{ height: 100, display: 'flex', alignItems: 'flex-end', gap: 4, paddingTop: 22, position: 'relative', marginBottom: 6 }}>
+      <div style={{ height: 140, display: 'flex', alignItems: 'flex-end', gap: 4, paddingTop: 22, position: 'relative', marginBottom: 6 }}>
         {dadosPorMes.map((m, i) => {
           const fut = m.saldo == null;
           const pos = !fut && m.saldo >= 0;

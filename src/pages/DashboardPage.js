@@ -239,9 +239,9 @@ function GraficoSaldo({ meses, style }) {
 
   return (
     <div style={{ ...S.card, ...style }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Análise mensal</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Análise mensal</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Saldo por mês · 2026</div>
+        <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF' }}>Saldo por mês · 2026</div>
         <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver fluxo →</span>
       </div>
       <div style={{ marginBottom: 10 }} />
@@ -777,8 +777,8 @@ export default function DashboardPage() {
 
           {/* Teto de Gastos + Limite Restante — card unificado */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Orçamento</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>Teto de Gastos</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Orçamento</div>
+            <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF', marginBottom: 10 }}>Teto de Gastos</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
               <div>
                 <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Utilizado</div>
@@ -814,8 +814,8 @@ export default function DashboardPage() {
 
           {/* Reserva */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Segurança</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>Reserva de Segurança</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Segurança</div>
+            <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF', marginBottom: 10 }}>Reserva de Segurança</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: (D.reserva?.valor || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{(D.reserva?.mesesCobertos || 0).toFixed(1)} meses de proteção</div>
 
@@ -918,8 +918,8 @@ export default function DashboardPage() {
 
           {/* Maior Gasto */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Destaque</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>Maior Gasto</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Destaque</div>
+            <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF', marginBottom: 10 }}>Maior Gasto</div>
             {D.maiorGasto?.nome && <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', marginBottom: 6 }}>{D.maiorGasto.nome}</div>}
             <div style={{ fontSize: 24, fontWeight: 700, color: (D.maiorGasto?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', lineHeight: 1, marginBottom: 6 }}>{fmt(D.maiorGasto?.valor)}</div>
             <Trend val={D.maiorGasto?.tendencia} suffix={`% vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`} />
@@ -939,7 +939,7 @@ export default function DashboardPage() {
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
               </svg>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>Investimentos</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em' }}>Investimentos</div>
             </div>
 
             {/* 3 KPIs em linha com separadores verticais */}
@@ -1045,9 +1045,9 @@ export default function DashboardPage() {
 
           {/* Categorias */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 2 }}>Distribuição</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Distribuição</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Categorias vs Saldo</div>
+              <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF' }}>Categorias vs Saldo</div>
               <div style={{ fontSize: 11, color: '#9CA3AF' }}>{MESES_ABREV[mes - 1]}</div>
             </div>
             {(() => {

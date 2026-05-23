@@ -288,7 +288,7 @@ function GraficoSaldo({ meses, style }) {
         )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, paddingBottom: 12, borderTop: '0.5px solid #F3F4F6' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, paddingBottom: 10, borderTop: '0.5px solid #F3F4F6' }}>
         <div style={{ display: 'flex', gap: 10 }}>
           {[{ cor: '#86EFAC', txt: 'Positivo' }, { cor: '#FCA5A5', txt: 'Negativo' }, { cor: '#F1F5F9', txt: 'Sem dados' }].map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#6B7280' }}>
@@ -297,6 +297,38 @@ function GraficoSaldo({ meses, style }) {
           ))}
         </div>
         <div style={{ fontSize: 12, fontWeight: 600, color: acum >= 0 ? '#16A34A' : '#EF4444' }}>Acumulado: {fmtS(acum)}</div>
+      </div>
+
+      {/* Mini cards: Desempenho do ano + Meta anual */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
+        {/* Desempenho do ano */}
+        <div style={{ background: acum >= 0 ? '#F0FDF4' : '#FEF2F2', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={acum >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+            </svg>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.04em' }}>Desempenho do ano</span>
+          </div>
+          <div style={{ fontSize: 11, color: '#64748B', fontWeight: 400 }}>Acumulado 2026</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: acum >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1 }}>{fmtS(acum)}</div>
+        </div>
+
+        {/* Meta anual */}
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+            </svg>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.04em' }}>Meta anual</span>
+          </div>
+          <div style={{ fontSize: 11, color: '#64748B', fontWeight: 400 }}>R$ 24.000</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ flex: 1, height: 4, background: '#E2E8F0', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ width: `${Math.min(Math.max((acum / 24000) * 100, 0), 100)}%`, height: '100%', background: '#2563EB', borderRadius: 2 }} />
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#2563EB', whiteSpace: 'nowrap' }}>{Math.round(Math.max((acum / 24000) * 100, 0))}% da meta</span>
+          </div>
+        </div>
       </div>
     </div>
   );

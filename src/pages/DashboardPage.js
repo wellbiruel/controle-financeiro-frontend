@@ -244,7 +244,7 @@ function GraficoSaldo({ meses, style }) {
         <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Saldo por mês · 2026</div>
         <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver fluxo →</span>
       </div>
-      <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>Evolução do saldo acumulado mês a mês</div>
+      <div style={{ marginBottom: 10 }} />
       <div style={{ display: 'flex', gap: 7, marginBottom: 14, flexWrap: 'wrap' }}>
         {pills.map(p => {
           const ativo = filtro === p.tipo;
@@ -288,16 +288,7 @@ function GraficoSaldo({ meses, style }) {
         )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, paddingBottom: 10, borderTop: '0.5px solid #F3F4F6' }}>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[{ cor: '#86EFAC', txt: 'Positivo' }, { cor: '#FCA5A5', txt: 'Negativo' }, { cor: '#F1F5F9', txt: 'Sem dados' }].map((l, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#6B7280' }}>
-              <div style={{ width: 8, height: 8, borderRadius: 2, background: l.cor }} />{l.txt}
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF' }}>{new Date().getFullYear()}</div>
-      </div>
+      <div style={{ height: '0.5px', background: '#F3F4F6', margin: '8px 0' }} />
 
       {/* Mini cards: Desempenho do ano + Meta anual */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>

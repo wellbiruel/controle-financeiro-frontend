@@ -742,7 +742,7 @@ export default function DashboardPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', marginBottom: 8, marginTop: 'auto' }}>
                   <div>
                     <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 2 }}>Renda preservada</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{fmtP(D.saldo?.pctRenda)} da renda</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: D.saldo?.valor >= 0 ? '#16A34A' : '#EF4444' }}>{fmtP(D.saldo?.pctRenda)} da renda</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

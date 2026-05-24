@@ -931,14 +931,14 @@ export default function DashboardPage() {
                 ? <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
                 : <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>;
               return (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: bg, borderRadius: 8, padding: 8, marginBottom: 10 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '6px 0', borderTop: '0.5px solid #F3F4F6', marginBottom: 10 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       {icoPath}
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
+                    <div style={{ fontSize: 11, fontWeight: 500, color: cor, marginBottom: 1 }}>{titulo}</div>
                     <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
                   </div>
                 </div>
@@ -1076,8 +1076,8 @@ export default function DashboardPage() {
                       const reservaVal = D.reserva?.valor || 0;
                       const multiplicador = reservaVal > 0 ? Math.round(maiorVal / reservaVal) : null;
                       return (
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#FEF2F2', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
-                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#FECACA', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '6px 0', borderTop: '0.5px solid #F3F4F6', marginTop: 6 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: 6, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                             </svg>
@@ -1100,8 +1100,8 @@ export default function DashboardPage() {
                       const mesesGanhos = gastoEssencial > 0 ? (metade / gastoEssencial).toFixed(1) : null;
                       if (saldoVal > 0) {
                         return (
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#FEF3C7', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
-                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '6px 0', borderTop: '0.5px solid #F3F4F6', marginTop: 6 }}>
+                            <div style={{ width: 20, height: 20, borderRadius: 6, background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                               </svg>
@@ -1128,8 +1128,8 @@ export default function DashboardPage() {
                         const mesProjetado   = MESES_ABREV[dataProjetada.getMonth()];
                         const anoProjetado   = dataProjetada.getFullYear();
                         return (
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#F0FDF4', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
-                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '6px 0', borderTop: '0.5px solid #F3F4F6', marginTop: 6 }}>
+                            <div style={{ width: 20, height: 20, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                               </svg>
@@ -1152,8 +1152,8 @@ export default function DashboardPage() {
                       const gastoEssencial = D.reserva?.metaValor ? D.reserva.metaValor / 6 : 0;
                       const mesesTotal     = gastoEssencial > 0 ? Math.round((patrimonio + (D.reserva?.valor || 0)) / gastoEssencial) : null;
                       return (
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#EFF6FF', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
-                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '6px 0', borderTop: '0.5px solid #F3F4F6', marginTop: 6 }}>
+                          <div style={{ width: 20, height: 20, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
                             </svg>
@@ -1278,14 +1278,14 @@ export default function DashboardPage() {
                 ? `${nome} nunca havia liderado os gastos em ${ano}.`
                 : `${nome} lidera os gastos em ${vezes} dos ${totalMeses} meses de ${ano}.`;
               return (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: bg, borderRadius: 8, padding: '8px', marginBottom: 10 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '6px 0', borderTop: '0.5px solid #F3F4F6', marginBottom: 10 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       {icoPath}
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
+                    <div style={{ fontSize: 11, fontWeight: 500, color: cor, marginBottom: 1 }}>{titulo}</div>
                     <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
                   </div>
                 </div>

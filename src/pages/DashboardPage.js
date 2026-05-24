@@ -999,16 +999,6 @@ export default function DashboardPage() {
               {/* Mini bloco gasto essencial + meta */}
               <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px', display: 'flex', flexDirection: 'column', gap: 6, minWidth: 100, flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>Gasto essencial</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>{fmt(D.reserva?.metaValor ? D.reserva.metaValor / 6 : 0)}</div>
-                  </div>
-                </div>
-                <div style={{ height: '0.5px', background: '#E5E7EB' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {(() => {
                     const faltam = Math.max(0, (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0));
                     const m = D.reserva?.mesesCobertos || 0;

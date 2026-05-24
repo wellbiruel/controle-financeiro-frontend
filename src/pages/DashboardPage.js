@@ -1174,40 +1174,6 @@ export default function DashboardPage() {
               );
             })()}
 
-            {/* Insight: status + faltam */}
-            {(() => {
-              const m = D.reserva?.mesesCobertos || 0;
-              const faltam = Math.max(0, (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0));
-              const isCritico = m < 1;
-              const isAtencao = m >= 1 && m < 3;
-              const isSaudavel = m >= 3 && m < 6;
-              const isCompleto = m >= 6;
-              const bg = isCritico ? '#FEF2F2' : isAtencao ? '#FEF3C7' : '#F0FDF4';
-              const icoBg = isCritico ? '#FECACA' : isAtencao ? '#FDE68A' : '#DCFCE7';
-              const cor = isCritico ? '#EF4444' : isAtencao ? '#D97706' : '#16A34A';
-              const titulo = isCritico ? 'Reserva em construção' : isAtencao ? 'Proteção parcial' : isSaudavel ? 'Reserva saudável' : 'Reserva completa';
-              const subtexto = isCritico ? 'Você possui menos de 1 mês de proteção.'
-                : isAtencao ? 'Sua reserva já cobre parte dos imprevistos.'
-                : isSaudavel ? 'Sua reserva já cobre emergências importantes.'
-                : 'Você atingiu sua meta de segurança financeira.';
-              const icoPath = isCritico
-                ? <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>
-                : isAtencao
-                ? <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
-                : <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>;
-              return (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: bg, borderRadius: 8, padding: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icoPath}</svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
-                    <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
-                  </div>
-                </div>
-              );
-            })()}
-
             {/* Variação vs mês anterior */}
             {D.reserva?.estado === 'crescendo' && (
               <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>

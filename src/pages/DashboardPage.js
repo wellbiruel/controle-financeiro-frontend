@@ -952,68 +952,187 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Reserva */}
-          <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Segurança</div>
-            <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF', marginBottom: 10 }}>Reserva de Segurança</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: (D.reserva?.valor || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.reserva?.valor)}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8 }}>{(D.reserva?.mesesCobertos || 0).toFixed(1)} meses de proteção</div>
+          {/* Reserva de Segurança — card premium */}
+          <div style={{ ...S.card, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-            {/* Barra de progresso global */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-              <div style={{ flex: 1, height: 4, background: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: '#16A34A', borderRadius: 2 }} />
+            {/* Header: ícone + título + badge status */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    {(D.reserva?.mesesCobertos || 0) >= 3 && <polyline points="9 12 11 14 15 10"/>}
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em' }}>Segurança</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400 }}>Reserva de Segurança</div>
+                </div>
               </div>
-              <span style={{ fontSize: 11, color: '#16A34A', fontWeight: 500, whiteSpace: 'nowrap' }}>{Math.round(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0)}%</span>
+              {/* Badge status dinâmico */}
+              {(() => {
+                const m = D.reserva?.mesesCobertos || 0;
+                const bg = m < 1 ? '#FEF2F2' : m < 3 ? '#FEF3C7' : m < 6 ? '#F0FDF4' : '#EFF6FF';
+                const cor = m < 1 ? '#EF4444' : m < 3 ? '#D97706' : m < 6 ? '#16A34A' : '#2563EB';
+                const txt = m < 1 ? 'Prioridade alta' : m < 3 ? 'Em evolução' : m < 6 ? 'Boa proteção' : 'Meta alcançada';
+                return (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: bg, color: cor, padding: '3px 8px', borderRadius: 99, fontSize: 10, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: cor }} />
+                    {txt}
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Quadrados de progresso — 6 meses meta */}
+            {/* Valor principal + mini info gasto/meta */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+              <div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: (D.reserva?.valor || 0) > 0 ? ((D.reserva?.mesesCobertos || 0) >= 3 ? '#16A34A' : (D.reserva?.mesesCobertos || 0) >= 1 ? '#D97706' : '#EF4444') : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>
+                  {fmt(D.reserva?.valor)}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 500, color: (D.reserva?.mesesCobertos || 0) < 1 ? '#EF4444' : (D.reserva?.mesesCobertos || 0) < 3 ? '#D97706' : '#16A34A' }}>
+                  {(D.reserva?.mesesCobertos || 0) < 1
+                    ? <><b>Menos de 1 mês</b> protegido</>
+                    : <><b>{(D.reserva?.mesesCobertos || 0).toFixed(1)} meses</b> protegidos</>}
+                </div>
+              </div>
+              {/* Mini bloco gasto essencial + meta */}
+              <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px', display: 'flex', flexDirection: 'column', gap: 6, minWidth: 100, flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>Gasto essencial</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>{fmt(D.reserva?.metaValor ? D.reserva.metaValor / 6 : 0)}</div>
+                  </div>
+                </div>
+                <div style={{ height: '0.5px', background: '#E5E7EB' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>Meta ideal</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>6 meses</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Barra de progresso global */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em' }}>Progresso da meta</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ flex: 1, height: 6, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(Math.max(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0, 0), 100)}%`, background: (D.reserva?.mesesCobertos || 0) < 1 ? '#EF4444' : (D.reserva?.mesesCobertos || 0) < 3 ? '#F59E0B' : '#16A34A', borderRadius: 99 }} />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: (D.reserva?.mesesCobertos || 0) < 1 ? '#EF4444' : (D.reserva?.mesesCobertos || 0) < 3 ? '#D97706' : '#16A34A', whiteSpace: 'nowrap' }}>
+                  {Math.round(isFinite(D.reserva?.pctMeta) ? D.reserva.pctMeta : 0)}%
+                </span>
+              </div>
+            </div>
+
+            {/* Blocos de proteção — 6 meses */}
             {(() => {
               const META_MESES = 6;
               const mesesCobertos = D.reserva?.mesesCobertos || 0;
               const mesesInteiros = Math.floor(mesesCobertos);
               const fracao = mesesCobertos - mesesInteiros;
+              const corBloco = mesesCobertos < 1 ? { bg: '#FEF2F2', border: '#FECACA', txt: '#EF4444' }
+                : mesesCobertos < 3 ? { bg: '#FEF3C7', border: '#FDE68A', txt: '#D97706' }
+                : { bg: '#F0FDF4', border: '#86EFAC', txt: '#16A34A' };
               return (
-                <>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>Meta ideal: {META_MESES} meses</div>
-                  <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>Sua proteção em meses</div>
+                  <div style={{ display: 'flex', gap: 4 }}>
                     {Array.from({ length: META_MESES }).map((_, i) => {
-                      if (i < mesesInteiros) {
-                        return <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: '#94A3B8', border: '1px solid #94A3B8' }} />;
-                      }
-                      if (i === mesesInteiros && fracao > 0) {
-                        const pct = Math.round(fracao * 100);
-                        return <div key={i} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #E5E7EB', background: `linear-gradient(to right, #94A3B8 ${pct}%, #F3F4F6 ${pct}%)` }} />;
-                      }
-                      return <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: '#F3F4F6', border: '1px solid #E5E7EB' }} />;
+                      const cheio = i < mesesInteiros;
+                      const parcial = i === mesesInteiros && fracao > 0;
+                      const pct = Math.round(fracao * 100);
+                      return (
+                        <div key={i} style={{ flex: 1, borderRadius: 6, padding: '4px 2px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: `1px solid ${cheio || parcial ? corBloco.border : '#E5E7EB'}`, background: cheio ? corBloco.bg : parcial ? `linear-gradient(to right, ${corBloco.bg} ${pct}%, #F8FAFC ${pct}%)` : '#F8FAFC' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: cheio ? corBloco.txt : parcial ? corBloco.txt : '#D1D5DB' }}>{i + 1}</span>
+                          <span style={{ fontSize: 8, color: cheio ? corBloco.txt : '#D1D5DB' }}>{i === 0 ? 'mês' : 'meses'}</span>
+                        </div>
+                      );
                     })}
                   </div>
-                </>
+                  {/* Zona labels */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: 9, fontWeight: 600, color: mesesCobertos < 1 ? '#EF4444' : '#9CA3AF' }}>Crítico</span>
+                      <span style={{ fontSize: 8, color: mesesCobertos < 1 ? '#EF4444' : '#9CA3AF' }}>0 a 1 mês</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: 9, fontWeight: 600, color: mesesCobertos >= 1 && mesesCobertos < 3 ? '#D97706' : '#9CA3AF' }}>Atenção</span>
+                      <span style={{ fontSize: 8, color: mesesCobertos >= 1 && mesesCobertos < 3 ? '#D97706' : '#9CA3AF' }}>1 a 3 meses</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontSize: 9, fontWeight: 600, color: mesesCobertos >= 3 ? '#16A34A' : '#9CA3AF' }}>Saudável</span>
+                      <span style={{ fontSize: 8, color: mesesCobertos >= 3 ? '#16A34A' : '#9CA3AF' }}>3 a 6 meses</span>
+                    </div>
+                  </div>
+                </div>
               );
             })()}
 
-            {/* Faltam R$ X para a meta */}
-            {(D.reserva?.metaValor || 0) > (D.reserva?.valor || 0) && (
-              <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6 }}>
-                Faltam <span style={{ color: '#6B7280', fontWeight: 500 }}>{fmt((D.reserva?.metaValor || 0) - (D.reserva?.valor || 0))}</span> para a meta
-              </div>
-            )}
+            {/* Insight: status + faltam */}
+            {(() => {
+              const m = D.reserva?.mesesCobertos || 0;
+              const faltam = Math.max(0, (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0));
+              const isCritico = m < 1;
+              const isAtencao = m >= 1 && m < 3;
+              const isSaudavel = m >= 3 && m < 6;
+              const isCompleto = m >= 6;
+              const bg = isCritico ? '#FEF2F2' : isAtencao ? '#FEF3C7' : '#F0FDF4';
+              const icoBg = isCritico ? '#FECACA' : isAtencao ? '#FDE68A' : '#DCFCE7';
+              const cor = isCritico ? '#EF4444' : isAtencao ? '#D97706' : '#16A34A';
+              const titulo = isCritico ? 'Reserva em construção' : isAtencao ? 'Proteção parcial' : isSaudavel ? 'Reserva saudável' : 'Reserva completa';
+              const subtexto = isCritico ? 'Você possui menos de 1 mês de proteção.'
+                : isAtencao ? 'Sua reserva já cobre parte dos imprevistos.'
+                : isSaudavel ? 'Sua reserva já cobre emergências importantes.'
+                : 'Você atingiu sua meta de segurança financeira.';
+              const icoPath = isCritico
+                ? <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>
+                : isAtencao
+                ? <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+                : <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>;
+              return (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: bg, borderRadius: 8, padding: 8 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icoPath}</svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
+                    <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
+                  </div>
+                  {faltam > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+                      <span style={{ fontSize: 10, color: '#9CA3AF' }}>Faltam</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: cor }}>{fmt(faltam)}</span>
+                      <span style={{ fontSize: 9, color: '#9CA3AF' }}>para a meta</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Variação vs mês anterior */}
             {D.reserva?.estado === 'crescendo' && (
-              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
                 <span style={{ color: '#16A34A' }}>↑</span> +{fmt(D.reserva?.variacao)} vs mês anterior
               </div>
             )}
             {D.reserva?.estado === 'reduzindo' && (
-              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
                 <span style={{ color: '#EF4444' }}>↓</span> -{fmt(Math.abs(D.reserva?.variacao))} vs mês anterior
               </div>
             )}
 
             {/* Insight preditivo */}
             {(() => {
-              const faltam = (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0);
+              const faltam = Math.max(0, (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0));
               const ritmo = D.reserva?.variacao || 0;
               if (faltam <= 0 || ritmo <= 0) return null;
               const mesesParaMeta = Math.ceil(faltam / ritmo);
@@ -1022,7 +1141,7 @@ export default function DashboardPage() {
               const mesProjetado = MESES_ABREV[dataProjetada.getMonth()];
               const anoProjetado = dataProjetada.getFullYear();
               return (
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ fontSize: 11, color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 4 }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                   </svg>
@@ -1031,29 +1150,18 @@ export default function DashboardPage() {
               );
             })()}
 
-            {/* Badge dinâmico */}
-            {(D.reserva?.mesesCobertos || 0) < 1
-              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Cobertura muito baixa
-                </div>
-              : (D.reserva?.mesesCobertos || 0) < 3
-              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Crítico
-                </div>
-              : (D.reserva?.mesesCobertos || 0) < 6
-              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#F59E0B', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Em progresso
-                </div>
-              : <div style={{ fontSize: 11, fontWeight: 500, color: '#16A34A', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  Proteção completa
-                </div>
-            }
+            {/* Links rodapé */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+              <span style={{ fontSize: 11, color: '#2563EB', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }} onClick={() => navigate('/reserva')}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Ver detalhes →
+              </span>
+              <span style={{ fontSize: 10, color: '#6B7280', fontWeight: 500, cursor: 'pointer', border: '0.5px solid #E5E7EB', padding: '3px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4 }} onClick={() => navigate('/reserva')}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                Ver plano da reserva
+              </span>
+            </div>
 
-            <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/reserva')}>Ver detalhes →</span>
           </div>
 
           {/* Maior Gasto */}

@@ -802,22 +802,13 @@ export default function DashboardPage() {
 
             {/* Barra trizona */}
             {(() => {
-              // Barra ocupa 100% da largura visual sempre
-              // Verde: 0-70% = 70% da barra
-              // Âmbar: 70-100% = 30% da barra
-              // Vermelho: >100% = expande além (overflow visual)
-              const maxVisual = Math.max(gaugePct, 100); // garante espaço pro excesso
-              const verdeW = 70; // sempre 70% da barra = zona verde fixa
-              const ambarW = 30; // sempre 30% da barra = zona âmbar fixa
-              const vermelhoW = gaugePct > 100 ? Math.min(gaugePct - 100, 20) : 0; // excesso até 20%
-              // dot: posição proporcional ao valor real
-              const dotPos = gaugePct <= 100
-                ? (gaugePct / 100) * 90 // dentro das zonas verde+âmbar (90% da barra)
-                : 90 + ((gaugePct - 100) / 20) * 10; // excesso na zona vermelha
-              // preenchimento real de cada zona
-              const verdePreench = Math.min(gaugePct, 70); // quanto da zona verde está preenchida
-              const ambarPreench = gaugePct > 70 ? Math.min(gaugePct - 70, 30) : 0;
-              const vermelhoPreench = gaugePct > 100 ? Math.min(gaugePct - 100, 20) : 0;
+              // Escala total = max(gaugePct, 100) — a barra representa sempre [0, total]
+              // Cada segmento é sua fatia real / total → soma sempre = 100% da largura
+              const total = Math.max(gaugePct, 100);
+              const verdeW = Math.min(gaugePct, 70) / total * 100;
+              const ambarW = gaugePct > 70 ? (Math.min(gaugePct, 100) - 70) / total * 100 : 0;
+              const vermelhoW = gaugePct > 100 ? (gaugePct - 100) / total * 100 : 0;
+              const dotPos = Math.min(gaugePct / total * 100, 97);
               const dotCor = gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444';
               return (
                 <div style={{ marginBottom: 8 }}>
@@ -827,14 +818,14 @@ export default function DashboardPage() {
                   </div>
                   <div style={{ position: 'relative', height: 7, background: '#F3F4F6', borderRadius: 99 }}>
                     {/* Fundo cinza total */}
-                    {/* Verde — preenchido até 70% real */}
-                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(verdePreench / 100) * 100}%`, background: '#16A34A', borderRadius: verdePreench < 70 ? '99px' : '99px 0 0 99px' }} />
-                    {/* Âmbar — preenchido de 70% até onde chegou */}
-                    {ambarPreench > 0 && <div style={{ position: 'absolute', left: `${verdePreench}%`, top: 0, height: '100%', width: `${ambarPreench}%`, background: '#F59E0B', borderRadius: ambarPreench < 30 ? '0 99px 99px 0' : '0' }} />}
-                    {/* Vermelho — excesso acima de 100% */}
-                    {vermelhoPreench > 0 && <div style={{ position: 'absolute', left: `${verdePreench + ambarPreench}%`, top: 0, height: '100%', width: `${vermelhoPreench}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />}
+                    {/* Verde */}
+                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${verdeW}%`, background: '#16A34A', borderRadius: ambarW === 0 && vermelhoW === 0 ? '99px' : '99px 0 0 99px' }} />
+                    {/* Âmbar */}
+                    {ambarW > 0 && <div style={{ position: 'absolute', left: `${verdeW}%`, top: 0, height: '100%', width: `${ambarW}%`, background: '#F59E0B', borderRadius: vermelhoW > 0 ? '0' : '0 99px 99px 0' }} />}
+                    {/* Vermelho */}
+                    {vermelhoW > 0 && <div style={{ position: 'absolute', left: `${verdeW + ambarW}%`, top: 0, height: '100%', width: `${vermelhoW}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />}
                     {/* Dot indicador */}
-                    <div style={{ position: 'absolute', top: '50%', left: `calc(${Math.min(verdePreench + ambarPreench + vermelhoPreench, 99)}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}` }} />
+                    <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}` }} />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>

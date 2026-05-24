@@ -783,7 +783,7 @@ export default function DashboardPage() {
             {/* Percentual grande + valor impacto lado a lado */}
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
               <div>
-                <div style={{ fontSize: 32, fontWeight: 800, color: gaugePct === 0 ? '#9CA3AF' : gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: gaugePct === 0 ? '#9CA3AF' : gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>
                   {Math.round(gaugePct)}%
                 </div>
                 <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>do teto utilizado</div>

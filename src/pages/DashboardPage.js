@@ -1071,6 +1071,115 @@ export default function DashboardPage() {
                       );
                     })}
                   </div>
+
+                  {/* Insight cruzado dinâmico por estado */}
+                  {(() => {
+                    const isCritico  = mesesCobertos < 1;
+                    const isAtencao  = mesesCobertos >= 1 && mesesCobertos < 3;
+                    const isSaudavel = mesesCobertos >= 3 && mesesCobertos < 6;
+                    const isCompleto = mesesCobertos >= 6;
+
+                    // CRÍTICO — cruzamento com maior gasto
+                    if (isCritico) {
+                      const maiorVal  = D.maiorGasto?.valor || 0;
+                      const maiorNome = D.maiorGasto?.descricao || D.maiorGasto?.nome || 'seu maior gasto';
+                      const reservaVal = D.reserva?.valor || 0;
+                      const multiplicador = reservaVal > 0 ? Math.round(maiorVal / reservaVal) : null;
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#FEF2F2', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
+                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#FECACA', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 10, fontWeight: 600, color: '#EF4444', marginBottom: 2 }}>Reserva vs maior gasto</div>
+                            <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>
+                              {maiorNome} ({fmt(maiorVal)}) é{multiplicador ? <span style={{ fontWeight: 600, color: '#EF4444' }}> {multiplicador}x maior</span> : ' maior'} que sua reserva. Um imprevisto comprometeria tudo.
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // ATENÇÃO — cruzamento com saldo positivo
+                    if (isAtencao) {
+                      const saldoVal = D.saldo?.valor || 0;
+                      const gastoEssencial = D.reserva?.metaValor ? D.reserva.metaValor / 6 : 0;
+                      const metade = Math.round(saldoVal / 2);
+                      const mesesGanhos = gastoEssencial > 0 ? (metade / gastoEssencial).toFixed(1) : null;
+                      if (saldoVal > 0) {
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#FEF3C7', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
+                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 10, fontWeight: 600, color: '#D97706', marginBottom: 2 }}>Oportunidade de aporte</div>
+                              <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>
+                                Seu saldo este mês foi <span style={{ fontWeight: 600 }}>{fmt(saldoVal)}</span>. Aportar metade (<span style={{ fontWeight: 600, color: '#D97706' }}>{fmt(metade)}</span>) aceleraria{mesesGanhos ? <span> sua reserva em <span style={{ fontWeight: 600 }}>{mesesGanhos} meses</span></span> : ' sua reserva'}.
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+
+                    // SAUDÁVEL — projeção temporal
+                    if (isSaudavel) {
+                      const faltam = Math.max(0, (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0));
+                      const ritmo  = D.reserva?.variacao || 0;
+                      if (faltam > 0 && ritmo > 0) {
+                        const mesesParaMeta  = Math.ceil(faltam / ritmo);
+                        const dataProjetada  = new Date(ano, mes - 1 + mesesParaMeta, 1);
+                        const mesProjetado   = MESES_ABREV[dataProjetada.getMonth()];
+                        const anoProjetado   = dataProjetada.getFullYear();
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#F0FDF4', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
+                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 10, fontWeight: 600, color: '#16A34A', marginBottom: 2 }}>Projeção da meta</div>
+                              <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>
+                                Na média atual, você atingirá <span style={{ fontWeight: 600 }}>6 meses de proteção</span> em <span style={{ fontWeight: 600, color: '#16A34A' }}>{mesProjetado}/{anoProjetado}</span>. Continue assim!
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+
+                    // COMPLETO — cruzamento com investimentos
+                    if (isCompleto) {
+                      const patrimonio     = D.investimentos?.patrimonioTotal || 0;
+                      const gastoEssencial = D.reserva?.metaValor ? D.reserva.metaValor / 6 : 0;
+                      const mesesTotal     = gastoEssencial > 0 ? Math.round((patrimonio + (D.reserva?.valor || 0)) / gastoEssencial) : null;
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: '#EFF6FF', borderRadius: 8, padding: '7px 8px', marginTop: 6 }}>
+                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 10, fontWeight: 600, color: '#2563EB', marginBottom: 2 }}>Reserva + investimentos</div>
+                            <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>
+                              Somando seu patrimônio de <span style={{ fontWeight: 600 }}>{fmt(patrimonio)}</span>, você tem cobertura real de{mesesTotal ? <span style={{ fontWeight: 600, color: '#2563EB' }}> {mesesTotal} meses</span> : ' longo prazo'}. Segurança sólida!
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return null;
+                  })()}
                 </div>
               );
             })()}

@@ -820,10 +820,19 @@ export default function DashboardPage() {
                     {vermelhoW > 0 && <div style={{ position: 'absolute', left: `${verdeW + ambarW}%`, top: 0, height: '100%', width: `${vermelhoW}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />}
                     <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}` }} />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginTop: 4 }}>
-                    <span style={{ color: '#16A34A' }}>Saudável até 70%</span>
-                    <span style={{ color: '#F59E0B' }}>Atenção</span>
-                    <span style={{ color: '#EF4444' }}>Crítico</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: '#16A34A' }}>Saudável</span>
+                      <span style={{ fontSize: 9, color: '#16A34A' }}>até 70%</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: '#F59E0B' }}>Atenção</span>
+                      <span style={{ fontSize: 9, color: '#F59E0B' }}>70% a 100%</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: '#EF4444' }}>Crítico</span>
+                      <span style={{ fontSize: 9, color: '#EF4444' }}>acima de 100%</span>
+                    </div>
                   </div>
                 </div>
               );

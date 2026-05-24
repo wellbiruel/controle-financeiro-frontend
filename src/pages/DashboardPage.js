@@ -929,10 +929,8 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{D.maiorGasto?.nome || '—'}</div>
-                  {D.maiorGasto?.descricao && (
-                    <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>{D.maiorGasto.descricao}</div>
-                  )}
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{D.maiorGasto?.descricao || D.maiorGasto?.nome || '—'}</div>
+                  <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>{D.maiorGasto?.nome || ''}</div>
                 </div>
               </div>
               {/* Badge variação */}

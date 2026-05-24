@@ -1009,13 +1009,23 @@ export default function DashboardPage() {
                 </div>
                 <div style={{ height: '0.5px', background: '#E5E7EB' }} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>Meta ideal</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>6 meses</div>
-                  </div>
+                  {(() => {
+                    const faltam = Math.max(0, (D.reserva?.metaValor || 0) - (D.reserva?.valor || 0));
+                    const m = D.reserva?.mesesCobertos || 0;
+                    const cor = m < 1 ? '#EF4444' : m < 3 ? '#D97706' : '#16A34A';
+                    const icoBg = m < 1 ? '#FEF2F2' : m < 3 ? '#FEF3C7' : '#F0FDF4';
+                    return (
+                      <>
+                        <div style={{ width: 20, height: 20, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: '#9CA3AF' }}>Faltam para meta</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: faltam > 0 ? cor : '#16A34A' }}>{faltam > 0 ? fmt(faltam) : 'Meta atingida!'}</div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -1061,21 +1071,6 @@ export default function DashboardPage() {
                       );
                     })}
                   </div>
-                  {/* Zona labels */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: 9, fontWeight: 600, color: mesesCobertos < 1 ? '#EF4444' : '#9CA3AF' }}>Crítico</span>
-                      <span style={{ fontSize: 8, color: mesesCobertos < 1 ? '#EF4444' : '#9CA3AF' }}>0 a 1 mês</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span style={{ fontSize: 9, fontWeight: 600, color: mesesCobertos >= 1 && mesesCobertos < 3 ? '#D97706' : '#9CA3AF' }}>Atenção</span>
-                      <span style={{ fontSize: 8, color: mesesCobertos >= 1 && mesesCobertos < 3 ? '#D97706' : '#9CA3AF' }}>1 a 3 meses</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ fontSize: 9, fontWeight: 600, color: mesesCobertos >= 3 ? '#16A34A' : '#9CA3AF' }}>Saudável</span>
-                      <span style={{ fontSize: 8, color: mesesCobertos >= 3 ? '#16A34A' : '#9CA3AF' }}>3 a 6 meses</span>
-                    </div>
-                  </div>
                 </div>
               );
             })()}
@@ -1110,13 +1105,6 @@ export default function DashboardPage() {
                     <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
                     <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
                   </div>
-                  {faltam > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
-                      <span style={{ fontSize: 10, color: '#9CA3AF' }}>Faltam</span>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: cor }}>{fmt(faltam)}</span>
-                      <span style={{ fontSize: 9, color: '#9CA3AF' }}>para a meta</span>
-                    </div>
-                  )}
                 </div>
               );
             })()}

@@ -802,45 +802,74 @@ export default function DashboardPage() {
 
             {/* Barra trizona */}
             {(() => {
-              // Escala total = max(gaugePct, 100) — a barra representa sempre [0, total]
-              // Cada segmento é sua fatia real / total → soma sempre = 100% da largura
-              const total = Math.max(gaugePct, 100);
-              const verdeW = Math.min(gaugePct, 70) / total * 100;
-              const ambarW = gaugePct > 70 ? (Math.min(gaugePct, 100) - 70) / total * 100 : 0;
-              const vermelhoW = gaugePct > 100 ? (gaugePct - 100) / total * 100 : 0;
-              const dotPos = Math.min(gaugePct / total * 100, 97);
+              // Zonas fixas visuais da barra (proporção fixa)
+              // Verde: 0-70% → ocupa 63% da barra visual
+              // Âmbar: 70-100% → ocupa 27% da barra visual
+              // Vermelho: 100%+ → ocupa 10% da barra visual
+              const VERDE_W = 63;
+              const AMBAR_W = 27;
+              const VERM_W = 10;
+
+              // Quanto de cada zona está preenchida (0-100% de cada segmento)
+              const verdePreench = Math.min(gaugePct / 70, 1) * 100;
+              const ambarPreench = gaugePct > 70 ? Math.min((gaugePct - 70) / 30, 1) * 100 : 0;
+              const vermelhoPreench = gaugePct > 100 ? Math.min((gaugePct - 100) / 15, 1) * 100 : 0;
+
+              // Posição do dot na barra visual
+              const dotPos = gaugePct <= 70
+                ? (gaugePct / 70) * VERDE_W
+                : gaugePct <= 100
+                ? VERDE_W + ((gaugePct - 70) / 30) * AMBAR_W
+                : VERDE_W + AMBAR_W + Math.min((gaugePct - 100) / 15, 1) * VERM_W;
+
               const dotCor = gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444';
+
               return (
                 <div style={{ marginBottom: 8 }}>
-                  <div style={{ position: 'relative', height: 12, marginBottom: 3 }}>
-                    <span style={{ position: 'absolute', left: 0, fontSize: 9, color: '#9CA3AF' }}>0%</span>
-                    <span style={{ position: 'absolute', left: `${verdeW}%`, fontSize: 9, color: '#9CA3AF', transform: 'translateX(-50%)' }}>70%</span>
-                    <span style={{ position: 'absolute', left: `${verdeW + ambarW}%`, fontSize: 9, color: '#9CA3AF', transform: 'translateX(-50%)' }}>100%</span>
-                    {gaugePct > 100 && <span style={{ position: 'absolute', right: 0, fontSize: 9, color: '#EF4444', fontWeight: 600 }}>{Math.round(gaugePct)}%</span>}
+                  {/* Labels superiores */}
+                  <div style={{ display: 'flex', fontSize: 9, color: '#9CA3AF', marginBottom: 3 }}>
+                    <span style={{ width: `${VERDE_W}%` }}>0%</span>
+                    <span style={{ width: `${AMBAR_W}%`, textAlign: 'center' }}>70%</span>
+                    <span style={{ width: `${VERM_W}%`, textAlign: 'right', color: gaugePct > 100 ? '#EF4444' : '#9CA3AF', fontWeight: gaugePct > 100 ? 600 : 400 }}>
+                      {gaugePct > 100 ? `${Math.round(gaugePct)}%` : '100%'}
+                    </span>
                   </div>
-                  <div style={{ position: 'relative', height: 7, background: '#F3F4F6', borderRadius: 99 }}>
-                    {/* Fundo cinza total */}
-                    {/* Verde */}
-                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${verdeW}%`, background: '#16A34A', borderRadius: ambarW === 0 && vermelhoW === 0 ? '99px' : '99px 0 0 99px' }} />
-                    {/* Âmbar */}
-                    {ambarW > 0 && <div style={{ position: 'absolute', left: `${verdeW}%`, top: 0, height: '100%', width: `${ambarW}%`, background: '#F59E0B', borderRadius: vermelhoW > 0 ? '0' : '0 99px 99px 0' }} />}
-                    {/* Vermelho */}
-                    {vermelhoW > 0 && <div style={{ position: 'absolute', left: `${verdeW + ambarW}%`, top: 0, height: '100%', width: `${vermelhoW}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />}
+
+                  {/* Barra com 3 segmentos fixos */}
+                  <div style={{ position: 'relative', height: 7, display: 'flex', borderRadius: 99, overflow: 'visible' }}>
+                    {/* Segmento verde */}
+                    <div style={{ width: `${VERDE_W}%`, height: '100%', background: '#F3F4F6', borderRadius: '99px 0 0 99px', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${verdePreench}%`, background: '#16A34A', borderRadius: '99px 0 0 99px' }} />
+                    </div>
+                    {/* Divisor */}
+                    <div style={{ width: 1, background: '#E5E7EB', flexShrink: 0 }} />
+                    {/* Segmento âmbar */}
+                    <div style={{ width: `${AMBAR_W}%`, height: '100%', background: '#F3F4F6', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${ambarPreench}%`, background: '#F59E0B' }} />
+                    </div>
+                    {/* Divisor */}
+                    <div style={{ width: 1, background: '#E5E7EB', flexShrink: 0 }} />
+                    {/* Segmento vermelho */}
+                    <div style={{ width: `${VERM_W}%`, height: '100%', background: '#F3F4F6', borderRadius: '0 99px 99px 0', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${vermelhoPreench}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />
+                    </div>
                     {/* Dot indicador */}
-                    <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}` }} />
+                    <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}`, zIndex: 2 }} />
                   </div>
-                  <div style={{ position: 'relative', height: 28, marginTop: 6 }}>
-                    <div style={{ position: 'absolute', left: 0, display: 'flex', flexDirection: 'column' }}>
+
+                  {/* Labels inferiores das zonas */}
+                  <div style={{ display: 'flex', marginTop: 5 }}>
+                    <div style={{ width: `${VERDE_W}%`, display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#16A34A' }}>Saudável</span>
                       <span style={{ fontSize: 9, color: '#16A34A' }}>até 70%</span>
                     </div>
-                    <div style={{ position: 'absolute', left: `${verdeW + ambarW / 2}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ width: `${AMBAR_W}%`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#F59E0B' }}>Atenção</span>
                       <span style={{ fontSize: 9, color: '#F59E0B' }}>70% a 100%</span>
                     </div>
-                    <div style={{ position: 'absolute', right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ width: `${VERM_W}%`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#EF4444' }}>Crítico</span>
-                      <span style={{ fontSize: 9, color: '#EF4444' }}>acima de 100%</span>
+                      <span style={{ fontSize: 9, color: '#EF4444' }}>+100%</span>
                     </div>
                   </div>
                 </div>

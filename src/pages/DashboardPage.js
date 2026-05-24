@@ -990,7 +990,7 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 24, fontWeight: 700, color: (D.reserva?.valor || 0) > 0 ? ((D.reserva?.mesesCobertos || 0) >= 3 ? '#16A34A' : (D.reserva?.mesesCobertos || 0) >= 1 ? '#D97706' : '#EF4444') : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>
                   {fmt(D.reserva?.valor)}
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 500, color: (D.reserva?.mesesCobertos || 0) < 1 ? '#EF4444' : (D.reserva?.mesesCobertos || 0) < 3 ? '#D97706' : '#16A34A' }}>
+                <div style={{ fontSize: 11, fontWeight: 500, color: (D.reserva?.mesesCobertos || 0) < 1 ? '#EF4444' : (D.reserva?.mesesCobertos || 0) < 3 ? '#D97706' : '#16A34A', whiteSpace: 'nowrap' }}>
                   {(D.reserva?.mesesCobertos || 0) < 1
                     ? <><b>Menos de 1 mês</b> protegido</>
                     : <><b>{(D.reserva?.mesesCobertos || 0).toFixed(1)} meses</b> protegidos</>}
@@ -1048,8 +1048,11 @@ export default function DashboardPage() {
                   <div style={{ display: 'flex', gap: 4 }}>
                     {Array.from({ length: META_MESES }).map((_, i) => {
                       const cheio = i < mesesInteiros;
-                      const parcial = i === mesesInteiros && fracao > 0;
-                      const pct = Math.round(fracao * 100);
+                      // quando mesesCobertos < 1, o primeiro bloco é parcial com fracao = mesesCobertos
+                      const fracaoReal = mesesCobertos < 1 ? mesesCobertos : fracao;
+                      const parcial = mesesCobertos < 1 ? i === 0 : (i === mesesInteiros && fracao > 0);
+                      const vazio = !cheio && !parcial;
+                      const pct = mesesCobertos < 1 ? Math.round(mesesCobertos * 100) : Math.round(fracaoReal * 100);
                       return (
                         <div key={i} style={{ flex: 1, borderRadius: 6, padding: '4px 2px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: `1px solid ${cheio || parcial ? corBloco.border : '#E5E7EB'}`, background: cheio ? corBloco.bg : parcial ? `linear-gradient(to right, ${corBloco.bg} ${pct}%, #F8FAFC ${pct}%)` : '#F8FAFC' }}>
                           <span style={{ fontSize: 11, fontWeight: 700, color: cheio ? corBloco.txt : parcial ? corBloco.txt : '#D1D5DB' }}>{i + 1}</span>

@@ -779,36 +779,107 @@ export default function DashboardPage() {
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Orçamento</div>
             <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF', marginBottom: 10 }}>Teto de Gastos</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+
+            {/* Percentual grande + valor impacto lado a lado */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
               <div>
-                <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Utilizado</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: gaugePct === 0 ? '#9CA3AF' : gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>{Math.round(gaugePct)}%</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 2 }}>Restante</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: (D.limiteRestante?.valor || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1 }}>{fmt(D.limiteRestante?.valor)}</div>
-              </div>
-            </div>
-            <div style={{ height: 4, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${Math.min(gaugePct, 100)}%`, background: gaugePct < 80 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', borderRadius: 3 }} />
-            </div>
-            <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
-              Gasto: <span style={{ color: (D.saidas?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF', fontWeight: 600 }}>{fmt(D.saidas?.valor)}</span> · Teto: {fmt(D.tetoGastos?.teto)}
-            </div>
-            {gaugePct >= 100
-              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  Teto ultrapassado
+                <div style={{ fontSize: 32, fontWeight: 800, color: gaugePct === 0 ? '#9CA3AF' : gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444', lineHeight: 1 }}>
+                  {Math.round(gaugePct)}%
                 </div>
-              : gaugePct >= 80
-              ? <div style={{ fontSize: 11, fontWeight: 500, color: '#F59E0B', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  Atenção — {Math.round(gaugePct)}% usado
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>do teto utilizado</div>
+              </div>
+              <div style={{ marginTop: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: gaugePct >= 100 ? '#EF4444' : gaugePct >= 70 ? '#F59E0B' : '#16A34A' }}>
+                  {gaugePct >= 100
+                    ? `${fmt(Math.abs(D.limiteRestante?.valor || 0))} acima`
+                    : fmt(D.limiteRestante?.valor || 0)}
                 </div>
-              : null}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
-              <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver planejamento →</span>
-              <span style={{ fontSize: 11, color: '#6B7280', cursor: 'pointer' }} onClick={() => setModalTeto(true)}>⚙ Alterar teto</span>
+                <div style={{ fontSize: 10, color: '#9CA3AF' }}>
+                  {gaugePct >= 100 ? 'do planejado' : 'ainda disponível'}
+                </div>
+              </div>
+            </div>
+
+            {/* Barra trizona */}
+            {(() => {
+              const pct = Math.min(gaugePct, 111);
+              const verdeW = Math.min(pct, 70) / 111 * 100;
+              const ambarW = pct > 70 ? (Math.min(pct, 100) - 70) / 111 * 100 : 0;
+              const vermelhoW = pct > 100 ? (pct - 100) / 111 * 100 : 0;
+              const dotPos = Math.min(gaugePct, 111) / 111 * 100;
+              const dotCor = gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444';
+              return (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#9CA3AF', marginBottom: 3 }}>
+                    <span>0%</span><span>70%</span><span>100%</span>
+                    {gaugePct > 100 && <span style={{ color: '#EF4444', fontWeight: 600 }}>{Math.round(gaugePct)}%</span>}
+                  </div>
+                  <div style={{ position: 'relative', height: 7, background: '#F3F4F6', borderRadius: 99 }}>
+                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${verdeW}%`, background: '#16A34A', borderRadius: '99px 0 0 99px' }} />
+                    {ambarW > 0 && <div style={{ position: 'absolute', left: `${verdeW}%`, top: 0, height: '100%', width: `${ambarW}%`, background: '#F59E0B' }} />}
+                    {vermelhoW > 0 && <div style={{ position: 'absolute', left: `${verdeW + ambarW}%`, top: 0, height: '100%', width: `${vermelhoW}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />}
+                    <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}` }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginTop: 4 }}>
+                    <span style={{ color: '#16A34A' }}>Saudável até 70%</span>
+                    <span style={{ color: '#F59E0B' }}>Atenção</span>
+                    <span style={{ color: '#EF4444' }}>Crítico</span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Gasto atual + Teto definido */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
+              <div style={{ flex: 1, background: '#F8FAFC', borderRadius: 6, padding: '6px 8px' }}>
+                <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 2 }}>Gasto atual</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: (D.saidas?.valor || 0) > 0 ? '#EF4444' : '#9CA3AF' }}>{fmt(D.saidas?.valor)}</div>
+              </div>
+              <div style={{ flex: 1, background: '#F8FAFC', borderRadius: 6, padding: '6px 8px' }}>
+                <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 2 }}>Teto definido</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#6B7280' }}>{fmt(D.tetoGastos?.teto)}</div>
+              </div>
+            </div>
+
+            {/* Insight dinâmico por estado */}
+            {(() => {
+              const isSaudavel = gaugePct < 70;
+              const isAtencao = gaugePct >= 70 && gaugePct < 100;
+              const isCritico = gaugePct >= 100;
+              const excesso = Math.round(gaugePct - 100);
+              const bg = isSaudavel ? '#F0FDF4' : isAtencao ? '#FEF3C7' : '#FEF2F2';
+              const icoBg = isSaudavel ? '#DCFCE7' : isAtencao ? '#FDE68A' : '#FECACA';
+              const cor = isSaudavel ? '#16A34A' : isAtencao ? '#D97706' : '#EF4444';
+              const titulo = isSaudavel ? 'Controle saudável do orçamento'
+                : isAtencao ? 'Próximo do limite definido'
+                : `Orçamento ultrapassado em ${excesso}%`;
+              const subtexto = isSaudavel ? 'Seu padrão de gastos está dentro do planejado.'
+                : isAtencao ? 'Pequenos ajustes podem evitar exceder o orçamento.'
+                : 'Revise categorias variáveis e priorize gastos essenciais.';
+              const icoPath = isSaudavel
+                ? <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>
+                : isAtencao
+                ? <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+                : <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>;
+              return (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, background: bg, borderRadius: 8, padding: 8, marginBottom: 10 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: icoBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {icoPath}
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: cor, marginBottom: 2 }}>{titulo}</div>
+                    <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.4 }}>{subtexto}</div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Links rodapé */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+              <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver análise →</span>
+              <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 500, cursor: 'pointer', border: '0.5px solid #E5E7EB', padding: '3px 8px', borderRadius: 6 }} onClick={() => setModalTeto(true)}>Ajustar teto</span>
             </div>
           </div>
 

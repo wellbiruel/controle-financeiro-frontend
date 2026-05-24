@@ -812,9 +812,11 @@ export default function DashboardPage() {
               const dotCor = gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444';
               return (
                 <div style={{ marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#9CA3AF', marginBottom: 3 }}>
-                    <span>0%</span><span>70%</span><span>100%</span>
-                    {gaugePct > 100 && <span style={{ color: '#EF4444', fontWeight: 600 }}>{Math.round(gaugePct)}%</span>}
+                  <div style={{ position: 'relative', height: 12, marginBottom: 3 }}>
+                    <span style={{ position: 'absolute', left: 0, fontSize: 9, color: '#9CA3AF' }}>0%</span>
+                    <span style={{ position: 'absolute', left: `${verdeW}%`, fontSize: 9, color: '#9CA3AF', transform: 'translateX(-50%)' }}>70%</span>
+                    <span style={{ position: 'absolute', left: `${verdeW + ambarW}%`, fontSize: 9, color: '#9CA3AF', transform: 'translateX(-50%)' }}>100%</span>
+                    {gaugePct > 100 && <span style={{ position: 'absolute', right: 0, fontSize: 9, color: '#EF4444', fontWeight: 600 }}>{Math.round(gaugePct)}%</span>}
                   </div>
                   <div style={{ position: 'relative', height: 7, background: '#F3F4F6', borderRadius: 99 }}>
                     {/* Fundo cinza total */}
@@ -827,16 +829,16 @@ export default function DashboardPage() {
                     {/* Dot indicador */}
                     <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}` }} />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div style={{ position: 'relative', height: 28, marginTop: 6 }}>
+                    <div style={{ position: 'absolute', left: 0, display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#16A34A' }}>Saudável</span>
                       <span style={{ fontSize: 9, color: '#16A34A' }}>até 70%</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ position: 'absolute', left: `${verdeW + ambarW / 2}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#F59E0B' }}>Atenção</span>
                       <span style={{ fontSize: 9, color: '#F59E0B' }}>70% a 100%</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ position: 'absolute', right: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#EF4444' }}>Crítico</span>
                       <span style={{ fontSize: 9, color: '#EF4444' }}>acima de 100%</span>
                     </div>

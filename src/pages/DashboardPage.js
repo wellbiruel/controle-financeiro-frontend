@@ -791,7 +791,7 @@ export default function DashboardPage() {
               <div style={{ marginTop: 4 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: gaugePct >= 100 ? '#EF4444' : gaugePct >= 70 ? '#F59E0B' : '#16A34A' }}>
                   {gaugePct >= 100
-                    ? `${fmt(Math.abs(D.limiteRestante?.valor || 0))} acima`
+                    ? `${fmt(Math.max(0, (D.saidas?.valor || 0) - (D.tetoGastos?.teto || 0)))} acima`
                     : fmt(D.limiteRestante?.valor || 0)}
                 </div>
                 <div style={{ fontSize: 10, color: '#9CA3AF' }}>

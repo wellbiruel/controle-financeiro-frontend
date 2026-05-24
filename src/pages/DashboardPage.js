@@ -802,76 +802,98 @@ export default function DashboardPage() {
 
             {/* Barra trizona */}
             {(() => {
-              // Zonas fixas visuais da barra (proporção fixa)
-              // Verde: 0-70% → ocupa 63% da barra visual
-              // Âmbar: 70-100% → ocupa 27% da barra visual
-              // Vermelho: 100%+ → ocupa 10% da barra visual
-              const VERDE_W = 63;
-              const AMBAR_W = 27;
-              const VERM_W = 10;
+              // ESCALA VISUAL DA BARRA — 3 zonas fixas proporcionais:
+              // Verde  0–70%  real → 50% da largura visual
+              // Âmbar  70–100% real → 30% da largura visual
+              // Verm   100%+  real → 20% da largura visual (cap 15% excesso)
+              // Conversão valor real → posição visual:
+              // 0–70%:   posVisual = (valor / 70) * 50
+              // 70–100%: posVisual = 50 + ((valor - 70) / 30) * 30
+              // 100%+:   posVisual = 80 + (Math.min(valor - 100, 15) / 15) * 20
 
-              // Quanto de cada zona está preenchida (0-100% de cada segmento)
-              const verdePreench = Math.min(gaugePct / 70, 1) * 100;
-              const ambarPreench = gaugePct > 70 ? Math.min((gaugePct - 70) / 30, 1) * 100 : 0;
+              const VERDE_END  = 50;  // % visual onde termina verde
+              const AMBAR_END  = 80;  // % visual onde termina âmbar
+              const VERM_END   = 100; // % visual onde termina vermelho
+
+              // Preenchimento de cada segmento (0–100% de cada zona)
+              const verdePreench  = Math.min(gaugePct / 70, 1) * 100;
+              const ambarPreench  = gaugePct > 70  ? Math.min((gaugePct - 70)  / 30, 1) * 100 : 0;
               const vermelhoPreench = gaugePct > 100 ? Math.min((gaugePct - 100) / 15, 1) * 100 : 0;
 
-              // Posição do dot na barra visual
-              const dotPos = gaugePct <= 70
-                ? (gaugePct / 70) * VERDE_W
+              // Posição visual do dot (0–100% da largura total da barra)
+              const dotVisual = gaugePct <= 70
+                ? (gaugePct / 70) * VERDE_END
                 : gaugePct <= 100
-                ? VERDE_W + ((gaugePct - 70) / 30) * AMBAR_W
-                : VERDE_W + AMBAR_W + Math.min((gaugePct - 100) / 15, 1) * VERM_W;
+                ? VERDE_END + ((gaugePct - 70) / 30) * (AMBAR_END - VERDE_END)
+                : AMBAR_END + (Math.min(gaugePct - 100, 15) / 15) * (VERM_END - AMBAR_END);
 
               const dotCor = gaugePct < 70 ? '#16A34A' : gaugePct < 100 ? '#F59E0B' : '#EF4444';
 
               return (
                 <div style={{ marginBottom: 8 }}>
-                  {/* Labels superiores */}
-                  <div style={{ display: 'flex', fontSize: 9, color: '#9CA3AF', marginBottom: 3 }}>
-                    <span style={{ width: `${VERDE_W}%` }}>0%</span>
-                    <span style={{ width: `${AMBAR_W}%`, textAlign: 'center' }}>70%</span>
-                    <span style={{ width: `${VERM_W}%`, textAlign: 'right', color: gaugePct > 100 ? '#EF4444' : '#9CA3AF', fontWeight: gaugePct > 100 ? 600 : 400 }}>
-                      {gaugePct > 100 ? `${Math.round(gaugePct)}%` : '100%'}
-                    </span>
+
+                  {/* Barra com marcadores acima */}
+                  <div style={{ position: 'relative', marginTop: 18, marginBottom: 4 }}>
+
+                    {/* Marcador fixo 70% — sempre visível */}
+                    <div style={{ position: 'absolute', bottom: 'calc(100% + 2px)', left: `${VERDE_END}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: 9, color: '#9CA3AF', whiteSpace: 'nowrap', marginBottom: 1 }}>70%</span>
+                      <div style={{ width: 1, height: 5, background: '#D1D5DB' }} />
+                    </div>
+
+                    {/* Marcador fixo 100% — sempre visível */}
+                    <div style={{ position: 'absolute', bottom: 'calc(100% + 2px)', left: `${AMBAR_END}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: 9, color: '#9CA3AF', whiteSpace: 'nowrap', marginBottom: 1 }}>100%</span>
+                      <div style={{ width: 1, height: 5, background: '#D1D5DB' }} />
+                    </div>
+
+                    {/* Marcador dinâmico — só aparece quando gaugePct > 100, mostra valor real */}
+                    {gaugePct > 100 && (
+                      <div style={{ position: 'absolute', bottom: 'calc(100% + 2px)', left: `${dotVisual}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <span style={{ fontSize: 9, color: '#EF4444', fontWeight: 700, whiteSpace: 'nowrap', marginBottom: 1 }}>{Math.round(gaugePct)}%</span>
+                        <div style={{ width: 1, height: 5, background: '#EF4444' }} />
+                      </div>
+                    )}
+
+                    {/* Barra principal — 3 segmentos com overflow: visible para o dot */}
+                    <div style={{ position: 'relative', height: 8, borderRadius: 99, overflow: 'hidden', background: '#F3F4F6' }}>
+                      {/* Segmento verde: largura visual 50%, preenchimento proporcional */}
+                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${VERDE_END}%`, background: '#F3F4F6' }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${verdePreench}%`, background: '#16A34A', borderRadius: verdePreench < 100 ? '99px' : '0' }} />
+                      </div>
+                      {/* Divisor verde/âmbar */}
+                      <div style={{ position: 'absolute', left: `${VERDE_END}%`, top: 0, height: '100%', width: 1, background: '#E5E7EB', zIndex: 1 }} />
+                      {/* Segmento âmbar: largura visual 30% */}
+                      <div style={{ position: 'absolute', left: `${VERDE_END}%`, top: 0, height: '100%', width: `${AMBAR_END - VERDE_END}%`, background: '#F3F4F6' }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${ambarPreench}%`, background: '#F59E0B' }} />
+                      </div>
+                      {/* Divisor âmbar/vermelho */}
+                      <div style={{ position: 'absolute', left: `${AMBAR_END}%`, top: 0, height: '100%', width: 1, background: '#E5E7EB', zIndex: 1 }} />
+                      {/* Segmento vermelho: largura visual 20% */}
+                      <div style={{ position: 'absolute', left: `${AMBAR_END}%`, top: 0, height: '100%', width: `${VERM_END - AMBAR_END}%`, background: '#F3F4F6', borderRadius: '0 99px 99px 0' }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${vermelhoPreench}%`, background: '#EF4444', borderRadius: vermelhoPreench >= 100 ? '0 99px 99px 0' : '0' }} />
+                      </div>
+                    </div>
+
+                    {/* Dot indicador — fora do overflow:hidden para aparecer sobre a barra */}
+                    <div style={{ position: 'absolute', top: '50%', left: `calc(${dotVisual}% - 6px)`, transform: 'translateY(-50%)', width: 12, height: 12, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}`, zIndex: 3 }} />
                   </div>
 
-                  {/* Barra com 3 segmentos fixos */}
-                  <div style={{ position: 'relative', height: 7, display: 'flex', borderRadius: 99, overflow: 'visible' }}>
-                    {/* Segmento verde */}
-                    <div style={{ width: `${VERDE_W}%`, height: '100%', background: '#F3F4F6', borderRadius: '99px 0 0 99px', overflow: 'hidden', position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${verdePreench}%`, background: '#16A34A', borderRadius: '99px 0 0 99px' }} />
-                    </div>
-                    {/* Divisor */}
-                    <div style={{ width: 1, background: '#E5E7EB', flexShrink: 0 }} />
-                    {/* Segmento âmbar */}
-                    <div style={{ width: `${AMBAR_W}%`, height: '100%', background: '#F3F4F6', overflow: 'hidden', position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${ambarPreench}%`, background: '#F59E0B' }} />
-                    </div>
-                    {/* Divisor */}
-                    <div style={{ width: 1, background: '#E5E7EB', flexShrink: 0 }} />
-                    {/* Segmento vermelho */}
-                    <div style={{ width: `${VERM_W}%`, height: '100%', background: '#F3F4F6', borderRadius: '0 99px 99px 0', overflow: 'hidden', position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${vermelhoPreench}%`, background: '#EF4444', borderRadius: '0 99px 99px 0' }} />
-                    </div>
-                    {/* Dot indicador */}
-                    <div style={{ position: 'absolute', top: '50%', left: `calc(${dotPos}% - 5px)`, transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: dotCor, border: '2px solid #fff', boxShadow: `0 0 0 1.5px ${dotCor}`, zIndex: 2 }} />
-                  </div>
-
-                  {/* Labels inferiores das zonas */}
-                  <div style={{ display: 'flex', marginTop: 5 }}>
-                    <div style={{ width: `${VERDE_W}%`, display: 'flex', flexDirection: 'column' }}>
+                  {/* Labels das zonas — alinhadas às larguras visuais reais */}
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ width: `${VERDE_END}%`, display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#16A34A' }}>Saudável</span>
-                      <span style={{ fontSize: 9, color: '#16A34A' }}>até 70%</span>
+                      <span style={{ fontSize: 9, color: '#16A34A' }}>0% – 70%</span>
                     </div>
-                    <div style={{ width: `${AMBAR_W}%`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: '#F59E0B' }}>Atenção</span>
-                      <span style={{ fontSize: 9, color: '#F59E0B' }}>70% a 100%</span>
+                    <div style={{ width: `${AMBAR_END - VERDE_END}%`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: gaugePct >= 70 ? '#F59E0B' : '#9CA3AF' }}>Atenção</span>
+                      <span style={{ fontSize: 9, color: gaugePct >= 70 ? '#F59E0B' : '#9CA3AF' }}>70–100%</span>
                     </div>
-                    <div style={{ width: `${VERM_W}%`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: '#EF4444' }}>Crítico</span>
-                      <span style={{ fontSize: 9, color: '#EF4444' }}>+100%</span>
+                    <div style={{ width: `${VERM_END - AMBAR_END}%`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: gaugePct >= 100 ? '#EF4444' : '#9CA3AF' }}>Crítico</span>
                     </div>
                   </div>
+
                 </div>
               );
             })()}

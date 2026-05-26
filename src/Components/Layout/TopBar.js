@@ -81,8 +81,10 @@ export default function TopBar({ widthMode, onToggleWidth }) {
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen,  setUserOpen]  = useState(false);
-  const notifRef = useRef(null);
-  const userRef  = useRef(null);
+  const [hidden,    setHidden]    = useState(false);
+  const notifRef    = useRef(null);
+  const userRef     = useRef(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     function handler(e) {
@@ -91,6 +93,16 @@ export default function TopBar({ widthMode, onToggleWidth }) {
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    function onScroll() {
+      const y = window.scrollY;
+      setHidden(y > lastScrollY.current && y > 60);
+      lastScrollY.current = y;
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const handleLogout = () => {
@@ -106,7 +118,7 @@ export default function TopBar({ widthMode, onToggleWidth }) {
   const emailExibido = user.email || 'wellbiruel@gmail.com';
 
   return (
-    <header className="topbar">
+    <header className={`topbar${hidden ? ' topbar--hidden' : ''}`}>
 
       {/* Busca */}
       <div className="tb-search">

@@ -11,6 +11,10 @@
   position: sticky;
   top: 0;
   z-index: 40;
+  transition: transform .28s ease;
+}
+.topbar--hidden {
+  transform: translateY(-100%);
 }
 
 /* Busca */

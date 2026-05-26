@@ -1333,7 +1333,7 @@ export default function DashboardPage() {
                   <div style={{ fontSize: 24, fontWeight: 700, color: (D.investimentos?.patrimonioTotal || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                   <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3 }}>
                     {D.investimentos?.patrimonioVsMes > 0 ? '↑' : D.investimentos?.patrimonioVsMes < 0 ? '↓' : '—'}
-                    <span>{D.investimentos?.patrimonioVsMes !== 0 ? `+${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}</span>
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{D.investimentos?.patrimonioVsMes !== 0 ? `+${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}</span>
                   </div>
                   {(() => {
                     const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p?.valor > 0);
@@ -1363,7 +1363,7 @@ export default function DashboardPage() {
                     if (semAporte && mesesSemAporte >= 2) return (
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEF3C7', color: '#D97706', marginTop: 6 }}>
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        {mesesSemAporte} meses sem aportar
+                        {mesesSemAporte}m sem aporte
                       </div>
                     );
                     return (
@@ -1381,7 +1381,7 @@ export default function DashboardPage() {
                 {/* Rentabilidade — período dinâmico no label */}
                 <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 3 }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>
-                    Rentabilidade <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400 }}>· Jan–{MESES_ABREV[mes - 1]} {ano}</span>
+                    Rentabilidade <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 400 }}>· Jan–{MESES_ABREV[mes - 1]}</span>
                   </div>
                   <div style={{ fontSize: 24, fontWeight: 700, color: (D.investimentos?.patrimonioVsAno || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 2 }}>
                     {D.investimentos?.patrimonioVsAno > 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}%

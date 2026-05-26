@@ -566,6 +566,7 @@ export default function DashboardPage() {
   const [apiError, setApiError] = useState(null);
   const [modalTeto, setModalTeto] = useState(false);
   const [valorTeto, setValorTeto] = useState(7000);
+  const [salvandoTeto, setSalvandoTeto] = useState(false);
   const [saldoTip, setSaldoTip] = useState(null);
 
   const carregarDados = useCallback(async (m, a) => {
@@ -584,6 +585,20 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { carregarDados(mes, ano); }, [mes, ano, carregarDados]);
+
+  const handleSalvarTeto = async () => {
+    if (!valorTeto || valorTeto <= 0) return;
+    setSalvandoTeto(true);
+    try {
+      await api.put('/dashboard/teto', { valor: valorTeto });
+      setModalTeto(false);
+      carregarDados(mes, ano);
+    } catch (err) {
+      console.error('Erro ao salvar teto:', err.message);
+    } finally {
+      setSalvandoTeto(false);
+    }
+  };
 
   const trocarPeriodo = (m, a) => { setMes(m); setAno(a); };
 
@@ -1584,17 +1599,12 @@ export default function DashboardPage() {
                   style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' }} />
                 <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3 }}>Renda estimada do mês: {fmt(D.entradas?.valor || 0)}</div>
               </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Válido a partir de</label>
-                <input type="month" defaultValue={`${ano}-${String(mes).padStart(2,'0')}`}
-                  style={{ width: '100%', padding: '9px 11px', border: '1px solid #E2E8F0', borderRadius: 7, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#111827' }} />
-              </div>
               <div style={{ background: '#EFF6FF', borderRadius: 7, padding: '10px 12px', fontSize: 12, color: '#1D4ED8', lineHeight: 1.5, marginBottom: 16 }}>
                 Com renda de {fmt(D.entradas?.valor || 0)}, um teto de {fmt(valorTeto)} deixa {fmt(Math.max(0, (D.entradas?.valor || 0) - valorTeto))} de margem.
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => setModalTeto(false)} style={{ flex: 1, padding: 8, background: 'white', border: '1px solid #E9ECEF', borderRadius: 7, fontSize: 12, color: '#374151', cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-                <button onClick={() => setModalTeto(false)} style={{ flex: 1, padding: 8, background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}>Salvar teto</button>
+                <button onClick={handleSalvarTeto} disabled={salvandoTeto} style={{ flex: 1, padding: 8, background: '#3B82F6', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 500, color: 'white', cursor: salvandoTeto ? 'not-allowed' : 'pointer', opacity: salvandoTeto ? 0.7 : 1, fontFamily: 'inherit' }}>{salvandoTeto ? 'Salvando…' : 'Salvar teto'}</button>
               </div>
             </div>
           </div>

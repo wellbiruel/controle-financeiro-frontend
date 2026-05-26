@@ -1440,7 +1440,7 @@ export default function DashboardPage() {
                       })}
                     </svg>
                     {/* Rendimentos por mês alinhados aos pontos X */}
-                    <div style={{ position: 'relative', height: 36, marginTop: 2 }}>
+                    <div style={{ position: 'relative', height: 36, marginTop: 2, marginBottom: 10 }}>
                       {hist.map((p, i) => {
                         const varTotal = i > 0 ? p.valor - hist[i-1].valor : null;
                         const rendeu = varTotal !== null ? varTotal - (p.aporte || 0) : null;

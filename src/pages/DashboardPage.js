@@ -1310,119 +1310,238 @@ export default function DashboardPage() {
             <span style={{ ...S.cardLink, marginTop: 'auto' }} onClick={() => navigate('/saidas')}>Ver análise do cartão →</span>
           </div>
 
-          {/* Investimentos — card unificado com Evolução */}
+          {/* Investimentos — card premium com gráfico de linha */}
           <div style={{ ...S.card, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
             {/* Faixa azul topo */}
             <div style={{ height: 6, background: '#2563EB', width: '100%', flexShrink: 0 }} />
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: 14 }}>
 
-            {/* Label com ícone */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em' }}>Investimentos</div>
-            </div>
-
-            {/* 3 KPIs em linha com separadores verticais */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', marginBottom: 12 }}>
-
-              {/* Patrimônio Total */}
-              <div style={{ paddingRight: 12 }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Patrimônio Total</div>
-                <div style={{ fontSize: 22, fontWeight: 500, color: (D.investimentos?.patrimonioTotal || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
-                <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  {D.investimentos?.patrimonioVsMes > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : D.investimentos?.patrimonioVsMes < 0 ? <span style={{ color: '#EF4444' }}>↓</span> : <span style={{ color: '#9CA3AF' }}>—</span>}
-                  <span>{D.investimentos?.patrimonioVsMes !== 0 ? `+${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}</span>
-                </div>
+              {/* Label com ícone */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+                </svg>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em' }}>Investimentos</div>
               </div>
 
-              {/* Separador vertical */}
-              <div style={{ background: '#E5E7EB' }} />
+              {/* 3 KPIs em linha */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', marginBottom: 12, alignItems: 'start' }}>
 
-              {/* Aporte do mês */}
-              <div style={{ padding: '0 12px' }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Aporte em {MESES_ABREV[mes - 1]}</div>
-                <div style={{ fontSize: 17, fontWeight: 500, color: (D.investimentos?.aporteMes || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.aporteMes)}</div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
-                <div style={{ fontSize: 11, color: '#9CA3AF' }}>
-                  {Math.abs(D.investimentos?.aporteVsAnterior || 0) < 1 ? 'sem variação'
-                    : D.investimentos?.aporteVsAnterior > 0
-                    ? `+${fmt(D.investimentos?.aporteVsAnterior)} vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`
-                    : `${fmt(D.investimentos?.aporteVsAnterior)} vs ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}`}
-                </div>
-              </div>
-
-              {/* Separador vertical */}
-              <div style={{ background: '#E5E7EB' }} />
-
-              {/* Rentabilidade */}
-              <div style={{ paddingLeft: 12 }}>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3 }}>Rentabilidade</div>
-                <div style={{ fontSize: 17, fontWeight: 500, color: (D.investimentos?.patrimonioVsAno || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>
-                  {D.investimentos?.patrimonioVsAno > 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}%
-                </div>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Jan – {MESES_ABREV[mes - 1]} {ano}</div>
-                <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  {(D.investimentos?.patrimonioVsAno || 0) > 0 ? <span style={{ color: '#16A34A' }}>↑</span> : <span style={{ color: '#9CA3AF' }}>—</span>}
-                  <span>{fmt((D.investimentos?.patrimonioTotal || 0) - (D.investimentos?.patrimonioHistorico?.[0]?.valor || D.investimentos?.patrimonioTotal || 0))}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Linha separadora horizontal entre KPIs e tabela */}
-            <div style={{ height: '0.5px', background: '#E5E7EB', margin: '0 0 12px' }} />
-
-            {/* Tabela Evolução */}
-            {(() => {
-              const histRaw = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
-              if (!histRaw.length) return <div style={{ fontSize: 11, color: '#9CA3AF' }}>Sem dados de evolução</div>;
-              const hist = histRaw.filter((p, i) => i === 0 || p.valor !== histRaw[i - 1].valor);
-              if (hist.length < 2) return null;
-              const maxVar = Math.max(...hist.map((p, i) => i > 0 ? Math.abs(p.valor - hist[i - 1].valor) : 0), 1);
-              const mesIni = MESES_ABREV[(hist[0].mes || 1) - 1];
-              const mesFim = MESES_ABREV[(hist[hist.length - 1].mes || 1) - 1];
-              const grid = { display: 'grid', gridTemplateColumns: '28px 40px 1fr 1fr 28px 1fr', gap: '0 6px', alignItems: 'center' };
-              return (
-                <>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
-                    Evolução {ano}
+                {/* KPI 1 — Patrimônio Total */}
+                <div style={{ paddingRight: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2.5"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><rect x="14" y="11" width="6" height="4" rx="1"/>
+                    </svg>
                   </div>
-                  <div style={{ ...grid, marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>Mês</span>
-                    <span />
-                    <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Aporte</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Rendeu</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>%</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>Saldo</div>
+                  <div style={{ fontSize: 10, color: '#6B7280' }}>Patrimônio Total</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: (D.investimentos?.patrimonioTotal || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1.1 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                  <div style={{ fontSize: 10, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    {D.investimentos?.patrimonioVsMes > 0 ? '↑' : D.investimentos?.patrimonioVsMes < 0 ? '↓' : '—'}
+                    <span>{D.investimentos?.patrimonioVsMes !== 0 ? `+${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}</span>
                   </div>
-                  {hist.map((p, i) => {
-                    const varTotal = i > 0 ? p.valor - hist[i - 1].valor : null;
-                    const aporteMes = p.aporte || 0;
-                    const rendeuMes = varTotal !== null ? varTotal - aporteMes : null;
-                    const barW = varTotal !== null ? Math.round((Math.abs(varTotal) / maxVar) * 100) : 0;
-                    const pctMes = i > 0 && hist[i - 1].valor > 0 ? ((p.valor / hist[i - 1].valor - 1) * 100).toFixed(1) : null;
+                  {(() => {
+                    const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p?.valor > 0);
+                    const mesesCrescendo = hist.length >= 2 ? hist.filter((p, i) => i > 0 && p.valor > hist[i-1].valor).length : 0;
+                    if (mesesCrescendo < 2) return null;
                     return (
-                      <div key={i} style={{ ...grid, marginBottom: 6 }}>
-                        <span style={{ fontSize: 12, color: '#9CA3AF' }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
-                        <div style={{ height: 2, background: i === 0 ? 'transparent' : '#F3F4F6', borderRadius: 1, overflow: 'hidden', minWidth: 0 }}>
-                          <div style={{ width: i === 0 ? '0%' : `${barW}%`, height: '100%', background: '#16A34A', borderRadius: 1 }} />
-                        </div>
-                        <span style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>{aporteMes > 0 ? fmt(aporteMes) : '—'}</span>
-                        <span style={{ fontSize: 12, color: rendeuMes === null ? '#9CA3AF' : '#16A34A', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          {rendeuMes === null ? '—' : `${rendeuMes >= 0 ? '+' : ''}${fmt(rendeuMes)}`}
-                        </span>
-                        <span style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          {pctMes === null ? '—' : `${parseFloat(pctMes) >= 0 ? '+' : ''}${pctMes}%`}
-                        </span>
-                        <span style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'right', whiteSpace: 'nowrap' }}>{fmt(p.valor)}</span>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 'auto', height: 20 }}>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        {mesesCrescendo} meses crescendo
                       </div>
                     );
-                  })}
-                </>
-              );
-            })()}
+                  })()}
+                </div>
+
+                <div style={{ background: '#E5E7EB' }} />
+
+                {/* KPI 2 — Aporte */}
+                <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                  </div>
+                  <div style={{ fontSize: 10, color: '#6B7280' }}>Aporte em {MESES_ABREV[mes - 1]}</div>
+                  <div style={{ fontSize: 16, fontWeight: 500, color: (D.investimentos?.aporteMes || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1.1 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                  <div style={{ fontSize: 10, color: '#9CA3AF' }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
+                  {(() => {
+                    const semAporte = (D.investimentos?.aporteMes || 0) === 0;
+                    const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p?.valor > 0);
+                    const mesesSemAporte = hist.filter(p => !p.aporte || p.aporte === 0).length;
+                    if (!semAporte || mesesSemAporte < 2) return (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 'auto', height: 20 }}>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                        Aporte realizado
+                      </div>
+                    );
+                    return (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#FEF3C7', color: '#D97706', marginTop: 'auto', height: 20 }}>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {mesesSemAporte} meses sem aportar
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div style={{ background: '#E5E7EB' }} />
+
+                {/* KPI 3 — Rentabilidade */}
+                <div style={{ paddingLeft: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="12" width="4" height="8" rx="1"/><rect x="9" y="7" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="17" rx="1"/>
+                    </svg>
+                  </div>
+                  <div style={{ fontSize: 10, color: '#6B7280' }}>
+                    Rentabilidade <span style={{ color: '#9CA3AF' }}>· Jan – {MESES_ABREV[mes - 1]} {ano}</span>
+                  </div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: (D.investimentos?.patrimonioVsAno || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1.1 }}>
+                    {D.investimentos?.patrimonioVsAno > 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}%
+                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#16A34A' }}>
+                    +{fmt((D.investimentos?.patrimonioTotal || 0) - (D.investimentos?.patrimonioHistorico?.[0]?.valor || D.investimentos?.patrimonioTotal || 0))}
+                  </div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 'auto', height: 20 }}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                    Acima da inflação
+                  </div>
+                </div>
+              </div>
+
+              {/* Linha separadora */}
+              <div style={{ height: '0.5px', background: '#E5E7EB', margin: '0 0 12px' }} />
+
+              {/* Gráfico de linha — evolução patrimônio */}
+              {(() => {
+                const histRaw = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
+                if (histRaw.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF' }}>Sem dados de evolução</div>;
+                const hist = histRaw.filter((p, i) => i === 0 || p.valor !== histRaw[i-1].valor);
+                const n = hist.length;
+                const W = 460; const H = 80;
+                const PAD_X = 20; const PAD_TOP = 22; const PAD_BOT = 0;
+                const minV = Math.min(...hist.map(p => p.valor));
+                const maxV = Math.max(...hist.map(p => p.valor));
+                const rangeV = maxV - minV || 1;
+                const xs = hist.map((_, i) => PAD_X + (i / (n - 1)) * (W - PAD_X * 2));
+                const ys = hist.map(p => PAD_TOP + (1 - (p.valor - minV) / rangeV) * (H - PAD_TOP - PAD_BOT));
+                const linePath = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x} ${ys[i]}`).join(' ');
+                const areaPath = linePath + ` L${xs[n-1]} ${H} L${xs[0]} ${H} Z`;
+                return (
+                  <>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
+                      Evolução do patrimônio • {ano}
+                    </div>
+                    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', overflow: 'visible' }}>
+                      <defs>
+                        <linearGradient id="invGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#2563EB" stopOpacity="0.12"/>
+                          <stop offset="100%" stopColor="#2563EB" stopOpacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <path d={areaPath} fill="url(#invGrad)"/>
+                      <path d={linePath} fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      {hist.map((p, i) => {
+                        const isLast = i === n - 1;
+                        const val = Math.round(p.valor).toLocaleString('pt-BR');
+                        return (
+                          <g key={i}>
+                            <circle cx={xs[i]} cy={ys[i]} r={isLast ? 5 : 3.5} fill="#2563EB" stroke={isLast ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 0}/>
+                            <text x={xs[i]} y={ys[i] - 8} fontSize="7.5" fill={isLast ? '#16A34A' : '#9CA3AF'} fontWeight={isLast ? '600' : '400'} textAnchor="middle">{val}</text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                    {/* Labels meses + rendimento alinhados aos pontos X */}
+                    <div style={{ position: 'relative', height: 34, marginTop: 2 }}>
+                      {hist.map((p, i) => {
+                        const varTotal = i > 0 ? p.valor - hist[i-1].valor : null;
+                        const rendeu = varTotal !== null ? varTotal - (p.aporte || 0) : null;
+                        const pct = i > 0 && hist[i-1].valor > 0 ? ((p.valor / hist[i-1].valor - 1) * 100).toFixed(1) : null;
+                        const posLeft = `${xs[i] / W * 100}%`;
+                        return (
+                          <div key={i} style={{ position: 'absolute', left: posLeft, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <span style={{ fontSize: 9, color: '#9CA3AF', fontWeight: 500 }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
+                            {rendeu !== null ? (
+                              <>
+                                <span style={{ fontSize: 9, fontWeight: 600, color: '#16A34A', whiteSpace: 'nowrap' }}>{rendeu >= 0 ? '+' : ''}{fmt(rendeu)}</span>
+                                <span style={{ fontSize: 8, color: '#16A34A', whiteSpace: 'nowrap' }}>{pct !== null ? `${parseFloat(pct) >= 0 ? '+' : ''}${pct}%` : ''}</span>
+                              </>
+                            ) : (
+                              <span style={{ fontSize: 9, color: '#D1D5DB' }}>—</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* Linha separadora */}
+              <div style={{ height: '0.5px', background: '#E5E7EB', margin: '10px 0 10px' }} />
+
+              {/* Objetivo anual — 3 blocos */}
+              {(() => {
+                const meta = 60000;
+                const atual = D.investimentos?.patrimonioTotal || 0;
+                const faltam = Math.max(0, meta - atual);
+                const pctMeta = Math.min(Math.round((atual / meta) * 100), 100);
+                const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p?.valor > 0);
+                const rendMedio = hist.length >= 2
+                  ? hist.slice(1).reduce((acc, p, i) => acc + (p.valor - hist[i].valor - (p.aporte || 0)), 0) / (hist.length - 1)
+                  : 0;
+                const mesesParaMeta = rendMedio > 0 ? Math.ceil(faltam / rendMedio) : null;
+                const dataProj = mesesParaMeta ? new Date(ano, mes - 1 + mesesParaMeta, 1) : null;
+                const mesProj = dataProj ? MESES_ABREV[dataProj.getMonth()] : null;
+                const anoProj = dataProj ? dataProj.getFullYear() : null;
+                const dash = 94.25;
+                const offset = dash - (pctMeta / 100) * dash;
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px' }}>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                        Objetivo anual
+                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{fmt(meta)}</div>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>Meta {ano}</div>
+                    </div>
+                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="38" height="38" viewBox="0 0 38 38" style={{ flexShrink: 0 }}>
+                        <circle cx="19" cy="19" r="15" fill="none" stroke="#E5E7EB" strokeWidth="3"/>
+                        <circle cx="19" cy="19" r="15" fill="none" stroke="#2563EB" strokeWidth="3"
+                          strokeDasharray={dash} strokeDashoffset={offset}
+                          strokeLinecap="round" transform="rotate(-90 19 19)"/>
+                        <text x="19" y="23" fontSize="9" fill="#2563EB" fontWeight="700" textAnchor="middle">{pctMeta}%</text>
+                      </svg>
+                      <div>
+                        <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 2 }}>Progresso atual</div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#111827' }}>{fmt(atual)}</div>
+                        <div style={{ fontSize: 10, color: '#9CA3AF' }}>Faltam {fmt(faltam)}</div>
+                      </div>
+                    </div>
+                    <div style={{ background: '#EFF6FF', borderRadius: 8, padding: '8px 10px' }}>
+                      <div style={{ fontSize: 10, color: '#2563EB', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Projeção
+                      </div>
+                      {mesProj ? (
+                        <>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: '#2563EB' }}>Meta em {mesProj}/{anoProj}</div>
+                          <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>Ritmo: ~{fmt(rendMedio)}/mês</div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF' }}>Sem projeção</div>
+                          <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>Adicione aportes</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
             </div>
           </div>
 

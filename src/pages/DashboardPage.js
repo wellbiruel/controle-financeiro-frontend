@@ -1325,10 +1325,10 @@ export default function DashboardPage() {
               </div>
 
               {/* 3 KPIs — sem ícones, tipografia protagonista, separadores verticais */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', gap: 0, marginBottom: 16, alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', gap: 0, marginBottom: 16, alignItems: 'stretch' }}>
 
                 {/* Patrimônio Total */}
-                <div style={{ paddingRight: 16, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <div style={{ paddingRight: 16, display: 'flex', flexDirection: 'column', gap: 3, justifyContent: 'space-between' }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>Patrimônio Total</div>
                   <div style={{ fontSize: 24, fontWeight: 700, color: (D.investimentos?.patrimonioTotal || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
                   <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3 }}>
@@ -1352,7 +1352,7 @@ export default function DashboardPage() {
                 <div style={{ background: '#E5E7EB', alignSelf: 'stretch' }} />
 
                 {/* Aporte */}
-                <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 3, justifyContent: 'space-between' }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>Aporte em {MESES_ABREV[mes - 1]}</div>
                   <div style={{ fontSize: 20, fontWeight: 600, color: (D.investimentos?.aporteMes || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.aporteMes)}</div>
                   <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
@@ -1379,7 +1379,7 @@ export default function DashboardPage() {
                 <div style={{ background: '#E5E7EB', alignSelf: 'stretch' }} />
 
                 {/* Rentabilidade — período dinâmico no label */}
-                <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 3, justifyContent: 'space-between' }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>
                     Rentabilidade <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 400 }}>· Jan–{MESES_ABREV[mes - 1]}</span>
                   </div>

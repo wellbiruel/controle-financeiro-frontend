@@ -1317,26 +1317,21 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: 14 }}>
 
               {/* Label com ícone */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 16 }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
                 </svg>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em' }}>Investimentos</div>
               </div>
 
-              {/* 3 KPIs em linha */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', marginBottom: 12, alignItems: 'start' }}>
+              {/* 3 KPIs — sem ícones, tipografia protagonista, separadores verticais */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', gap: 0, marginBottom: 16, alignItems: 'start' }}>
 
-                {/* KPI 1 — Patrimônio Total */}
-                <div style={{ paddingRight: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="7" width="20" height="14" rx="2.5"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><rect x="14" y="11" width="6" height="4" rx="1"/>
-                    </svg>
-                  </div>
-                  <div style={{ fontSize: 10, color: '#6B7280' }}>Patrimônio Total</div>
-                  <div style={{ fontSize: 20, fontWeight: 600, color: (D.investimentos?.patrimonioTotal || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1.1 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
-                  <div style={{ fontSize: 10, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3 }}>
+                {/* Patrimônio Total */}
+                <div style={{ paddingRight: 16, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>Patrimônio Total</div>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: (D.investimentos?.patrimonioTotal || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.patrimonioTotal)}</div>
+                  <div style={{ fontSize: 12, color: '#16A34A', display: 'flex', alignItems: 'center', gap: 3 }}>
                     {D.investimentos?.patrimonioVsMes > 0 ? '↑' : D.investimentos?.patrimonioVsMes < 0 ? '↓' : '—'}
                     <span>{D.investimentos?.patrimonioVsMes !== 0 ? `+${fmt(D.investimentos?.patrimonioVsMes)} (${D.investimentos?.patrimonioVsMesPct > 0 ? '+' : ''}${D.investimentos?.patrimonioVsMesPct}%) em ${MESES_ABREV[mes <= 1 ? 11 : mes - 2]}` : 'sem variação'}</span>
                   </div>
@@ -1345,7 +1340,7 @@ export default function DashboardPage() {
                     const mesesCrescendo = hist.length >= 2 ? hist.filter((p, i) => i > 0 && p.valor > hist[i-1].valor).length : 0;
                     if (mesesCrescendo < 2) return null;
                     return (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 'auto', height: 20 }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 6 }}>
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         {mesesCrescendo} meses crescendo
                       </div>
@@ -1353,56 +1348,48 @@ export default function DashboardPage() {
                   })()}
                 </div>
 
-                <div style={{ background: '#E5E7EB' }} />
+                {/* Separador vertical */}
+                <div style={{ background: '#E5E7EB', alignSelf: 'stretch' }} />
 
-                {/* KPI 2 — Aporte */}
-                <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                  </div>
-                  <div style={{ fontSize: 10, color: '#6B7280' }}>Aporte em {MESES_ABREV[mes - 1]}</div>
-                  <div style={{ fontSize: 16, fontWeight: 500, color: (D.investimentos?.aporteMes || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1.1 }}>{fmt(D.investimentos?.aporteMes)}</div>
-                  <div style={{ fontSize: 10, color: '#9CA3AF' }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
+                {/* Aporte */}
+                <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>Aporte em {MESES_ABREV[mes - 1]}</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: (D.investimentos?.aporteMes || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 4 }}>{fmt(D.investimentos?.aporteMes)}</div>
+                  <div style={{ fontSize: 12, color: '#9CA3AF' }}>{fmtP(D.investimentos?.aportePctRenda)} da renda</div>
                   {(() => {
                     const semAporte = (D.investimentos?.aporteMes || 0) === 0;
                     const hist = (D.investimentos?.patrimonioHistorico || []).filter(p => p?.valor > 0);
                     const mesesSemAporte = hist.filter(p => !p.aporte || p.aporte === 0).length;
-                    if (!semAporte || mesesSemAporte < 2) return (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 'auto', height: 20 }}>
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
-                        Aporte realizado
+                    if (semAporte && mesesSemAporte >= 2) return (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#FEF3C7', color: '#D97706', marginTop: 6 }}>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        {mesesSemAporte} meses sem aportar
                       </div>
                     );
                     return (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#FEF3C7', color: '#D97706', marginTop: 'auto', height: 20 }}>
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        {mesesSemAporte} meses sem aportar
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 6 }}>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                        Aporte realizado
                       </div>
                     );
                   })()}
                 </div>
 
-                <div style={{ background: '#E5E7EB' }} />
+                {/* Separador vertical */}
+                <div style={{ background: '#E5E7EB', alignSelf: 'stretch' }} />
 
-                {/* KPI 3 — Rentabilidade */}
-                <div style={{ paddingLeft: 12, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="12" width="4" height="8" rx="1"/><rect x="9" y="7" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="17" rx="1"/>
-                    </svg>
+                {/* Rentabilidade — período dinâmico no label */}
+                <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 4 }}>
+                    Rentabilidade <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400 }}>· Jan–{MESES_ABREV[mes - 1]} {ano}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: '#6B7280' }}>
-                    Rentabilidade <span style={{ color: '#9CA3AF' }}>· Jan – {MESES_ABREV[mes - 1]} {ano}</span>
-                  </div>
-                  <div style={{ fontSize: 20, fontWeight: 600, color: (D.investimentos?.patrimonioVsAno || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1.1 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: (D.investimentos?.patrimonioVsAno || 0) > 0 ? '#16A34A' : '#9CA3AF', lineHeight: 1, marginBottom: 2 }}>
                     {D.investimentos?.patrimonioVsAno > 0 ? '+' : ''}{D.investimentos?.patrimonioVsAno}%
                   </div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#16A34A' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#16A34A', marginBottom: 2 }}>
                     +{fmt((D.investimentos?.patrimonioTotal || 0) - (D.investimentos?.patrimonioHistorico?.[0]?.valor || D.investimentos?.patrimonioTotal || 0))}
                   </div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 7px', borderRadius: 99, fontSize: 10, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 'auto', height: 20 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 99, fontSize: 11, fontWeight: 500, background: '#F0FDF4', color: '#16A34A', marginTop: 6 }}>
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
                     Acima da inflação
                   </div>
@@ -1410,26 +1397,26 @@ export default function DashboardPage() {
               </div>
 
               {/* Linha separadora */}
-              <div style={{ height: '0.5px', background: '#E5E7EB', margin: '0 0 12px' }} />
+              <div style={{ height: '0.5px', background: '#E5E7EB', margin: '0 0 14px' }} />
 
-              {/* Gráfico de linha — evolução patrimônio */}
+              {/* Gráfico de linha */}
               {(() => {
                 const histRaw = (D.investimentos?.patrimonioHistorico || []).filter(p => p != null && p.valor > 0);
                 if (histRaw.length < 2) return <div style={{ fontSize: 11, color: '#9CA3AF' }}>Sem dados de evolução</div>;
                 const hist = histRaw.filter((p, i) => i === 0 || p.valor !== histRaw[i-1].valor);
                 const n = hist.length;
-                const W = 460; const H = 80;
-                const PAD_X = 20; const PAD_TOP = 22; const PAD_BOT = 0;
+                const W = 460; const H = 85;
+                const PAD_X = 20; const PAD_TOP = 24;
                 const minV = Math.min(...hist.map(p => p.valor));
                 const maxV = Math.max(...hist.map(p => p.valor));
                 const rangeV = maxV - minV || 1;
                 const xs = hist.map((_, i) => PAD_X + (i / (n - 1)) * (W - PAD_X * 2));
-                const ys = hist.map(p => PAD_TOP + (1 - (p.valor - minV) / rangeV) * (H - PAD_TOP - PAD_BOT));
+                const ys = hist.map(p => PAD_TOP + (1 - (p.valor - minV) / rangeV) * (H - PAD_TOP - 5));
                 const linePath = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x} ${ys[i]}`).join(' ');
                 const areaPath = linePath + ` L${xs[n-1]} ${H} L${xs[0]} ${H} Z`;
                 return (
                   <>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10 }}>
                       Evolução do patrimônio • {ano}
                     </div>
                     <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', overflow: 'visible' }}>
@@ -1446,29 +1433,29 @@ export default function DashboardPage() {
                         const val = Math.round(p.valor).toLocaleString('pt-BR');
                         return (
                           <g key={i}>
-                            <circle cx={xs[i]} cy={ys[i]} r={isLast ? 5 : 3.5} fill="#2563EB" stroke={isLast ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 0}/>
-                            <text x={xs[i]} y={ys[i] - 8} fontSize="7.5" fill={isLast ? '#16A34A' : '#9CA3AF'} fontWeight={isLast ? '600' : '400'} textAnchor="middle">{val}</text>
+                            <circle cx={xs[i]} cy={ys[i]} r={isLast ? 5.5 : 4} fill="#2563EB" stroke={isLast ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 0}/>
+                            <text x={xs[i]} y={ys[i] - 8} fontSize="10" fill={isLast ? '#16A34A' : '#9CA3AF'} fontWeight={isLast ? '700' : '500'} textAnchor="middle">{val}</text>
                           </g>
                         );
                       })}
                     </svg>
-                    {/* Labels meses + rendimento alinhados aos pontos X */}
-                    <div style={{ position: 'relative', height: 34, marginTop: 2 }}>
+                    {/* Rendimentos por mês alinhados aos pontos X */}
+                    <div style={{ position: 'relative', height: 36, marginTop: 2 }}>
                       {hist.map((p, i) => {
                         const varTotal = i > 0 ? p.valor - hist[i-1].valor : null;
                         const rendeu = varTotal !== null ? varTotal - (p.aporte || 0) : null;
                         const pct = i > 0 && hist[i-1].valor > 0 ? ((p.valor / hist[i-1].valor - 1) * 100).toFixed(1) : null;
-                        const posLeft = `${xs[i] / W * 100}%`;
+                        const posLeft = `${(xs[i] / W) * 100}%`;
                         return (
                           <div key={i} style={{ position: 'absolute', left: posLeft, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                            <span style={{ fontSize: 9, color: '#9CA3AF', fontWeight: 500 }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
+                            <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500 }}>{MESES_ABREV[(p.mes || 1) - 1]}</span>
                             {rendeu !== null ? (
                               <>
-                                <span style={{ fontSize: 9, fontWeight: 600, color: '#16A34A', whiteSpace: 'nowrap' }}>{rendeu >= 0 ? '+' : ''}{fmt(rendeu)}</span>
-                                <span style={{ fontSize: 8, color: '#16A34A', whiteSpace: 'nowrap' }}>{pct !== null ? `${parseFloat(pct) >= 0 ? '+' : ''}${pct}%` : ''}</span>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: '#16A34A', whiteSpace: 'nowrap' }}>{rendeu >= 0 ? '+' : ''}{fmt(rendeu)}</span>
+                                <span style={{ fontSize: 10, color: '#16A34A', whiteSpace: 'nowrap' }}>{pct !== null ? `${parseFloat(pct) >= 0 ? '+' : ''}${pct}%` : ''}</span>
                               </>
                             ) : (
-                              <span style={{ fontSize: 9, color: '#D1D5DB' }}>—</span>
+                              <span style={{ fontSize: 10, color: '#D1D5DB' }}>—</span>
                             )}
                           </div>
                         );
@@ -1479,7 +1466,7 @@ export default function DashboardPage() {
               })()}
 
               {/* Linha separadora */}
-              <div style={{ height: '0.5px', background: '#E5E7EB', margin: '10px 0 10px' }} />
+              <div style={{ height: '0.5px', background: '#E5E7EB', margin: '10px 0' }} />
 
               {/* Objetivo anual — 3 blocos */}
               {(() => {
@@ -1499,16 +1486,16 @@ export default function DashboardPage() {
                 const offset = dash - (pctMeta / 100) * dash;
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px' }}>
-                      <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '9px 11px' }}>
+                      <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
                         Objetivo anual
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{fmt(meta)}</div>
-                      <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>Meta {ano}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{fmt(meta)}</div>
+                      <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Meta {ano}</div>
                     </div>
-                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <svg width="38" height="38" viewBox="0 0 38 38" style={{ flexShrink: 0 }}>
+                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '9px 11px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="40" height="40" viewBox="0 0 38 38" style={{ flexShrink: 0 }}>
                         <circle cx="19" cy="19" r="15" fill="none" stroke="#E5E7EB" strokeWidth="3"/>
                         <circle cx="19" cy="19" r="15" fill="none" stroke="#2563EB" strokeWidth="3"
                           strokeDasharray={dash} strokeDashoffset={offset}
@@ -1516,25 +1503,25 @@ export default function DashboardPage() {
                         <text x="19" y="23" fontSize="9" fill="#2563EB" fontWeight="700" textAnchor="middle">{pctMeta}%</text>
                       </svg>
                       <div>
-                        <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 2 }}>Progresso atual</div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: '#111827' }}>{fmt(atual)}</div>
-                        <div style={{ fontSize: 10, color: '#9CA3AF' }}>Faltam {fmt(faltam)}</div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Progresso atual</div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>{fmt(atual)}</div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF' }}>Faltam {fmt(faltam)}</div>
                       </div>
                     </div>
-                    <div style={{ background: '#EFF6FF', borderRadius: 8, padding: '8px 10px' }}>
-                      <div style={{ fontSize: 10, color: '#2563EB', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ background: '#EFF6FF', borderRadius: 8, padding: '9px 11px' }}>
+                      <div style={{ fontSize: 11, color: '#2563EB', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         Projeção
                       </div>
                       {mesProj ? (
                         <>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: '#2563EB' }}>Meta em {mesProj}/{anoProj}</div>
-                          <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>Ritmo: ~{fmt(rendMedio)}/mês</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#2563EB' }}>Meta em {mesProj}/{anoProj}</div>
+                          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Ritmo: ~{fmt(rendMedio)}/mês</div>
                         </>
                       ) : (
                         <>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF' }}>Sem projeção</div>
-                          <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>Adicione aportes</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF' }}>Sem projeção</div>
+                          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>Adicione aportes</div>
                         </>
                       )}
                     </div>

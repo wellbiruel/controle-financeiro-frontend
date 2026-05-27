@@ -213,7 +213,6 @@ function PMA({ acaoAgora }) {
 function GraficoSaldo({ meses, style }) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState(null);
-  const [filtro, setFiltro] = useState('todos');
   if (!meses?.length) meses = [];
 
   const comDados  = meses.filter(m => m != null && m.saldo != null);
@@ -221,103 +220,257 @@ function GraficoSaldo({ meses, style }) {
   const negativos = comDados.filter(m => m.saldo < 0).length;
   const semDados  = 12 - comDados.length;
   const acum      = comDados.reduce((s, m) => s + (m.saldo || 0), 0);
-  const absMax    = Math.max(...comDados.map(m => Math.abs(m.saldo || 0)), 1);
-  const maxH      = 100;
 
   const dadosPorMes = MESES_ABREV.map((label, i) => {
     const found = meses.find(m => m != null && m.mes === i + 1);
-    return { label, ...found };
+    return { label, mes: i + 1, ...found };
   });
 
-  const toggleFiltro = (tipo) => setFiltro(f => f === tipo ? 'todos' : tipo);
+  const comSaldo = dadosPorMes.filter(m => m.saldo != null);
+  const melhorMes = comSaldo.length ? comSaldo.reduce((a, b) => b.saldo > a.saldo ? b : a) : null;
+  const piorMes   = comSaldo.length ? comSaldo.reduce((a, b) => b.saldo < a.saldo ? b : a) : null;
 
-  const pills = [
-    { tipo: 'positivos', baseBg: '#F0FDF4', ativoBg: '#D1FAE5', txt: '#15803D', dotBg: '#86EFAC', border: '#16A34A', label: `${positivos} positivos` },
-    { tipo: 'negativos', baseBg: '#FEF2F2', ativoBg: '#FEE2E2', txt: '#991B1B', dotBg: '#FCA5A5', border: '#EF4444', label: `${negativos} negativo` },
-    { tipo: 'semDados',  baseBg: '#F7F8FA', ativoBg: '#F3F4F6', txt: '#6B7280', dotBg: '#D1D5DB', border: '#9CA3AF', label: `${semDados} sem dados` },
-  ];
+  let maiorRecup = null, maiorRecupLabel = '';
+  for (let i = 1; i < comSaldo.length; i++) {
+    const diff = comSaldo[i].saldo - comSaldo[i-1].saldo;
+    if (maiorRecup === null || diff > maiorRecup) {
+      maiorRecup = diff;
+      maiorRecupLabel = `${comSaldo[i-1].label}→${comSaldo[i].label}`;
+    }
+  }
+
+  let seq = 0;
+  for (let i = comSaldo.length - 1; i >= 0; i--) {
+    if (comSaldo[i].saldo >= 0) seq++;
+    else break;
+  }
+  const seqLabel = seq >= 2 && comSaldo.length >= 2
+    ? `${comSaldo[comSaldo.length - seq].label}→${comSaldo[comSaldo.length - 1].label}`
+    : null;
+
+  const SVG_W = 580;
+  const SVG_H = 170;
+  const ZERO_Y = 90;
+  const PAD_LEFT = 36;
+  const AREA_W = SVG_W - PAD_LEFT - 4;
+  const BAR_W = Math.floor(AREA_W / 12) - 4;
+  const maxAbs = Math.max(...comSaldo.map(m => Math.abs(m.saldo || 0)), 1);
+  const SCALE = 70 / maxAbs;
+
+  const picoPos = melhorMes?.saldo > 0 ? melhorMes.saldo : null;
+  const picoNeg = piorMes?.saldo < 0 ? piorMes.saldo : null;
+  const picoYPos = picoPos ? ZERO_Y - Math.round(picoPos * SCALE) : null;
+  const picoYNeg = picoNeg ? ZERO_Y + Math.round(Math.abs(picoNeg) * SCALE) : null;
+
+  const barXs = dadosPorMes.map((_, i) => PAD_LEFT + Math.round(i * (AREA_W / 12)) + Math.floor((AREA_W / 12) / 2));
+
+  const linePoints = dadosPorMes.map((m, i) => {
+    if (m.saldo == null) return null;
+    const h = Math.max(3, Math.round(Math.abs(m.saldo) * SCALE));
+    const pos = m.saldo >= 0;
+    const y = pos ? ZERO_Y - h : ZERO_Y + h;
+    return { x: barXs[i], y, pos };
+  });
+
+  const validPoints = linePoints.filter(p => p !== null);
+  const linePath = validPoints.length >= 2
+    ? validPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ')
+    : null;
+
+  const META_ANUAL = 24000;
 
   return (
     <div style={{ ...S.card, ...style }}>
       <div style={{ fontSize: 11, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>Análise mensal</div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-        <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF' }}>Saldo por mês · 2026</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF' }}>Saldo por mês · {new Date().getFullYear()}</div>
         <span style={S.cardLink} onClick={() => navigate('/fluxo-anual')}>Ver fluxo →</span>
       </div>
-      <div style={{ marginBottom: 10 }} />
-      <div style={{ display: 'flex', gap: 7, marginBottom: 14, flexWrap: 'wrap' }}>
-        {pills.map(p => {
-          const ativo = filtro === p.tipo;
-          return (
-            <div key={p.tipo}
-              onClick={() => toggleFiltro(p.tipo)}
-              style={{ ...S.pill(ativo ? p.ativoBg : p.baseBg, p.txt), cursor: 'pointer', border: `1.5px solid ${ativo ? p.border : 'transparent'}` }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: p.dotBg }} />
-              {p.label}
-            </div>
-          );
-        })}
+
+      {/* 4 KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6, marginBottom: 14 }}>
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 1 }}>Melhor mês</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', lineHeight: 1 }}>{melhorMes?.label || '—'}</div>
+            <div style={{ fontSize: 10, color: '#16A34A', marginTop: 1 }}>{melhorMes ? fmtS(melhorMes.saldo) : '—'}</div>
+          </div>
+        </div>
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 1 }}>Pior mês</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', lineHeight: 1 }}>{piorMes?.label || '—'}</div>
+            <div style={{ fontSize: 10, color: '#EF4444', marginTop: 1 }}>{piorMes ? fmtS(piorMes.saldo) : '—'}</div>
+          </div>
+        </div>
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 1 18"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 1 }}>Maior recuperação</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#2563EB', lineHeight: 1 }}>{maiorRecup !== null ? fmtS(maiorRecup) : '—'}</div>
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>{maiorRecupLabel || '—'}</div>
+          </div>
+        </div>
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c0 6-6 10-6 14a6 6 0 0 0 12 0c0-4-6-8-6-14z"/></svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 1 }}>Sequência</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', lineHeight: 1 }}>{seq >= 2 ? `${seq} positivos` : seq === 1 ? '1 positivo' : '—'}</div>
+            <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 1 }}>{seqLabel || '—'}</div>
+          </div>
+        </div>
       </div>
 
-      <div style={{ height: 140, display: 'flex', alignItems: 'flex-end', gap: 4, paddingTop: 22, position: 'relative', marginBottom: 6 }}>
+      {/* Gráfico SVG */}
+      <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 3 }}>Saldo mensal (R$)</div>
+      <svg width="100%" height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{ display: 'block', overflow: 'visible' }}>
+        {picoYPos !== null && (
+          <>
+            <text x={PAD_LEFT - 4} y={picoYPos + 4} fontSize="9" fill="#16A34A" fontWeight="600" textAnchor="end">{`+${Math.round(picoPos).toLocaleString('pt-BR')}`}</text>
+            <line x1={PAD_LEFT - 2} y1={picoYPos} x2={PAD_LEFT + 2} y2={picoYPos} stroke="#E5E7EB" strokeWidth="1"/>
+          </>
+        )}
+        {picoYNeg !== null && (
+          <>
+            <text x={PAD_LEFT - 4} y={picoYNeg + 4} fontSize="9" fill="#EF4444" fontWeight="600" textAnchor="end">{`${Math.round(picoNeg).toLocaleString('pt-BR')}`}</text>
+            <line x1={PAD_LEFT - 2} y1={picoYNeg} x2={PAD_LEFT + 2} y2={picoYNeg} stroke="#E5E7EB" strokeWidth="1"/>
+          </>
+        )}
+        <line x1={PAD_LEFT} y1={ZERO_Y} x2={SVG_W} y2={ZERO_Y} stroke="#E5E7EB" strokeWidth="1"/>
+        {(() => {
+          const yMeta = ZERO_Y - Math.round(500 * SCALE);
+          return (
+            <>
+              <line x1={PAD_LEFT} y1={yMeta} x2={SVG_W * 0.62} y2={yMeta} stroke="#CBD5E1" strokeWidth="1" strokeDasharray="3 3"/>
+              <text x={SVG_W * 0.63} y={yMeta + 3} fontSize="8" fill="#9CA3AF">+R$500</text>
+            </>
+          );
+        })()}
         {dadosPorMes.map((m, i) => {
           const fut = m.saldo == null;
           const pos = !fut && m.saldo >= 0;
-          const grayed = filtro !== 'todos' && (
-            filtro === 'semDados' ? !fut :
-            !fut && ((filtro === 'positivos' && !pos) || (filtro === 'negativos' && pos))
-          );
-          const cor  = fut ? '#F1F5F9' : grayed ? '#E5E7EB' : pos ? '#86EFAC' : '#EF4444';
-          const corV = fut ? '#D1D5DB' : grayed ? '#D1D5DB' : pos ? '#16A34A' : '#EF4444';
-          const h = fut ? 3 : Math.max(3, Math.round(Math.abs(m.saldo) / absMax * maxH));
-          const valTxt = fut ? '' : (pos ? '+' : '-') + 'R$ ' + Math.abs(Math.round(m.saldo)).toLocaleString('pt-BR');
+          const h = fut ? 3 : Math.max(3, Math.round(Math.abs(m.saldo) * SCALE));
+          const x = barXs[i] - Math.floor(BAR_W / 2);
+          const y = pos ? ZERO_Y - h : ZERO_Y;
+          const cor = fut ? '#F1F5F9' : pos ? '#22C55E' : '#EF4444';
+          const corV = fut ? '#D1D5DB' : pos ? '#16A34A' : '#EF4444';
+          const valTxt = fut ? '' : (pos ? '+' : '') + 'R$' + Math.round(m.saldo).toLocaleString('pt-BR');
           return (
-            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: fut ? 'default' : 'pointer', position: 'relative' }}
+            <g key={i} style={{ cursor: fut ? 'default' : 'pointer' }}
               onMouseEnter={e => { if (!fut) { const r = e.currentTarget.getBoundingClientRect(); setTooltip({ x: r.left + r.width/2, y: r.top - 38, m: m.label, val: m.saldo, pos }); }}}
               onMouseLeave={() => setTooltip(null)}>
-              <div style={{ fontSize: 9, fontWeight: 700, position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', color: corV }}>{valTxt}</div>
-              <div style={{ width: '100%', height: h, background: cor, borderRadius: '4px 4px 0 0', minHeight: 3 }} />
-              <div style={{ fontSize: 10, color: fut ? '#D1D5DB' : '#9CA3AF' }}>{m.label}</div>
-            </div>
+              <rect x={x} y={y} width={BAR_W} height={h} rx="3" fill={cor} opacity={fut ? 1 : 0.8}/>
+              {!fut && pos && <text x={barXs[i]} y={y - 4} fontSize="8" fill={corV} fontWeight="600" textAnchor="middle">{valTxt}</text>}
+              {!fut && !pos && <text x={barXs[i]} y={ZERO_Y + h + 12} fontSize="8" fill={corV} fontWeight="600" textAnchor="middle">{valTxt}</text>}
+              <text x={barXs[i]} y={!fut && !pos ? ZERO_Y + h + 23 : SVG_H - 2} fontSize="9" fill={fut ? '#D1D5DB' : '#9CA3AF'} textAnchor="middle">{m.label}</text>
+            </g>
+          );
+        })}
+        {linePath && (
+          <path d={linePath} fill="none" stroke="#94A3B8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.55"/>
+        )}
+        {linePoints.map((p, i) => {
+          if (!p) return null;
+          const isLast = i === linePoints.reduce((li, lp, idx) => lp ? idx : li, -1);
+          return (
+            <circle key={i} cx={p.x} cy={p.y} r={isLast ? 3.5 : 2.5}
+              fill={isLast ? (p.pos ? '#16A34A' : '#EF4444') : '#fff'}
+              stroke={p.pos ? '#16A34A' : '#EF4444'} strokeWidth="1.5"/>
           );
         })}
         {tooltip && (
-          <div style={{ position: 'fixed', background: '#111827', color: 'white', fontSize: 12, fontWeight: 600, padding: '5px 10px', borderRadius: 7, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 200, left: tooltip.x, top: tooltip.y, transform: 'translateX(-50%)' }}>
-            {tooltip.m}: <span style={{ color: tooltip.pos ? '#86EFAC' : '#FCA5A5' }}>{tooltip.pos ? '+' : '-'}R$ {Math.abs(Math.round(tooltip.val)).toLocaleString('pt-BR')}</span>
-          </div>
+          <foreignObject x={0} y={0} width={1} height={1} style={{ overflow: 'visible' }}>
+            <div style={{ position: 'fixed', background: '#111827', color: 'white', fontSize: 12, fontWeight: 600, padding: '5px 10px', borderRadius: 7, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 200, left: tooltip.x, top: tooltip.y, transform: 'translateX(-50%)' }}>
+              {tooltip.m}: <span style={{ color: tooltip.pos ? '#86EFAC' : '#FCA5A5' }}>{tooltip.pos ? '+' : ''}R$ {Math.abs(Math.round(tooltip.val)).toLocaleString('pt-BR')}</span>
+            </div>
+          </foreignObject>
         )}
-      </div>
+      </svg>
 
-      <div style={{ height: '0.5px', background: '#F3F4F6', margin: '8px 0' }} />
+      <div style={{ height: '0.5px', background: '#E5E7EB', margin: '10px 0' }} />
 
-      {/* Mini cards: Desempenho do ano + Meta anual */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
-        {/* Desempenho do ano */}
-        <div style={{ background: acum >= 0 ? '#F0FDF4' : '#FEF2F2', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={acum >= 0 ? '#16A34A' : '#EF4444'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-            </svg>
-            <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.04em' }}>Desempenho do ano</span>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {/* Entradas e Saídas */}
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '10px 12px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Entradas e Saídas
           </div>
-          <div style={{ fontSize: 11, color: '#64748B', fontWeight: 400 }}>Acumulado 2026</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: acum >= 0 ? '#16A34A' : '#EF4444', lineHeight: 1 }}>{fmtS(acum)}</div>
+          {(() => {
+            const totalEntradas = comDados.reduce((s, m) => s + Math.max(0, m.entradas || 0), 0);
+            const totalSaidas   = comDados.reduce((s, m) => s + Math.abs(m.saidas || 0), 0);
+            const maxVal = Math.max(totalEntradas, totalSaidas, 1);
+            return (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A' }}/>
+                    <span style={{ fontSize: 11, color: '#6B7280' }}>Total entradas</span>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#16A34A' }}>{fmtS(totalEntradas)}</span>
+                </div>
+                <div style={{ height: 4, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden', marginBottom: 8 }}>
+                  <div style={{ width: '100%', height: '100%', background: '#16A34A', borderRadius: 99, opacity: 0.5 }}/>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444' }}/>
+                    <span style={{ fontSize: 11, color: '#6B7280' }}>Total saídas</span>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#EF4444' }}>{fmtS(totalSaidas)}</span>
+                </div>
+                <div style={{ height: 4, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden', marginBottom: 10 }}>
+                  <div style={{ width: `${Math.round((totalSaidas / maxVal) * 100)}%`, height: '100%', background: '#EF4444', borderRadius: 99, opacity: 0.5 }}/>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '0.5px solid #E5E7EB' }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: '#6B7280' }}>Saldo líquido</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: acum >= 0 ? '#16A34A' : '#EF4444' }}>{fmtS(acum)}</span>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
-        {/* Meta anual */}
-        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-            </svg>
-            <span style={{ fontSize: 10, fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.04em' }}>Meta anual</span>
+        {/* Resumo do período */}
+        <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '10px 12px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Resumo do período
           </div>
-          <div style={{ fontSize: 11, color: '#64748B', fontWeight: 400 }}>R$ 24.000</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ flex: 1, height: 4, background: '#E2E8F0', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ width: `${Math.min(Math.max((acum / 24000) * 100, 0), 100)}%`, height: '100%', background: '#2563EB', borderRadius: 2 }} />
+          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            <div style={{ flex: 1, background: '#F0FDF4', borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#16A34A', lineHeight: 1 }}>{positivos}</div>
+              <div style={{ fontSize: 10, color: '#16A34A' }}>positivos</div>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#2563EB', whiteSpace: 'nowrap' }}>{Math.round(Math.max((acum / 24000) * 100, 0))}% da meta</span>
+            <div style={{ flex: 1, background: '#FEF2F2', borderRadius: 6, padding: '6px 8px', textAlign: 'center' }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#EF4444', lineHeight: 1 }}>{negativos}</div>
+              <div style={{ fontSize: 10, color: '#EF4444' }}>negativos</div>
+            </div>
+            <div style={{ flex: 1, background: '#F8FAFC', borderRadius: 6, padding: '6px 8px', textAlign: 'center', border: '0.5px solid #E5E7EB' }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#9CA3AF', lineHeight: 1 }}>{semDados}</div>
+              <div style={{ fontSize: 10, color: '#9CA3AF' }}>sem dados</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 3, display: 'flex', justifyContent: 'space-between' }}>
+            <span>Meta anual: {fmtS(META_ANUAL)}</span>
+            <span style={{ color: '#2563EB', fontWeight: 600 }}>{Math.round(Math.max((acum / META_ANUAL) * 100, 0))}%</span>
+          </div>
+          <div style={{ height: 4, background: '#E5E7EB', borderRadius: 99, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{ width: `${Math.min(Math.max((acum / META_ANUAL) * 100, 0), 100)}%`, height: '100%', background: '#2563EB', borderRadius: 99 }}/>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '0.5px solid #E5E7EB' }}>
+            <span style={{ fontSize: 11, color: '#6B7280' }}>Acumulado {new Date().getFullYear()}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: acum >= 0 ? '#16A34A' : '#EF4444' }}>{fmtS(acum)}</span>
           </div>
         </div>
       </div>

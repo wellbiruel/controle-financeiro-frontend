@@ -420,7 +420,7 @@ function GraficoSaldo({ meses, style }) {
                   <span style={{ fontSize: 12, fontWeight: 600, color: '#16A34A' }}>{fmtS(totalEntradas)}</span>
                 </div>
                 <div style={{ height: 4, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden', marginBottom: 8 }}>
-                  <div style={{ width: '100%', height: '100%', background: '#16A34A', borderRadius: 99, opacity: 0.5 }}/>
+                  <div style={{ width: `${Math.round((totalEntradas / maxVal) * 100)}%`, height: '100%', background: '#16A34A', borderRadius: 99, opacity: 0.5 }}/>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
